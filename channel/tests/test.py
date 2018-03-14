@@ -1,6 +1,6 @@
 import unittest
 import struct
-from packHelper import packHelper
+from packHelper import PackHelper
 
 class TestPackHelperMethods(unittest.TestCase):
 
@@ -9,15 +9,15 @@ class TestPackHelperMethods(unittest.TestCase):
         label = b'label'
         uid = b'uid'
         payload = b'payload'
-        packhelper = packHelper()
+        pack_helper = PackHelper()
 
-        actual = packhelper.pack(tag, label, uid)
+        actual = pack_helper.pack(tag, label, uid)
         expected = struct.pack("i6s3s5s3s", 6, b'3s5s3s',
                                tag, label, uid)
         self.assertEqual(expected, actual)
 
-        actual = packhelper.pack(tag, label, uid,
-                                 payload=payload)
+        actual = pack_helper.pack(tag, label, uid,
+                                  payload=payload)
         expected += payload
         self.assertEqual(expected, actual)
         
@@ -26,14 +26,14 @@ class TestPackHelperMethods(unittest.TestCase):
         label = b'label'
         uid = b'uid'
         payload = b'payload'
-        packhelper = packHelper()
+        pack_helper = PackHelper()
 
-        actual = packhelper.unpack(packhelper.pack(tag, label, uid))
+        actual = pack_helper.unpack(pack_helper.pack(tag, label, uid))
         expected = ((tag, label, uid), None)
         self.assertEqual(expected, actual)
 
-        actual = packhelper.unpack(packhelper.pack(tag, label, uid,
-                                                   payload=payload))
+        actual = pack_helper.unpack(pack_helper.pack(tag, label, uid,
+                                                     payload=payload))
         expected = ((tag, label, uid), payload)
         self.assertEqual(expected, actual)
 
