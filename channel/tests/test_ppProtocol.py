@@ -4,7 +4,7 @@ from ppProtocol import PingPongMessage
 
 class TestPingPongMessage(unittest.TestCase):
 
-    def test_message(self):
+    def test_pingpong_message(self):
         tag = b'tag'
         label = b'label'
         uid = b'uid'
