@@ -5,7 +5,7 @@ import struct
 import time
 import socket
 
-class ppSenderChannel:
+class SenderChannel:
 
     def __init__(self, callback_obj, ip, port, pingTX):
         context = zmq.asyncio.Context()

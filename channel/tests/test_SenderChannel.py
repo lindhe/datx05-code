@@ -3,7 +3,7 @@ import struct
 import mock
 from unittest.mock import patch
 from ppProtocol import PingPongMessage
-from ppSenderChannel import ppSenderChannel
+from SenderChannel import SenderChannel
 from .unittest_helper import run, mock_async_method
 import zmq
 import asyncio
@@ -13,10 +13,10 @@ class CallbackObj:
     async def callback(self):
         return "test"
 
-pingpong = ppSenderChannel(CallbackObj(), "127.0.0.1", "5555", b'0')
+pingpong = SenderChannel(CallbackObj(), "127.0.0.1", "5555", b'0')
 token = struct.pack("ii", 0, 1)
 
-class TestppSenderChannel(unittest.TestCase):
+class TestSenderChannel(unittest.TestCase):
 
     @patch.object(pingpong.socket, 'recv', new=mock_async_method(return_value=token))
     def test_receive_no_exception(self):
