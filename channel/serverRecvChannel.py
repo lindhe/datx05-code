@@ -4,14 +4,16 @@ import asyncio
 import struct
 import sys
 from ppProtocol import PingPongMessage
+from GossipProtocol import GossipMessage
 
 class ServerRecvChannel:
 
-    def __init__(self, callback_obj, port):
+    def __init__(self, callback_obj_pp, callback_obj_gossip, port):
         context = zmq.asyncio.Context()
         self.socket = context.socket(zmq.ROUTER)
         self.socket.bind("tcp://*:%s" % port)
-        self.cb_obj = callback_obj
+        self.cb_obj_pp = callback_obj_pp
+        self.cb_obj_gossip = callback_obj_gossip
         self.tokens = {}
 
     async def receive(self):
@@ -23,21 +25,25 @@ class ServerRecvChannel:
         int_size = struct.calcsize("i")
         msg_type, msg_cntr = struct.unpack("ii", res[:(2*int_size)])  
         print(msg_type)
-        pp_msg = ""
+        msg = ""
         if(msg_type == 0):
-            pp_msg = PingPongMessage()
-            pp_msg.set_message(res[(2*int_size):])
+            msg = PingPongMessage()
         else:
-            return
+            msg = GossipMessage()
 
-        if(pp_msg.get_id() not in self.tokens.keys()):
+        msg.set_message(res[(2*int_size):])
+
+        if(msg.get_id() not in self.tokens.keys()):
             print("Add to token list")
-            self.tokens[pp_msg.get_id()] = 0
+            self.tokens[msg.get_id()] = 0
 
-        if(self.tokens[pp_msg.get_id()] != msg_cntr): 
-            new_msg = await self.cb_obj.callback()
-            self.tokens[pp_msg.get_id()] = msg_cntr
-            token = struct.pack("ii",0,self.tokens[pp_msg.get_id()])
+        if(self.tokens[msg.get_id()] != msg_cntr):
+            if(msg_type == 0):
+                new_msg = await self.cb_obj_pp.callback()
+            elif(msg_type == 1):
+                new_msg = await self.cb_obj_gossip.callback()
+            self.tokens[msg.get_id()] = msg_cntr
+            token = struct.pack("ii",0,self.tokens[msg.get_id()])
             response = token+new_msg
         else:
             print("NO TOKEN ARRIVAL")

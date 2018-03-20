@@ -7,8 +7,9 @@ import socket
 
 class SenderChannel:
 
-    def __init__(self, callback_obj, ip, port, pingTX):
+    def __init__(self, channel_type, callback_obj, ip, port, pingTX):
         context = zmq.asyncio.Context()
+        self.ch_type = channel_type
         self.pingTX = pingTX
         self.socket = context.socket(zmq.DEALER)
         self.socket.setsockopt(zmq.RCVTIMEO, 5000)
@@ -30,11 +31,11 @@ class SenderChannel:
     async def start(self):
         counter = 1
         while True:
-            token = struct.pack("ii", 0, counter)
+            token = struct.pack("ii", self.ch_type, counter)
             msg_type, msg_cntr = await self.receive(token)
             if(msg_cntr >= counter):
                 await self.cb_obj.callback()
                 counter = msg_cntr+1
-                token = struct.pack("ii", 0, counter)
+                token = struct.pack("ii", self.ch_type, counter)
                 await self.socket.send_multipart([token+self.pingTX])
             print("Client: Got response with counter %i" % msg_cntr)
