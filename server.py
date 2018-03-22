@@ -3,10 +3,10 @@ import zmq.asyncio
 import asyncio
 import struct
 import sys
-from ppProtocol import PingPongMessage
-from GossipProtocol import GossipMessage
-from serverRecvChannel import ServerRecvChannel
-from SenderChannel import SenderChannel
+from channel.ppProtocol import PingPongMessage
+from channel.GossipProtocol import GossipMessage
+from channel.serverRecvChannel import ServerRecvChannel
+from channel.SenderChannel import SenderChannel
 
 class ppAlg:
     async def callback(self):

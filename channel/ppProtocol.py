@@ -1,4 +1,4 @@
-from packHelper import PackHelper
+from .packHelper import PackHelper
 
 class PingPongMessage:
 

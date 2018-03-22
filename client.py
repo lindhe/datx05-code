@@ -1,8 +1,8 @@
 import zmq
 import zmq.asyncio
 import asyncio
-from ppProtocol import PingPongMessage
-from SenderChannel import SenderChannel
+from channel.ppProtocol import PingPongMessage
+from channel.SenderChannel import SenderChannel
 
 class ppAlg:
     async def callback(self):

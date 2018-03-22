@@ -3,8 +3,8 @@ import zmq.asyncio
 import asyncio
 import struct
 import sys
-from ppProtocol import PingPongMessage
-from GossipProtocol import GossipMessage
+from .ppProtocol import PingPongMessage
+from .GossipProtocol import GossipMessage
 
 class ServerRecvChannel:
 
