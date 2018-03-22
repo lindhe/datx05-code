@@ -19,10 +19,6 @@ class ppAlg:
 class GossipAlg:
     async def callback(self):
         print("Gossip CALLBACK")
-        gossip_msg = GossipMessage()
-        msg = gossip_msg.create_message(b'tag_tuple', b'prp',
-                                    b'msg_all', b'echo', b'uid')
-        return msg
 
 port = sys.argv[1]
 p = ppAlg()
@@ -34,6 +30,7 @@ if(port == "5556"):
     c1 = SenderChannel(1, g, "127.0.0.1", "5555", pingTX)
 else:
     c1 = SenderChannel(1, g, "127.0.0.1", "5556", pingTX)
+
 s = ServerRecvChannel(p, g, port)
 loop = asyncio.get_event_loop()
 loop.create_task(c1.start())

@@ -38,4 +38,4 @@ class SenderChannel:
                 counter = msg_cntr+1
                 token = struct.pack("ii", self.ch_type, counter)
                 await self.socket.send_multipart([token+self.pingTX])
-            print("Client: Got response with counter %i" % msg_cntr)
+            print("Got response with counter %i" % msg_cntr)

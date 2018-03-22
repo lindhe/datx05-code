@@ -24,7 +24,6 @@ class ServerRecvChannel:
     async def check_msg(self, res, sender):
         int_size = struct.calcsize("i")
         msg_type, msg_cntr = struct.unpack("ii", res[:(2*int_size)])  
-        print(msg_type)
         msg = ""
         if(msg_type == 0):
             msg = PingPongMessage()
@@ -38,13 +37,14 @@ class ServerRecvChannel:
             self.tokens[msg.get_id()] = 0
 
         if(self.tokens[msg.get_id()] != msg_cntr):
-            if(msg_type == 0):
-                new_msg = await self.cb_obj_pp.callback()
-            elif(msg_type == 1):
-                new_msg = await self.cb_obj_gossip.callback()
             self.tokens[msg.get_id()] = msg_cntr
             token = struct.pack("ii",0,self.tokens[msg.get_id()])
-            response = token+new_msg
+            if(msg_type == 0):
+                new_msg = await self.cb_obj_pp.callback()
+                response = token+new_msg
+            elif(msg_type == 1):
+                await self.cb_obj_gossip.callback()
+                response = token
         else:
             print("NO TOKEN ARRIVAL")
             response = res
