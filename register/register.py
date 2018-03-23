@@ -15,6 +15,9 @@ class Register:
     test = Record(0, "null", 0)
     self.registers = {0: test}
 
+  def __repr__(self):
+    return str(self.registers)
+
   """
   Update the set of stored records appropriately
   """
