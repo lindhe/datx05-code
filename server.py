@@ -10,7 +10,7 @@ from channel.serverRecvChannel import ServerRecvChannel
 from channel.SenderChannel import SenderChannel
 
 class ppAlg:
-    async def callback(self):
+    async def callback(self, msg_data):
         print("pingpong CALLBACK")
         pp_msg = PingPongMessage()
         msg = pp_msg.create_message(b'qry', b'bot',
@@ -18,14 +18,11 @@ class ppAlg:
         return msg
         
 class GossipAlg:
-    async def callback(self):
+    async def callback(self, msg_data):
         print("Gossip CALLBACK")
 
 p = ppAlg()
 g = GossipAlg()
-gossip_msg = GossipMessage()
-pingTX= gossip_msg.create_message(b'tag_tuple', b'prp',
-                            b'msg_all', b'echo', b'uid')
 
 my_port = sys.argv[1]
 my_ip = sys.argv[2]
@@ -37,7 +34,7 @@ config.read('config/config.ini')
 for key in config['Nodes']:
     ip, port = config['Nodes'][key].split(':')
     if not ((ip == my_ip) and (port == my_port)):
-        c = SenderChannel(1, g, ip, port, pingTX)
+        c = SenderChannel(1, g, ip, port)
         loop.create_task(c.start())
 
 s = ServerRecvChannel(p, g, my_port)

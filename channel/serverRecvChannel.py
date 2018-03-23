@@ -24,26 +24,29 @@ class ServerRecvChannel:
     async def check_msg(self, res, sender):
         int_size = struct.calcsize("i")
         msg_type, msg_cntr = struct.unpack("ii", res[:(2*int_size)])  
-        msg = ""
-        if(msg_type == 0):
-            msg = PingPongMessage()
-        else:
-            msg = GossipMessage()
-
-        msg.set_message(res[(2*int_size):])
-
-        if(msg.get_id() not in self.tokens.keys()):
-            print("Add to token list")
-            self.tokens[msg.get_id()] = 0
-
-        if(self.tokens[msg.get_id()] != msg_cntr):
-            self.tokens[msg.get_id()] = msg_cntr
-            token = struct.pack("ii",0,self.tokens[msg.get_id()])
+        msg = None
+        
+        if len(res[(2*int_size):]):
             if(msg_type == 0):
-                new_msg = await self.cb_obj_pp.callback()
+                msg = PingPongMessage()
+            else:
+                msg = GossipMessage()
+
+            msg.set_message(res[(2*int_size):])
+
+        if(sender not in self.tokens.keys()):
+            print("Add to token list")
+            self.tokens[sender] = 0
+
+        if(self.tokens[sender] != msg_cntr):
+            self.tokens[sender] = msg_cntr
+            token = struct.pack("ii",msg_type,self.tokens[sender])
+            if(msg_type == 0):
+                new_msg = await self.cb_obj_pp.callback(msg)
+                print("RESPOND WITH %s" % new_msg)
                 response = token+new_msg
             elif(msg_type == 1):
-                await self.cb_obj_gossip.callback()
+                await self.cb_obj_gossip.callback(msg)
                 response = token
         else:
             print("NO TOKEN ARRIVAL")

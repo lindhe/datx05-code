@@ -5,14 +5,16 @@ from channel.ppProtocol import PingPongMessage
 from channel.SenderChannel import SenderChannel
 
 class ppAlg:
-    async def callback(self):
+    async def callback(self, msg_data):
         print("pingpong arrival!")
+        if msg_data:
+            print("Got message with label %s" % msg_data.get_label())
+        else:
+            print("Got empty message")
 
 p = ppAlg()
-pp_msg = PingPongMessage()
-pingTX = pp_msg.create_message(b'qry', b'bot', b'1', b'bot') 
-c1 = SenderChannel(0, p, "127.0.0.1", "5555", pingTX)
-c2 = SenderChannel(0, p, "127.0.0.1", "5556", pingTX)
+c1 = SenderChannel(0, p, "127.0.0.1", "5555")
+c2 = SenderChannel(0, p, "127.0.0.1", "5556")
 loop = asyncio.get_event_loop()
 loop.create_task(c1.start())
 loop.create_task(c2.start())
