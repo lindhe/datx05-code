@@ -4,7 +4,15 @@
 # License: MIT
 # Author: Andreas Lindhé
 
+from record import Record
+
+
 class Register:
+
+  def __init__(self):
+    # TODO: These are just temporary: should be removed.
+    test = Record(0, "null", 0)
+    self.registers = {0: test}
 
   """
   Update the set of stored records appropriately
@@ -35,8 +43,13 @@ class Register:
   returns the maximum t of all (t, *, p) recrods stored which has p=phase.
   Argument phases is a list of all phases which should be examined
   """
-  def max_phase(phases):
-    return
+  def max_phase(self, phases):
+    S = self.registers
+    phase_tags = []
+    for tag in S:
+      if S[tag].phase in phases:
+        phase_tags.append(tag)
+    return max(phase_tags)
 
   """
   return the tripple with max_phase of pre, fin and FIN records respectively
