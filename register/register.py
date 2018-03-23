@@ -33,12 +33,16 @@ class Register:
 
   """
   returns the maximum t of all (t, *, p) recrods stored which has p=phase.
+  Argument phases is a list of all phases which should be examined
   """
-  def max_phase(phase):
+  def max_phase(phases):
     return
 
   """
   return the tripple with max_phase of pre, fin and FIN records respectively
   """
-  def tag_tuple():
-    return
+  def tag_tuple(self):
+    max_all = self.max_phase(['pre', 'fin', 'FIN'])
+    max_finFIN = self.max_phase(['fin', 'FIN'])
+    max_FIN = self.max_phase(['FIN'])
+    return (max_all, max_finFIN, max_FIN)
