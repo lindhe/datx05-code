@@ -18,6 +18,7 @@ class Register:
     phase is either 'pre', 'fin' or 'FIN'.
     """
     self.register = {}
+    self.t0 = (0, None)
 
   def __repr__(self):
     """ String representation prints the entire register dict """
@@ -58,6 +59,8 @@ class Register:
     for tag in S:
       if S[tag].phase in phases:
         phase_tags.append(tag)
+    if 'fin' in phases:
+      phase_tags.append(self.t0)
     return max(phase_tags)
 
   def tag_tuple(self):
