@@ -11,18 +11,18 @@ class Register:
   """ Implementation of the register which stores recrods """
 
   def __init__(self):
-    # TODO: These are just temporary: should be removed.
-    test = Record(0, "null", 0)
-    self.registers = {0: test}
+    """ Initiates a register with no records """
+    self.register = {}
 
   def __repr__(self):
-    return str(self.registers)
+    """ String representation prints the entire dict register """
+    return str(self.register)
 
   """
   Update the set of stored records appropriately
   """
   def update_phase(self, tag, element, phase):
-    S = self.registers
+    S = self.register
     if (tag in S) and S[tag].element and element:
       w = S[tag].element
       current_phase = S[tag].phase
@@ -55,7 +55,7 @@ class Register:
   Argument phases is a list of all phases which should be examined
   """
   def max_phase(self, phases):
-    S = self.registers
+    S = self.register
     phase_tags = []
     for tag in S:
       if S[tag].phase in phases:
