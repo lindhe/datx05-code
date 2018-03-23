@@ -1,6 +1,6 @@
 import unittest
 import struct
-from packHelper import PackHelper
+from ..packHelper import PackHelper
 
 class TestPackHelperMethods(unittest.TestCase):
 

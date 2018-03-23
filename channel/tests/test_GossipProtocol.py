@@ -1,6 +1,6 @@
 import unittest
 import struct
-from GossipProtocol import GossipMessage
+from ..GossipProtocol import GossipMessage
 
 class TestGossipMessage(unittest.TestCase):
 

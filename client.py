@@ -11,6 +11,10 @@ class ppAlg:
             print("Got message with label %s" % msg_data.get_label())
         else:
             print("Got empty message")
+        pp_msg = PingPongMessage()
+        msg = pp_msg.create_message(b'qry', b'bot',
+                                    b'bot',b'none')
+        return msg
 
 p = ppAlg()
 c1 = SenderChannel(0, p, "127.0.0.1", "5555")

@@ -1,6 +1,6 @@
 import unittest
 import struct
-from ppProtocol import PingPongMessage
+from ..ppProtocol import PingPongMessage
 
 class TestPingPongMessage(unittest.TestCase):
 
