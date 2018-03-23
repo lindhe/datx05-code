@@ -29,11 +29,9 @@ class SenderChannel:
                 res = await self.socket.recv()
                 msg_type, msg_cntr = struct.unpack("ii", res[:(2*int_size)])  
                 msg_data = None
-                print("SENDER GOT %s" % res[(2*int_size):])
                 if len(res[(2*int_size):]):
                     self.msg_obj.set_message(res[(2*int_size):])
                     msg_data = self.msg_obj
-                    print("MSG_DATA %s" % msg_data.get_label())
                 break
             except Exception as e:
                 msg = token+self.pingTX if self.pingTX else token
