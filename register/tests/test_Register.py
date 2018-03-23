@@ -80,8 +80,7 @@ class TestRegister(unittest.TestCase):
     self.assertEqual( s.register[t1].phase, 'FIN')
 
   def test_max_phase(self):
-    """ Test that the correct tag is returned for each set of phases.
-    """
+    """ Test that the correct tag is returned for each set of phases. """
     s = self.s
     all_sets = []
     for i in range(len(self.phases)+1):
@@ -95,11 +94,11 @@ class TestRegister(unittest.TestCase):
       else:
         self.assertEqual( s.max_phase(D)[0], self.FIN_max-1)
 
-  @unittest.skip("Skipping tag_tuple()")
   def test_tag_tuple(self):
-    """ Test that the correct Record is returned for each set of phases.
-    """
-    return
+    """ Test that the correct Record is returned for each set of phases. """
+    tt = self.s.tag_tuple()
+    self.assertGreaterEqual(tt[0], tt[1])
+    self.assertGreaterEqual(tt[1], tt[2])
 
 if __name__ == '__main__':
   unittest.main()
