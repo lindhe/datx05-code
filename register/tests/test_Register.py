@@ -5,6 +5,7 @@
 # Author: Andreas Lindhé
 
 import unittest
+import itertools
 from record import Record
 from register import Register
 
@@ -12,6 +13,24 @@ class TestRegister(unittest.TestCase):
   def setUp(self):
     self.s = Register()
     self.phases = ['pre', 'fin', 'FIN']
+    pre_max = 20
+    fin_max = 12
+    FIN_max = 6
+    self.pre_max = pre_max
+    self.fin_max = fin_max
+    self.FIN_max = FIN_max
+    for i in range(2, FIN_max):
+      x = ((i, 'dflt'), None, 'FIN')
+      r = Record(*x)
+      self.s.update_phase(*x)
+    for i in range(FIN_max, fin_max):
+      x = ((i, 'dflt'), None, 'fin')
+      r = Record(*x)
+      self.s.update_phase(*x)
+    for i in range(fin_max, pre_max):
+      x = ((i, 'dflt'), None, 'pre')
+      r = Record(*x)
+      self.s.update_phase(*x)
 
   def test_update_phase(self):
     """ Test that records can be updated correctly.
@@ -60,11 +79,21 @@ class TestRegister(unittest.TestCase):
     s.update_phase(*x)
     self.assertEqual( s.register[t1].phase, 'FIN')
 
-  @unittest.skip("Skipping max_phase()")
   def test_max_phase(self):
     """ Test that the correct tag is returned for each set of phases.
     """
-    return
+    s = self.s
+    all_sets = []
+    for i in range(len(self.phases)+1):
+      all_sets += itertools.combinations(self.phases, i)
+    all_sets = [list(a) for a in all_sets][1:]
+    for D in all_sets:
+      if 'pre' in D:
+        self.assertEqual( s.max_phase(D)[0], self.pre_max-1)
+      elif 'fin' in D:
+        self.assertEqual( s.max_phase(D)[0], self.fin_max-1)
+      else:
+        self.assertEqual( s.max_phase(D)[0], self.FIN_max-1)
 
   @unittest.skip("Skipping tag_tuple()")
   def test_tag_tuple(self):
