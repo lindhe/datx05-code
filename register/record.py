@@ -13,4 +13,4 @@ class Record:
     self.phase = phase
 
   def __repr__(self):
-    return str((self.tag, self.element, self.phase))
+    return repr( (self.tag, self.element, self.phase) )

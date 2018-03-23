@@ -11,12 +11,17 @@ class Register:
   """ Implementation of the register which stores recrods """
 
   def __init__(self):
-    """ Initiates a register with no records """
+    """ Initiates a register with no records.
+    register is a dict of Record objects: {(tag, element, phase)}
+    tag is a tuple of (seq, uid)
+    element is either None or a file path
+    phase is either 'pre', 'fin' or 'FIN'.
+    """
     self.register = {}
 
   def __repr__(self):
     """ String representation prints the entire register dict """
-    return str(self.register)
+    return repr( self.register )
 
   def update_phase(self, tag, element, phase):
     """ Update the set of stored records appropriately """
