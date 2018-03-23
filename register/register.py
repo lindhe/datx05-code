@@ -8,6 +8,7 @@ from record import Record
 
 
 class Register:
+  """ Implementation of the register which stores recrods """
 
   def __init__(self):
     # TODO: These are just temporary: should be removed.
@@ -18,7 +19,14 @@ class Register:
   Update the set of stored records appropriately
   """
   def update_phase(self, tag, element, phase):
-    return
+    S = self.registers
+    if (tag in S) and S[tag].element and element:
+      w = S[tag].element
+      current_phase = S[tag].phase
+      p = self.upgrade_phase(current_phase, phase)
+      S[tag] = Record(tag, w, p)
+    else:
+      S[tag] = Record(tag, element, phase)
 
   """
   Returns the correct phase:
