@@ -29,7 +29,9 @@
 import sys
 import pathlib
 
-def write_file(data, filename, path="./storage/"):
+default_path = "./.storage/"
+
+def write_file(data, filename, path=default_path):
   """ Tries to write data to a file.
 
   Will make sure that the path exists by creating any missing (parent)
@@ -55,7 +57,7 @@ def write_file(data, filename, path="./storage/"):
   except OSError as e:
     print(f"Error reading file {filepath}: {e}", file=sys.stderr)
 
-def read_file(filename):
+def read_file(filename, path=default_path):
   """ Tries to read (binary) data from a file.
 
   Args:
@@ -63,8 +65,9 @@ def read_file(filename):
   Returns:
     data (bytes): File content
   """
+  filepath = path + filename
   try:
-    with open(filename, 'rb') as f:
+    with open(filepath, 'rb') as f:
       data = f.read()
     return data
   except OSError as e:

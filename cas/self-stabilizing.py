@@ -24,8 +24,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from channel.ppProtocol import PingPongMessage
 from register.record import Record
 from register.register import Register
+
 
 class Server:
   """ The event handlers for the server in Algorithm 2 """
@@ -50,9 +52,19 @@ class Server:
       phases = ['pre', 'fin', 'FIN']
     return (self.S.max_phase(phases), None, 'qry')
 
-  def pre_write(self):
-    """ Reply to pre-write arrival event, from pj's writer to pi's server. """
-    return
+  def pre_write(self, pp_msg):
+    """ Reply to pre-write arrival event, from pj's writer to pi's server.
+
+    Args:
+      pp_msg (PingPongMessage): The arriving message.
+    Returns:
+      A Record with (tag, None, 'pre').
+    """
+    tag = pp_msg.get_tag()
+    element = pp_msg.get_data()
+    phase = 'pre'
+    self.S.update_phase(tag, element, phase)
+    return Record(tag, None, phase)
 
   def finalize(self):
     """ Reply to fin or FIN arrival event, from pj's client to pi's server. """

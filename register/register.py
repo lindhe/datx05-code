@@ -25,6 +25,7 @@
 # SOFTWARE.
 
 from .record import Record
+from .fileHelper import *
 
 
 class Register:
@@ -45,7 +46,16 @@ class Register:
     return repr( self.register )
 
   def update_phase(self, tag, element, phase):
-    """ Update the set of stored records appropriately """
+    """ Update the set of stored records appropriately.
+
+    If element is not None, we store it in a file and stores just the filepath
+    in the Record.
+
+    Args:
+      tag (tuple): Sequence number and UID
+      element (Maybe None): If not none, it's the coded element to be stored.
+      phase (string): 'pre', 'fin' or 'FIN'
+    """
     S = self.register
     if (tag in S) and S[tag].element and element:
       w = S[tag].element
@@ -53,6 +63,10 @@ class Register:
       p = self.upgrade_phase(current_phase, phase)
       S[tag] = Record(tag, w, p)
     else:
+      # If element is not None, we write it to a file and use the path instead
+      if element:
+        filename = str(tag) + '.elem'
+        element = write_file(element, filename)
       S[tag] = Record(tag, element, phase)
 
   def upgrade_phase(self, old, new):
