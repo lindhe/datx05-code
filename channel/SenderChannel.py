@@ -46,7 +46,7 @@ class SenderChannel:
             msg_type, msg_cntr, msg_data = await self.receive(token)
             print("Got response with counter %i" % msg_cntr)
             if(msg_cntr >= counter):
-                self.pingTX = await self.cb_obj.callback(msg_data)
+                self.pingTX = await self.cb_obj.departure(msg_data)
                 counter = msg_cntr+1
                 token = struct.pack("ii", self.ch_type, counter)
                 msg = token+self.pingTX if self.pingTX else token

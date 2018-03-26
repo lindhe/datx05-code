@@ -1,7 +1,7 @@
 from channel.ppProtocol import PingPongMessage
 
 class ExamplePingPongRecv:
-    async def callback(self, msg_data):
+    async def arrival(self, msg_data):
         print("pingpong CALLBACK")
         if msg_data:
             print("Got message with label %s" % msg_data.get_label())

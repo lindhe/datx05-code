@@ -1,7 +1,7 @@
 from channel.GossipProtocol import GossipMessage
 
 class ExampleGossipSend:
-    async def callback(self, msg_data):
+    async def departure(self, msg_data):
         print("Gossip CALLBACK SEND")
         tag_tuple = b'tag_tuple'
         prp = b'prp'
