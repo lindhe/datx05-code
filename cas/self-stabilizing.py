@@ -34,9 +34,12 @@ class Server:
     """ Initialize with an empty register S """
     self.S = Register()
 
-  def query(self):
+  def query(self, pp_msg):
     """ Reply to query arrival event, from pj's client to pi's server. """
-    return
+    if pp_msg.mode == "read":
+      return (S.max_phase(['fin', 'FIN']), None, 'qry')
+    else:
+      return (S.max_phase(['pre', 'fin', 'FIN']), None, 'qry')
 
   def pre_write(self):
     """ Reply to pre-write arrival event, from pj's writer to pi's server. """
