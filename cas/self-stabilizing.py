@@ -35,11 +35,20 @@ class Server:
     self.S = Register()
 
   def query(self, pp_msg):
-    """ Reply to query arrival event, from pj's client to pi's server. """
+    """ Reply to query arrival event, from pj's client to pi's server.
+
+    Args:
+      pp_msg (PingPongMessage): The arriving message.
+    Returns:
+      tuple (t, None, 'qry') where
+        t is max_phase of ['fin', 'FIN'] for a read query and
+        t is max_phase of ['pre', 'fin', 'FIN'] for a write query.
+    """
     if pp_msg.mode == "read":
-      return (S.max_phase(['fin', 'FIN']), None, 'qry')
+      phases = ['fin', 'FIN']
     else:
-      return (S.max_phase(['pre', 'fin', 'FIN']), None, 'qry')
+      phases = ['pre', 'fin', 'FIN']
+    return (self.S.max_phase(phases), None, 'qry')
 
   def pre_write(self):
     """ Reply to pre-write arrival event, from pj's writer to pi's server. """
