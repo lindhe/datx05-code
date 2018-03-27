@@ -65,7 +65,7 @@ class Register:
     else:
       # If element is not None, we write it to a file and use the path instead
       if element:
-        filename = str(tag) + '.elem'
+        filename = self.tag_to_filename(tag)
         element = write_file(element, filename)
       S[tag] = Record(tag, element, phase)
 
@@ -103,3 +103,33 @@ class Register:
     max_finFIN = self.max_phase(['fin', 'FIN'])
     max_FIN = self.max_phase(['FIN'])
     return (max_all, max_finFIN, max_FIN)
+
+  def fetch(self, tag):
+    """ Reads a Record from disk (if it exists).
+
+    If there is a Record with tag tag and a non-empty element stored in the
+    Register, we will read the element from disk and return a Record with that
+    element.
+
+    If there is a Record with an empty element stored in the record, we return a
+    Record of (tag, None, phase). If there is no Record with tag stored, None is
+    returned.
+
+    Args:
+      tag (tuple): Sequence number and UID
+    Returns:
+      Either None, or a Record of (tag, element, phase) as decribed above.
+    """
+    S = self.register
+    if tag in S:
+      element = S[tag].element
+      phase = S[tag].phase
+      if element:
+        filename = self.tag_to_filename(tag)
+        element = read_file(filename)
+      return Record(tag, element, phase)
+    else:
+      return None
+
+  def tag_to_filename(self, tag):
+    return '-'.join( [str(t) for t in tag] ) + '.elem'

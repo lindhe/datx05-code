@@ -62,42 +62,43 @@ class TestRegister(unittest.TestCase):
     s = self.s
     # 1. If we add a record, that record can be found again.
     t1 = (1, 'a')
-    w1 = '/tmp/asdf.txt'
+    w1 = b"content"
     x = (t1, w1, 'pre')
     r1 = Record(*x)
     s.update_phase(*x)
-    self.assertEqual( s.register[t1], r1 )
+    f1 = s.fetch(t1)
+    self.assertEqual( s.fetch(t1), r1 )
     # 2. Update with the same values should not change the register.
     s.update_phase(*x)
-    self.assertEqual( s.register[t1], r1 )
+    self.assertEqual( s.fetch(t1), r1 )
     # 3. Only allow legal phase updates.
     x = (t1, w1, 'fin')
     r2 = Record(*x)
     # 3.1 Update existing record to phase 'fin'
     s.update_phase(*x)
-    self.assertNotEqual( s.register[t1], r1 )
-    self.assertEqual( s.register[t1], r2 )
+    self.assertNotEqual( s.fetch(t1), r1 )
+    self.assertEqual( s.fetch(t1), r2 )
     # 3.2 Try to change from 'fin' to 'pre', with element != None
     x = (t1, w1, 'pre')
     s.update_phase(*x)
-    self.assertNotEqual( s.register[t1], r1 )
-    self.assertEqual( s.register[t1], r2 )
+    self.assertNotEqual( s.fetch(t1), r1 )
+    self.assertEqual( s.fetch(t1), r2 )
     # 3.3 Try to change from 'fin' to 'pre', with element = None
     x = (t1, None, 'pre')
     s.update_phase(*x)
-    self.assertEqual( s.register[t1].phase, 'pre')
+    self.assertEqual( s.fetch(t1).phase, 'pre')
     # 3.4 Try to change from 'pre' to 'FIN', with element != None
     x = (t1, w1, 'pre')
     s.update_phase(*x)
     x = (t1, w1, 'FIN')
     s.update_phase(*x)
-    self.assertNotEqual( s.register[t1].phase, 'FIN')
+    self.assertNotEqual( s.fetch(t1).phase, 'FIN')
     # 3.5 Try to change from 'pre' to 'fin' and then to 'FIN', with element != None
     x = (t1, w1, 'fin')
     s.update_phase(*x)
     x = (t1, w1, 'FIN')
     s.update_phase(*x)
-    self.assertEqual( s.register[t1].phase, 'FIN')
+    self.assertEqual( s.fetch(t1).phase, 'FIN')
 
   def test_max_phase(self):
     """ Test that the correct tag is returned for each set of phases. """
