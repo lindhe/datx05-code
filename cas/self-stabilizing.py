@@ -24,6 +24,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from channel.GossipProtocol import GossipMessage
 from channel.ppProtocol import PingPongMessage
 from register.record import Record
 from register.register import Register
@@ -32,9 +33,16 @@ from register.register import Register
 class Server:
   """ The event handlers for the server in Algorithm 2 """
 
-  def __init__(self):
-    """ Initialize with an empty register S """
+  def __init__(self, ip, port, quorum):
+    self.uid = ip + ':' + str(port)
+    # Quorum size:
+    self.quorum = quorum
+    # Initialize with an empty register S
     self.S = Register()
+    # Received gossip messages. Key is UID and value is GossipMessage
+    self.pre = {}
+    self.fin = {}
+    self.FIN = {}
 
   def query(self, pp_msg):
     """ Reply to query arrival event, from pj's client to pi's server.
@@ -84,6 +92,33 @@ class Server:
       element = S.fetch(tag).element
     return Record(tag, element, phase)
 
-  def gossip(self):
-    """ Reply to gossip arrival event, from pj's server to pi's server. """
-    return
+  def gossip(self, k, received_tags):
+    """ Reply to gossip arrival event, from pj's server to pi's server.
+
+    Updates the class variables pre, fin and FIN to include the content of the
+    most recently received tag_tuple from a gossip from k.
+
+    Args:
+      k (uid): the UID of the server from which we received a gossip message
+      tag_tuple (tag, tag, tag): the tag_tuple included in the gossip from k
+    Returns:
+      tag_tuple(): (max_all, max_finFIN, max_FIN)
+    """
+    (self.pre[k], self.fin[k], self.FIN[k]) = received_tags
+    received_finFIN = (self.fin[k], self.FIN[k])
+    received_finFIN = (self.FIN[k])
+    i = self.uid
+    # pre
+    pre[i] = max( *received_tags, self.S.max_phase(['pre', 'fin', 'FIN']) )
+    self.S.update_phase(pre[i], None, 'pre')
+    # fin
+    fin[i] = max( *received_finFIN, self.S.max_phase(['fin', 'FIN']) )
+    self.S.update_phase(fin[i], None, 'fin')
+    #FIN
+    implicitFinalized = []
+    fin_tags = [t for t in self.fin if t == self.fin[k]]
+    if len(fin_tags) >= self.quorum:
+      implicitFinalized = [self.fin[k]]
+    FIN[i] = max( *received_FIN, self.S.max_phase(['FIN']), *implicitFinalized )
+    self.S.update_phase(FIN[i], None, 'FIN')
+    return self.S.tag_tuple()
