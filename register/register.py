@@ -45,6 +45,9 @@ class Register:
     """ String representation prints the entire register dict """
     return repr( self.register )
 
+  def __contains__(self, r):
+    return r in self.register
+
   def update_phase(self, tag, element, phase):
     """ Update the set of stored records appropriately.
 
