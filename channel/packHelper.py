@@ -7,13 +7,14 @@ class PackHelper:
     pack them into one byte object.
     '''
     def pack(self, *args, payload=None):
+        header_fields = [x if x is not None else b'' for x in args]
         h_pattern = ""
-        for field in args:
+        for field in header_fields:
             h_pattern += str(len(field))+"s"
         h_size = len(h_pattern.encode())
         tot_pattern = "i"+str(h_size)+"s"+h_pattern
         binary_data = struct.pack(tot_pattern, h_size,
-                                  h_pattern.encode(), *args)
+                                  h_pattern.encode(), *header_fields)
         if payload:
             binary_data += payload
         return binary_data
@@ -32,7 +33,8 @@ class PackHelper:
         h_start = int_size+pattern_size
         h_fields = struct.unpack(h_pattern,
                                  binary_data[h_start:h_start+h_size])
+        header_fields = [x if x is not b'' else None for x in h_fields]
         if(h_start+h_size < len(binary_data)):
-            return (h_fields, binary_data[h_start+h_size:])
+            return (header_fields, binary_data[h_start+h_size:])
         else:
-            return (h_fields,None)
+            return (header_fields,None)

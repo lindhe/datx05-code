@@ -5,9 +5,9 @@ class ExamplePingPongRecv:
         print("pingpong CALLBACK")
         if msg_data:
             print("Got message with label %s" % msg_data.get_label())
+            new_msg = PingPongMessage(b'qry2', b'bot',
+                                     b'bot', req_tag=msg_data.get_tag())
+            return new_msg.get_bytes()
         else:
             print("Got empty message")
-        pp_msg = PingPongMessage()
-        msg = pp_msg.create_message(b'qry2', b'bot',
-                                    b'bot',b'none') 
-        return msg
+            return None

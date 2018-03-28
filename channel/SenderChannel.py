@@ -9,14 +9,11 @@ from .GossipProtocol import GossipMessage
 
 class SenderChannel:
 
-    def __init__(self, channel_type, callback_obj, ip, port):
+    def __init__(self, uid, channel_type, callback_obj, ip, port):
         context = zmq.asyncio.Context()
+        self.uid = uid
         self.ch_type = channel_type
         self.pingTX = None
-        if channel_type:
-            self.msg_obj = GossipMessage()
-        else:
-            self.msg_obj = PingPongMessage()
         self.socket = context.socket(zmq.DEALER)
         self.socket.setsockopt(zmq.RCVTIMEO, 5000)
         self.socket.connect("tcp://%s:%s" % (ip, port))
@@ -30,8 +27,9 @@ class SenderChannel:
                 msg_type, msg_cntr = struct.unpack("ii", res[:(2*int_size)])  
                 msg_data = None
                 if len(res[(2*int_size):]):
-                    self.msg_obj.set_message(res[(2*int_size):])
-                    msg_data = self.msg_obj
+                    if not self.ch_type:
+                        msg_list = PingPongMessage.set_message(res[(2*int_size):])
+                        msg_data = PingPongMessage(*msg_list)
                 break
             except Exception as e:
                 msg = token+self.pingTX if self.pingTX else token
@@ -46,7 +44,7 @@ class SenderChannel:
             msg_type, msg_cntr, msg_data = await self.receive(token)
             print("Got response with counter %i" % msg_cntr)
             if(msg_cntr >= counter):
-                self.pingTX = await self.cb_obj.departure(msg_data)
+                self.pingTX = await self.cb_obj.departure(self.uid, msg_data)
                 counter = msg_cntr+1
                 token = struct.pack("ii", self.ch_type, counter)
                 msg = token+self.pingTX if self.pingTX else token

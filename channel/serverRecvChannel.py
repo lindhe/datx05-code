@@ -28,11 +28,12 @@ class ServerRecvChannel:
         
         if len(res[(2*int_size):]):
             if(msg_type == 0):
-                msg = PingPongMessage()
+                msg_list = PingPongMessage.set_message(res[(2*int_size):])
+                msg = PingPongMessage(*msg_list)
             else:
                 msg = GossipMessage()
+                msg.set_message(res[(2*int_size):])
 
-            msg.set_message(res[(2*int_size):])
 
         if(sender not in self.tokens.keys()):
             print("Add to token list")
@@ -43,7 +44,7 @@ class ServerRecvChannel:
             token = struct.pack("ii",msg_type,self.tokens[sender])
             if(msg_type == 0):
                 new_msg = await self.cb_obj_pp.arrival(msg)
-                response = token+new_msg
+                response = token+new_msg if new_msg else token
             elif(msg_type == 1):
                 await self.cb_obj_gossip.arrival(msg)
                 response = token
