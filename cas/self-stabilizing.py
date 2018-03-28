@@ -66,9 +66,23 @@ class Server:
     self.S.update_phase(tag, element, phase)
     return Record(tag, None, phase)
 
-  def finalize(self):
-    """ Reply to fin or FIN arrival event, from pj's client to pi's server. """
-    return
+  def finalize(self, pp_msg):
+    """ Reply to fin or FIN arrival event, from pj's client to pi's server.
+
+    Assumes that the message has phase 'fin' or 'FIN'.
+
+    Args:
+      pp_msg (PingPongMessage): The arriving message.
+    Returns:
+      Record(tag, element, phase) where element is ...
+    """
+    tag = pp_msg.get_tag()
+    element = None
+    phase = pp_msg.get_label()
+    self.S.update_phase(tag, element, phase)
+    if (pp_msg.mode = 'read') and (tag in S):
+      element = S.fetch(tag).element
+    return Record(tag, element, phase)
 
   def gossip(self):
     """ Reply to gossip arrival event, from pj's server to pi's server. """
