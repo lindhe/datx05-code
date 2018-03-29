@@ -23,7 +23,7 @@ class QuorumSend:
         if msg and (self.pingTx != None):
             if(msg.get_req_tag() == self.pingTx.get_tag() and
                (msg.get_tag() == None or
-               msg.get_label() != 'qry' or
+               msg.get_label() == 'qry' or
                (msg.get_label() != 'qry' and
                (msg.get_tag() == msg_data.get_req_tag() 
               )))):

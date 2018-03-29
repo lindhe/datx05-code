@@ -1,14 +1,15 @@
 from .packHelper import PackHelper
+from ast import literal_eval
 
 class PingPongMessage:
 
     pack_helper = PackHelper()
     
     def __init__(self, tag, label, data, req_tag=None):
-        self.tag = tag
-        self.label = label
+        self.tag = str(tag).encode() if type(tag) != bytes else tag
+        self.label = label.encode() if type(label) != bytes else label
         self. data = data
-        self.req_tag = req_tag
+        self.req_tag = str(req_tag).encode() if type(req_tag) != bytes else req_tag
 
     def set_message(msg):
         res_tuple = PingPongMessage.pack_helper.unpack(msg)
@@ -24,23 +25,14 @@ class PingPongMessage:
               pack_helper.pack(self.tag, self.label, self.req_tag, payload=self.data)
         return msg
 
-    def is_bot(self):
-        if (self.tag == None and self.label == None):
-            return True
-        else:
-            return False
-
     def get_tag(self):
-        return self.tag
+        return literal_eval(self.tag.decode())
 
     def get_data(self):
         return self.data
 
     def get_label(self):
-        return self.label
-
-    def get_id(self):
-        return self.uid
+        return self.label.decode()
 
     def get_req_tag(self):
-        return self.req_tag
+        return literal_eval(self.req_tag.decode())
