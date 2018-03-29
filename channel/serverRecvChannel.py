@@ -43,8 +43,11 @@ class ServerRecvChannel:
             self.tokens[sender] = msg_cntr
             token = struct.pack("ii",msg_type,self.tokens[sender])
             if(msg_type == 0):
-                new_msg = await self.cb_obj_pp.arrival(msg)
-                response = token+new_msg if new_msg else token
+                if msg:
+                    new_msg = await self.cb_obj_pp.arrival(msg)
+                    response = token+new_msg
+                else:
+                    response = token
             elif(msg_type == 1):
                 await self.cb_obj_gossip.arrival(msg)
                 response = token

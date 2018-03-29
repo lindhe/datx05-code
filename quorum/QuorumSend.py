@@ -22,14 +22,16 @@ class QuorumSend:
         print("pingpong arrival! ")
         if msg and (self.pingTx != None):
             if(msg.get_req_tag() == self.pingTx.get_tag() and
-              (msg.is_bot() or
-               msg.get_tag() == None or
+               (msg.get_tag() == None or
                msg.get_label() != 'qry' or
                (msg.get_label() != 'qry' and
                (msg.get_tag() == msg_data.get_req_tag() 
               )))):
                 self.pongRx[server_id] = msg
                 print("ADD to pongRx with size %s" % len(self.pongRx))
+        elif not msg:
+            self.pongRx.pop(server_id, None)
+
         if len(self.pongRx) >= self.Q:
             print("GOT ENOUGH elements")
             self.aggregated = list(self.pongRx.values())
