@@ -60,19 +60,17 @@ class Server:
       phases = ['pre', 'fin', 'FIN']
     return (self.S.max_phase(phases), None, 'qry')
 
-  def pre_write(self, pp_msg):
+  def pre_write(self, t, w):
     """ Reply to pre-write arrival event, from pj's writer to pi's server.
 
     Args:
-      pp_msg (PingPongMessage): The arriving message.
+      t (tuple): tag (Sequence number, UID)
+      w (Byte): coded element
     Returns:
-      A Record with (tag, None, 'pre').
+      (t, None, 'pre')
     """
-    tag = pp_msg.get_tag()
-    element = pp_msg.get_data()
-    phase = 'pre'
-    self.S.update_phase(tag, element, phase)
-    return Record(tag, None, phase)
+    self.S.update_phase(t, w, 'pre')
+    return (t, None, 'pre')
 
   def finalize(self, pp_msg):
     """ Reply to fin or FIN arrival event, from pj's client to pi's server.
