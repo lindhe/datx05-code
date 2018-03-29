@@ -72,23 +72,31 @@ class Server:
     self.S.update_phase(t, w, 'pre')
     return (t, None, 'pre')
 
-  def finalize(self, pp_msg):
-    """ Reply to fin or FIN arrival event, from pj's client to pi's server.
-
-    Assumes that the message has phase 'fin' or 'FIN'.
+  def read_finalize(self, t, d):
+    """ Update register and return a reply, for fin or FIN pp-arrival event.
 
     Args:
-      pp_msg (PingPongMessage): The arriving message.
+      t (tuple): tag (Sequence number, UID)
+      d (string): phase 'fin' or 'FIN'
     Returns:
-      Record(tag, element, phase) where element is ...
+      tuple: (t, w, d) where w is the coded element if it exists in the record,
+      or None otherwise.
     """
-    tag = pp_msg.get_tag()
-    element = None
-    phase = pp_msg.get_label()
-    self.S.update_phase(tag, element, phase)
-    if (pp_msg.mode = 'read') and (tag in S):
-      element = S.fetch(tag).element
-    return Record(tag, element, phase)
+    self.S.update_phase(t, None, d)
+    w = S.fetch(t)
+    return (t, w, d)
+
+  def write_finalize(self, t, d):
+    """ Update register and return a reply, for fin or FIN pp-arrival event.
+
+    Args:
+      t (tuple): tag (Sequence number, UID)
+      d (string): phase 'fin' or 'FIN'
+    Returns:
+      tuple: (t, None, d)
+    """
+    self.S.update_phase(t, None, d)
+    return (t, None, d)
 
   def gossip(self, k, pre, fin, FIN):
     """ Reply to gossip arrival event, from pj's server to pi's server.

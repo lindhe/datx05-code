@@ -108,29 +108,25 @@ class Register:
     return (max_all, max_finFIN, max_FIN)
 
   def fetch(self, tag):
-    """ Reads a Record from disk (if it exists).
+    """ Reads a coded element from disk (if it exists).
 
-    If there is a Record with tag tag and a non-empty element stored in the
-    Register, we will read the element from disk and return a Record with that
-    element.
-
-    If there is a Record with an empty element stored in the record, we return a
-    Record of (tag, None, phase). If there is no Record with tag stored, None is
+    If there exists a Record with tag=tag, and its element is non-empty,
+    we will read the element from disk and return it. Otherwise, None is
     returned.
 
     Args:
-      tag (tuple): Sequence number and UID
+      tag (tuple): Sequence number and UID.
     Returns:
-      Either None, or a Record of (tag, element, phase) as decribed above.
+      Coded element if it exists on disk,
+      None otherwise.
     """
     S = self.register
     if tag in S:
       element = S[tag].element
-      phase = S[tag].phase
       if element:
         filename = self.tag_to_filename(tag)
         element = read_file(filename)
-      return Record(tag, element, phase)
+      return element
     else:
       return None
 
