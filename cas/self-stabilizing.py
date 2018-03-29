@@ -33,12 +33,12 @@ from register.register import Register
 class Server:
   """ The event handlers for the server in Algorithm 2 """
 
-  def __init__(self, ip, port, quorum):
+  def __init__(self, ip, port, quorum, storage_location="./storage/"):
     self.uid = ip + ':' + str(port)
     # Quorum size:
     self.quorum = quorum
     # Initialize with an empty register S
-    self.S = Register()
+    self.S = Register(storage_location)
     # Received gossip messages. Key is UID and value is tag
     self.pre = {}
     self.fin = {}

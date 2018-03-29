@@ -31,15 +31,19 @@ from .fileHelper import *
 class Register:
   """ Implementation of the register which stores recrods """
 
-  def __init__(self):
+  def __init__(self, storage_location="./storage/"):
     """ Initiates a register with no records.
     register is a dict of Record objects: {(tag, element, phase)}
     tag is a tuple of (seq, uid)
     element is either None or a file path
     phase is either 'pre', 'fin' or 'FIN'.
+
+    Args:
+      storage_location (string, optional): path to storage location for elements
     """
     self.register = {}
     self.t0 = (0, None)
+    self.storage_location = storage_location
 
   def __repr__(self):
     """ String representation prints the entire register dict """
@@ -69,7 +73,7 @@ class Register:
       # If element is not None, we write it to a file and use the path instead
       if element:
         filename = self.tag_to_filename(tag)
-        element = write_file(element, filename)
+        element = write_file(element, filename, path=self.storage_location)
       S[tag] = Record(tag, element, phase)
 
   def upgrade_phase(self, old, new):
@@ -125,7 +129,7 @@ class Register:
       element = S[tag].element
       if element:
         filename = self.tag_to_filename(tag)
-        element = read_file(filename)
+        element = read_file(filename, path=self.storage_location)
       return element
     else:
       return None
