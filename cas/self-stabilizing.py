@@ -115,7 +115,7 @@ class Server:
     self.S.update_phase(fin[i], None, 'fin')
     #FIN
     implicitFinalized = []
-    fin_tags = [t for t in self.fin if t == self.fin[k]]
+    fin_tags = [t for t in self.fin.values() if t == self.fin[k]]
     if len(fin_tags) >= self.quorum:
       implicitFinalized = [self.fin[k]]
     FIN[i] = max( *received_FIN, self.S.max_phase(['FIN']), *implicitFinalized )
