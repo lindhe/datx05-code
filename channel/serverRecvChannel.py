@@ -31,9 +31,8 @@ class ServerRecvChannel:
                 msg_list = PingPongMessage.set_message(res[(2*int_size):])
                 msg = PingPongMessage(*msg_list)
             else:
-                msg = GossipMessage()
-                msg.set_message(res[(2*int_size):])
-
+                msg_list = GossipMessage.set_message(res[(2*int_size):])
+                msg = GossipMessage(*msg_list)
 
         if(sender not in self.tokens.keys()):
             print("Add to token list")

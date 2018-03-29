@@ -3,11 +3,9 @@ from channel.GossipProtocol import GossipMessage
 class ExampleGossipSend:
     async def departure(self, uid, msg_data):
         print("Gossip CALLBACK SEND")
-        tag_tuple = b'tag_tuple'
-        prp = b'prp'
-        msg_all = b'msg_all'
-        echo = b'echo'
-        uid = b'uid'
-        gossip_obj = GossipMessage()
-        return gossip_obj.create_message(tag_tuple, prp,
-                                       msg_all, echo, uid)
+        tag_tuple = ((2,(1,2)),(1,(1,2)),(1,(1,2)))
+        prp = (1,None)
+        msg_all = False
+        echo = (prp, msg_all)
+        gossip_obj = GossipMessage(tag_tuple, prp, msg_all, echo)
+        return gossip_obj.get_bytes()
