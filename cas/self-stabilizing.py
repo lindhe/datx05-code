@@ -92,7 +92,7 @@ class Server:
       element = S.fetch(tag).element
     return Record(tag, element, phase)
 
-  def gossip(self, k, received_tags):
+  def gossip(self, k, g_msg):
     """ Reply to gossip arrival event, from pj's server to pi's server.
 
     Updates the class variables pre, fin and FIN to include the content of the
@@ -100,10 +100,11 @@ class Server:
 
     Args:
       k (uid): the UID of the server from which we received a gossip message
-      tag_tuple (tag, tag, tag): the tag_tuple included in the gossip from k
+      g_msg (GossipMessage): the gossip message recevied from k with the tag_tuple
     Returns:
       tag_tuple(): (max_all, max_finFIN, max_FIN)
     """
+    received_tags = g_msg.get_tag_tuple()
     (self.pre[k], self.fin[k], self.FIN[k]) = received_tags
     received_finFIN = (self.fin[k], self.FIN[k])
     received_finFIN = (self.FIN[k])
