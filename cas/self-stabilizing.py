@@ -39,7 +39,7 @@ class Server:
     self.quorum = quorum
     # Initialize with an empty register S
     self.S = Register()
-    # Received gossip messages. Key is UID and value is GossipMessage
+    # Received gossip messages. Key is UID and value is tag
     self.pre = {}
     self.fin = {}
     self.FIN = {}
@@ -90,34 +90,34 @@ class Server:
       element = S.fetch(tag).element
     return Record(tag, element, phase)
 
-  def gossip(self, k, g_msg):
+  def gossip(self, k, pre, fin, FIN):
     """ Reply to gossip arrival event, from pj's server to pi's server.
 
     Updates the class variables pre, fin and FIN to include the content of the
-    most recently received tag_tuple from a gossip from k.
+    pre, fin and FIN received via a gossip message from server with uid k.
 
     Args:
-      k (uid): the UID of the server from which we received a gossip message
-      g_msg (GossipMessage): the gossip message recevied from k with the tag_tuple
+      k (string): the UID of the server from which we received a gossip message
+      pre (tuple): the pre[k] tag received in gossip[k]
+      fin (tuple): the fin[k] tag received in gossip[k]
+      FIN (tuple): the FIN[k] tag received in gossip[k]
     Returns:
       tag_tuple(): (max_all, max_finFIN, max_FIN)
     """
-    received_tags = g_msg.get_tag_tuple()
-    (self.pre[k], self.fin[k], self.FIN[k]) = received_tags
-    received_finFIN = (self.fin[k], self.FIN[k])
-    received_finFIN = (self.FIN[k])
+    # We need to store the received tag values, for the implicit FIN to work
+    (self.pre[k], self.fin[k], self.FIN[k]) = (pre, fin, FIN)
     i = self.uid
     # pre
-    pre[i] = max( *received_tags, self.S.max_phase(['pre', 'fin', 'FIN']) )
-    self.S.update_phase(pre[i], None, 'pre')
+    self.pre[i] = max( pre, fin, FIN, self.S.max_phase(['pre', 'fin', 'FIN']) )
+    self.S.update_phase(self.pre[i], None, 'pre')
     # fin
-    fin[i] = max( *received_finFIN, self.S.max_phase(['fin', 'FIN']) )
-    self.S.update_phase(fin[i], None, 'fin')
+    self.fin[i] = max( fin, FIN, self.S.max_phase(['fin', 'FIN']) )
+    self.S.update_phase(self.fin[i], None, 'fin')
     #FIN
     implicitFinalized = []
-    fin_tags = [t for t in self.fin.values() if t == self.fin[k]]
+    fin_tags = [t for t in self.fin.values() if t == fin]
     if len(fin_tags) >= self.quorum:
-      implicitFinalized = [self.fin[k]]
-    FIN[i] = max( *received_FIN, self.S.max_phase(['FIN']), *implicitFinalized )
-    self.S.update_phase(FIN[i], None, 'FIN')
+      implicitFinalized = [fin]
+    self.FIN[i] = max( FIN, self.S.max_phase(['FIN']), *implicitFinalized )
+    self.S.update_phase(self.FIN[i], None, 'FIN')
     return self.S.tag_tuple()
