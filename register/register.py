@@ -31,7 +31,7 @@ from .fileHelper import *
 class Register:
   """ Implementation of the register which stores recrods """
 
-  def __init__(self, storage_location="./storage/"):
+  def __init__(self, storage_location="./.storage/"):
     """ Initiates a register with no records.
     register is a dict of Record objects: {(tag, element, phase)}
     tag is a tuple of (seq, uid)
@@ -64,7 +64,7 @@ class Register:
       phase (string): 'pre', 'fin' or 'FIN'
     """
     S = self.register
-    if (tag in S) and S[tag].element and element:
+    if (tag in S) and S[tag].element and not element:
       w = S[tag].element
       current_phase = S[tag].phase
       p = self.upgrade_phase(current_phase, phase)

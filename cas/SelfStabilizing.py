@@ -33,7 +33,7 @@ from register.register import Register
 class Server:
   """ The event handlers for the server in Algorithm 2 """
 
-  def __init__(self, uid, quorum, storage_location="./storage/"):
+  def __init__(self, uid, quorum, storage_location="./.storage/"):
     self.uid = uid
     # Quorum size:
     self.quorum = quorum
@@ -83,7 +83,7 @@ class Server:
       or None otherwise.
     """
     self.S.update_phase(t, None, d)
-    w = S.fetch(t)
+    w = self.S.fetch(t)
     return (t, w, d)
 
   def write_finalize(self, t, d):
