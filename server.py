@@ -10,6 +10,7 @@ from channel.SenderChannel import SenderChannel
 from gossip.ExampleGossipRecv import ExampleGossipRecv
 from gossip.ExampleGossipSend import ExampleGossipSend
 from quorum.ExamplePingPongRecv import ExamplePingPongRecv
+from cas.SelfStabilizing import Server
 
 p = ExamplePingPongRecv()
 gr = ExampleGossipRecv()
