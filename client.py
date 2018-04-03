@@ -4,10 +4,23 @@ import asyncio
 import configparser
 import time
 import threading
+import random as r
 from threading import Thread
 from channel.SenderChannel import SenderChannel
 from quorum.QuorumSend import QuorumSend
 from channel.ppProtocol import PingPongMessage
+
+with open('/sys/class/net/lo/address') as f:
+    hw_addr = f.read().splitlines()[0]
+    if (hw_addr == '00:00:00:00:00:00'):
+        hw_addr = ':'.join(['%02x']*6) % (
+                    r.randint(0, 255),
+                    r.randint(0, 255),
+                    r.randint(0, 255),
+                    r.randint(0, 255),
+                    r.randint(0, 255),
+                    r.randint(0, 255)
+                    )
 
 loop = asyncio.get_event_loop()
 p = QuorumSend()
@@ -37,7 +50,7 @@ def write(msg):
     res = qrmAccess(qry_msg, p, loop)
     max_tag = max([x.get_tag() for x in res])
     new_int = int(max_tag[0])+1
-    new_tag = (new_int, None)
+    new_tag = (new_int, hw_addr)
     pre_msg = PingPongMessage(new_tag, msg, 'pre', 'write')
     res = qrmAccess(pre_msg, p, loop)
     fin_msg = PingPongMessage(new_tag, None, 'fin', 'write')
@@ -55,7 +68,11 @@ def read():
     res = qrmAccess(fin_msg, p, loop)
     elements = [x.get_data() for x in res]
     print("RESPONSE TO CLIENT %s" % str(elements))
+
 time.sleep(10)
 write(b'hello world')
 read()
-#time.sleep(15)
+time.sleep(10)
+write(b'(update) hello world')
+read()
+time.sleep(10)
