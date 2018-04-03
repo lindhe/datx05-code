@@ -10,19 +10,27 @@ from channel.SenderChannel import SenderChannel
 from gossip.ExampleGossipRecv import ExampleGossipRecv
 from gossip.ExampleGossipSend import ExampleGossipSend
 from quorum.ExamplePingPongRecv import ExamplePingPongRecv
+from quorum.QuorumRecv import QuorumRecv
 from cas.SelfStabilizing import Server
-
-p = ExamplePingPongRecv()
-gr = ExampleGossipRecv()
-gs = ExampleGossipSend()
 
 my_port = sys.argv[1]
 my_ip = sys.argv[2]
 
-loop = asyncio.get_event_loop()
-
 config = configparser.ConfigParser()
 config.read('config/config.ini')
+j = 0
+for key in config['Nodes']:
+    ip, port = config['Nodes'][key].split(':')
+    if ((ip == my_ip) and (port == my_port)):
+        my_id = j
+
+server = Server(j, 3)
+p = QuorumRecv(server)
+gr = ExampleGossipRecv()
+gs = ExampleGossipSend()
+
+loop = asyncio.get_event_loop()
+
 i = 0
 for key in config['Nodes']:
     ip, port = config['Nodes'][key].split(':')

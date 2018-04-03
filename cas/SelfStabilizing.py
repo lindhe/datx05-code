@@ -33,8 +33,8 @@ from register.register import Register
 class Server:
   """ The event handlers for the server in Algorithm 2 """
 
-  def __init__(self, ip, port, quorum, storage_location="./storage/"):
-    self.uid = ip + ':' + str(port)
+  def __init__(self, uid, quorum, storage_location="./storage/"):
+    self.uid = uid
     # Quorum size:
     self.quorum = quorum
     # Initialize with an empty register S
