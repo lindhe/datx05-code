@@ -8,7 +8,7 @@ class PingPongMessage:
     def __init__(self, tag, label, data, req_tag=None):
         self.tag = str(tag).encode() if type(tag) != bytes else tag
         self.label = label.encode() if type(label) != bytes else label
-        self. data = data
+        self.data = data
         self.req_tag = str(req_tag).encode() if type(req_tag) != bytes else req_tag
 
     def set_message(msg):
