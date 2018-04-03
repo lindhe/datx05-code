@@ -5,7 +5,7 @@ class PingPongMessage:
 
     pack_helper = PackHelper()
     
-    def __init__(self, tag, label, data, req_tag=None):
+    def __init__(self, tag, data, label, req_tag=None):
         self.tag = str(tag).encode() if type(tag) != bytes else tag
         self.label = label.encode() if type(label) != bytes else label
         self.data = data
@@ -18,7 +18,7 @@ class PingPongMessage:
         tag = ctrl_data[0]
         label = ctrl_data[1]
         req_tag = ctrl_data[2]
-        return [tag, label, data, req_tag]
+        return [tag, data, label, req_tag]
 
     def get_bytes(self):
         msg = PingPongMessage. \

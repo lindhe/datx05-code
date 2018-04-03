@@ -32,7 +32,7 @@ def qrmAccess(msg, p, loop):
     fut = asyncio.run_coroutine_threadsafe(p.phaseInit(msg), loop)
     return fut.result()
 
-pp_msg = PingPongMessage((1,(2,3)), b'qry', None)
+pp_msg = PingPongMessage((1,(2,3)), None, 'qry')
 time.sleep(10)
 res = qrmAccess(pp_msg, p, loop)
 print("RESPONSE TO CLIENT %s" % res)
