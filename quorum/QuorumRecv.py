@@ -1,0 +1,33 @@
+from channel.ppProtocol import PingPongMessage
+
+class QuorumRecv:
+
+    def __init__(self, server):
+        self.server = server
+
+    async def arrival(self, msg_data):
+        print("pingpong CALLBACK")
+        if msg_data:
+            tag = msg_data.get_tag()
+            data = msg_data.get_data()
+            label = msg_data.get_label()
+            mode = msg_data.get_mode()
+            if (label == 'qry'):
+                if (mode == 'read'):
+                    res = self.server.read_query()
+                else:
+                    res = self.server.write_query()
+            elif (label == 'pre'):
+                res = self.server.pre_write(tag, data)
+            elif (label == 'fin' or label == 'FIN'):
+                if (mode == 'read'):
+                    res = self.server.read_finalize(tag, label)
+                else:
+                    res = self.server.write_query(tag, label)
+            else:
+                return None
+            new_msg = PingPongMessage(*res, mode, req_tag=msg_data.get_tag())
+            return new_msg.get_bytes()
+        else:
+            print("Got empty message")
+            return None
