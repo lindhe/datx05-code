@@ -97,11 +97,11 @@ class Register:
     """
     S = self.register
     phase_tags = []
-    if not S:
-      return self.t0
     for tag in S:
       if S[tag].phase in phases:
         phase_tags.append(tag)
+    if not phase_tags:
+        return self.t0
     return max(phase_tags)
 
   def tag_tuple(self):
