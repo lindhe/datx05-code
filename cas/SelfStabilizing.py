@@ -60,7 +60,7 @@ class Server:
     """
     return (self.S.max_phase(['pre', 'fin', 'FIN']), None, 'qry')
 
-  def pre_write(self, t, w):
+  async def pre_write(self, t, w):
     """ Reply to pre-write arrival event, from pj's writer to pi's server.
 
     Args:
@@ -69,10 +69,10 @@ class Server:
     Returns:
       (t, None, 'pre')
     """
-    self.S.update_phase(t, w, 'pre')
+    await self.S.update_phase(t, w, 'pre')
     return (t, None, 'pre')
 
-  def read_finalize(self, t, d):
+  async def read_finalize(self, t, d):
     """ Update register and return a reply, for fin or FIN pp-arrival event.
 
     Args:
@@ -82,11 +82,11 @@ class Server:
       tuple: (t, w, d) where w is the coded element if it exists in the record,
       or None otherwise.
     """
-    self.S.update_phase(t, None, d)
-    w = self.S.fetch(t)
+    await self.S.update_phase(t, None, d)
+    w = await self.S.fetch(t)
     return (t, w, d)
 
-  def write_finalize(self, t, d):
+  async def write_finalize(self, t, d):
     """ Update register and return a reply, for fin or FIN pp-arrival event.
 
     Args:
@@ -95,10 +95,10 @@ class Server:
     Returns:
       tuple: (t, None, d)
     """
-    self.S.update_phase(t, None, d)
+    await self.S.update_phase(t, None, d)
     return (t, None, d)
 
-  def gossip(self, k, pre, fin, FIN):
+  async def gossip(self, k, pre, fin, FIN):
     """ Reply to gossip arrival event, from pj's server to pi's server.
 
     Updates the class variables pre, fin and FIN to include the content of the
@@ -117,17 +117,17 @@ class Server:
     i = self.uid
     # pre
     self.pre[i] = max( pre, fin, FIN, self.S.max_phase(['pre', 'fin', 'FIN']) )
-    self.S.update_phase(self.pre[i], None, 'pre')
+    await self.S.update_phase(self.pre[i], None, 'pre')
     # fin
     self.fin[i] = max( fin, FIN, self.S.max_phase(['fin', 'FIN']) )
-    self.S.update_phase(self.fin[i], None, 'fin')
+    await self.S.update_phase(self.fin[i], None, 'fin')
     #FIN
     implicitFinalized = []
     fin_tags = [t for t in self.fin.values() if t == fin]
     if len(fin_tags) >= self.quorum:
       implicitFinalized = [fin]
     self.FIN[i] = max( FIN, self.S.max_phase(['FIN']), *implicitFinalized )
-    self.S.update_phase(self.FIN[i], None, 'FIN')
+    await self.S.update_phase(self.FIN[i], None, 'FIN')
 
   def get_tag_tuple(self):
     return self.S.tag_tuple()

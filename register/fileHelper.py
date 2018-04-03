@@ -28,10 +28,11 @@
 
 import sys
 import pathlib
+import aiofiles
 
 default_path = "./.storage/"
 
-def write_file(data, filename, path=default_path):
+async def write_file(data, filename, path=default_path):
   """ Tries to write data to a file.
 
   Will make sure that the path exists by creating any missing (parent)
@@ -51,13 +52,13 @@ def write_file(data, filename, path=default_path):
   if type(data) == str:
     data = str.encode(data)
   try:
-    with open(filepath, 'wb') as f:
-      f.write(data)
+    async with aiofiles.open(filepath, 'wb') as f:
+      await f.write(data)
     return filepath
   except OSError as e:
     print(f"Error reading file {filepath}: {e}", file=sys.stderr)
 
-def read_file(filename, path=default_path):
+async def read_file(filename, path=default_path):
   """ Tries to read (binary) data from a file.
 
   Args:
@@ -67,8 +68,8 @@ def read_file(filename, path=default_path):
   """
   filepath = path + filename
   try:
-    with open(filepath, 'rb') as f:
-      data = f.read()
+    async with aiofiles.open(filepath, 'rb') as f:
+      data = await f.read()
     return data
   except OSError as e:
     print(f"Error reading file {path}: {e}", file=sys.stderr)

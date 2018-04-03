@@ -52,7 +52,7 @@ class Register:
   def __contains__(self, r):
     return r in self.register
 
-  def update_phase(self, tag, element, phase):
+  async def update_phase(self, tag, element, phase):
     """ Update the set of stored records appropriately.
 
     If element is not None, we store it in a file and stores just the filepath
@@ -73,7 +73,7 @@ class Register:
       # If element is not None, we write it to a file and use the path instead
       if element:
         filename = self.tag_to_filename(tag)
-        element = write_file(element, filename, path=self.storage_location)
+        element = await write_file(element, filename, path=self.storage_location)
       S[tag] = Record(tag, element, phase)
 
   def upgrade_phase(self, old, new):
@@ -111,7 +111,7 @@ class Register:
     max_FIN = self.max_phase(['FIN'])
     return (max_all, max_finFIN, max_FIN)
 
-  def fetch(self, tag):
+  async def fetch(self, tag):
     """ Reads a coded element from disk (if it exists).
 
     If there exists a Record with tag=tag, and its element is non-empty,
@@ -129,7 +129,7 @@ class Register:
       element = S[tag].element
       if element:
         filename = self.tag_to_filename(tag)
-        element = read_file(filename, path=self.storage_location)
+        element = await read_file(filename, path=self.storage_location)
       return element
     else:
       return None

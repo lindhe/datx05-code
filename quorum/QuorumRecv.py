@@ -18,12 +18,12 @@ class QuorumRecv:
                 else:
                     res = self.server.write_query()
             elif (label == 'pre'):
-                res = self.server.pre_write(tag, data)
+                res = await self.server.pre_write(tag, data)
             elif (label == 'fin' or label == 'FIN'):
                 if (mode == 'read'):
-                    res = self.server.read_finalize(tag, label)
+                    res = await self.server.read_finalize(tag, label)
                 else:
-                    res = self.server.write_finalize(tag, label)
+                    res = await self.server.write_finalize(tag, label)
             else:
                 return None
             new_msg = PingPongMessage(*res, mode, req_tag=msg_data.get_tag())

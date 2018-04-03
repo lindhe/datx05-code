@@ -19,6 +19,6 @@ class Gossip:
         if msg_data:
             print("Got message with tag_tuple:")
             print(msg_data.get_tag_tuple())
-            self.server.gossip(uid, *msg_data.get_tag_tuple())
+            await self.server.gossip(uid, *msg_data.get_tag_tuple())
         else:
             print("Got empty message")

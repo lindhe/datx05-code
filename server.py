@@ -41,7 +41,7 @@ for key in config['Nodes']:
     ip, port = config['Nodes'][key].split(':')
     if not ((ip == my_ip) and (port == my_port)):
         c = SenderChannel(i, 1, g, ip, port, init_tx=m)
-        #loop.create_task(c.start())
+        loop.create_task(c.start())
     i += 1
 
 s = ServerRecvChannel(p, g, my_port)
