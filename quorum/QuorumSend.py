@@ -11,7 +11,12 @@ class QuorumSend:
 
     async def phaseInit(self, m):
         self.pongRx.clear()
-        self.pingTx = m
+        if (type(m[1]) == list):
+            self.pingTx = []
+            for i in range(len(m[1])):
+                self.pingTx.append(PingPongMessage(m[0], m[1][i], *m[2:]))
+        else:
+            self.pingTx = PingPongMessage(*m)
         self.event = asyncio.Event()
         await self.event.wait()
         x = self.aggregated
@@ -20,8 +25,13 @@ class QuorumSend:
 
     async def departure(self, server_id, msg):
         print("pingpong arrival! ")
-        if msg and (self.pingTx != None):
-            if(msg.get_req_tag() == self.pingTx.get_tag() and
+        if (type(self.pingTx) == list):
+            pingTx = self.pingTx[server_id]
+        else:
+            pingTx = self.pingTx
+
+        if msg and (pingTx != None):
+            if(msg.get_req_tag() == pingTx.get_tag() and
                (msg.get_tag() == None or
                msg.get_label() == 'qry' or
                (msg.get_label() != 'qry' and
@@ -39,4 +49,7 @@ class QuorumSend:
             self.pingTx = None
             self.event.set()
 
-        return self.pingTx.get_bytes() if self.pingTx else None
+        if (type(self.pingTx) == list):
+            return self.pingTx[server_id].get_bytes()
+        else:
+            return self.pingTx.get_bytes() if self.pingTx else None

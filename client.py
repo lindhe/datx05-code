@@ -9,6 +9,7 @@ from threading import Thread
 from channel.SenderChannel import SenderChannel
 from quorum.QuorumSend import QuorumSend
 from channel.ppProtocol import PingPongMessage
+from pyeclib.ec_iface import ECDriver
 
 with open('/sys/class/net/lo/address') as f:
     hw_addr = f.read().splitlines()[0]
@@ -23,6 +24,7 @@ with open('/sys/class/net/lo/address') as f:
                     )
 
 loop = asyncio.get_event_loop()
+ec_driver = ECDriver(k=2, m=2, ec_type='liberasurecode_rs_vand')
 p = QuorumSend()
 
 def start_event_loop(loop, config_path):
@@ -46,28 +48,24 @@ def qrmAccess(msg, p, loop):
     return fut.result()
 
 def write(msg):
-    qry_msg = PingPongMessage(None, None, 'qry', 'write')
-    res = qrmAccess(qry_msg, p, loop)
+    elements = ec_driver.encode(msg)
+    res = qrmAccess((None, None, 'qry', 'write'), p, loop)
     max_tag = max([x.get_tag() for x in res])
     new_int = int(max_tag[0])+1
     new_tag = (new_int, hw_addr)
-    pre_msg = PingPongMessage(new_tag, msg, 'pre', 'write')
-    res = qrmAccess(pre_msg, p, loop)
-    fin_msg = PingPongMessage(new_tag, None, 'fin', 'write')
-    res = qrmAccess(fin_msg, p, loop)
-    FIN_msg = PingPongMessage(new_tag, None, 'FIN', 'write')
-    res = qrmAccess(FIN_msg, p, loop)
+    res = qrmAccess((new_tag, elements, 'pre', 'write'), p, loop)
+    res = qrmAccess((new_tag, None, 'fin', 'write'), p, loop)
+    res = qrmAccess((new_tag, None, 'FIN', 'write'), p, loop)
     print("FINISHED WRITING")
 
 def read():
-    qry_msg = PingPongMessage(None, None, 'qry', 'read')
-    res = qrmAccess(qry_msg, p, loop)
+    res = qrmAccess((None, None, 'qry', 'read'), p, loop)
     max_tag = max([x.get_tag() for x in res])
     print("MAX_TAG %s" % str(max_tag))
-    fin_msg = PingPongMessage(max_tag, None, 'fin', 'read')
-    res = qrmAccess(fin_msg, p, loop)
+    res = qrmAccess((max_tag, None, 'fin', 'read'), p, loop)
     elements = [x.get_data() for x in res]
-    print("RESPONSE TO CLIENT %s" % str(elements))
+    decoded_msg = ec_driver.decode(elements)
+    print("RESPONSE TO CLIENT %s" % str(decoded_msg))
 
 time.sleep(10)
 write(b'hello world')
