@@ -48,7 +48,7 @@ class ServerRecvChannel:
                 else:
                     response = token
             elif(msg_type == 1):
-                await self.cb_obj_gossip.arrival(msg)
+                await self.cb_obj_gossip.arrival(sender, msg)
                 response = token
         else:
             print("NO TOKEN ARRIVAL")

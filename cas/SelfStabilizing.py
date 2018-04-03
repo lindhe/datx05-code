@@ -128,4 +128,6 @@ class Server:
       implicitFinalized = [fin]
     self.FIN[i] = max( FIN, self.S.max_phase(['FIN']), *implicitFinalized )
     self.S.update_phase(self.FIN[i], None, 'FIN')
+
+  def get_tag_tuple(self):
     return self.S.tag_tuple()

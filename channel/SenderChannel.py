@@ -9,11 +9,11 @@ from .GossipProtocol import GossipMessage
 
 class SenderChannel:
 
-    def __init__(self, uid, channel_type, callback_obj, ip, port):
+    def __init__(self, uid, channel_type, callback_obj, ip, port, init_tx = None):
         context = zmq.asyncio.Context()
         self.uid = uid
         self.ch_type = channel_type
-        self.pingTX = None
+        self.pingTX = init_tx
         self.socket = context.socket(zmq.DEALER)
         self.socket.setsockopt(zmq.RCVTIMEO, 5000)
         self.socket.connect("tcp://%s:%s" % (ip, port))
@@ -30,6 +30,9 @@ class SenderChannel:
                     if not self.ch_type:
                         msg_list = PingPongMessage.set_message(res[(2*int_size):])
                         msg_data = PingPongMessage(*msg_list)
+                    else:
+                        msg_list = GossipMessage.set_message(res[(2*int_size):])
+                        msg_data = GossipMessage(*msg_list)
                 break
             except Exception as e:
                 msg = token+self.pingTX if self.pingTX else token
