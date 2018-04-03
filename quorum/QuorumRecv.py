@@ -23,7 +23,7 @@ class QuorumRecv:
                 if (mode == 'read'):
                     res = self.server.read_finalize(tag, label)
                 else:
-                    res = self.server.write_query(tag, label)
+                    res = self.server.write_finalize(tag, label)
             else:
                 return None
             new_msg = PingPongMessage(*res, mode, req_tag=msg_data.get_tag())

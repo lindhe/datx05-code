@@ -32,8 +32,30 @@ def qrmAccess(msg, p, loop):
     fut = asyncio.run_coroutine_threadsafe(p.phaseInit(msg), loop)
     return fut.result()
 
-pp_msg = PingPongMessage((1,(2,3)), None, 'qry', 'read')
+def write(msg):
+    qry_msg = PingPongMessage(None, None, 'qry', 'write')
+    res = qrmAccess(qry_msg, p, loop)
+    max_tag = max([x.get_tag() for x in res])
+    new_int = int(max_tag[0])+1
+    new_tag = (new_int, None)
+    pre_msg = PingPongMessage(new_tag, msg, 'pre', 'write')
+    res = qrmAccess(pre_msg, p, loop)
+    fin_msg = PingPongMessage(new_tag, None, 'fin', 'write')
+    res = qrmAccess(fin_msg, p, loop)
+    FIN_msg = PingPongMessage(new_tag, None, 'FIN', 'write')
+    res = qrmAccess(FIN_msg, p, loop)
+    print("FINISHED WRITING")
+
+def read():
+    qry_msg = PingPongMessage(None, None, 'qry', 'read')
+    res = qrmAccess(qry_msg, p, loop)
+    max_tag = max([x.get_tag() for x in res])
+    print("MAX_TAG %s" % str(max_tag))
+    fin_msg = PingPongMessage(max_tag, None, 'fin', 'read')
+    res = qrmAccess(fin_msg, p, loop)
+    elements = [x.get_data() for x in res]
+    print("RESPONSE TO CLIENT %s" % str(elements))
 time.sleep(10)
-res = qrmAccess(pp_msg, p, loop)
-print("RESPONSE TO CLIENT %s" % res)
-time.sleep(15)
+write(b'hello world')
+read()
+#time.sleep(15)

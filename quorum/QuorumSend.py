@@ -4,7 +4,7 @@ import asyncio
 class QuorumSend:
     def __init__(self):
         self.pongRx = {}
-        self.Q = 3
+        self.Q = 2
         self.pingTx = None
         self.event = None
         self.aggregated = None
@@ -25,7 +25,7 @@ class QuorumSend:
                (msg.get_tag() == None or
                msg.get_label() == 'qry' or
                (msg.get_label() != 'qry' and
-               (msg.get_tag() == msg_data.get_req_tag() 
+               (msg.get_tag() == msg.get_req_tag()
               )))):
                 self.pongRx[server_id] = msg
                 print("ADD to pongRx with size %s" % len(self.pongRx))

@@ -41,4 +41,4 @@ class PingPongMessage:
 
     def get_mode(self):
         """ Mode is 'write' or 'read' """
-        return self.mode
+        return self.mode.decode()

@@ -22,8 +22,9 @@ for key in config['Nodes']:
     ip, port = config['Nodes'][key].split(':')
     if ((ip == my_ip) and (port == my_port)):
         my_id = j
+    j += 1
 
-server = Server(j, 3)
+server = Server(j, 3, storage_location="./.storage/server%s/"%my_id)
 p = QuorumRecv(server)
 g = Gossip(server)
 
@@ -40,7 +41,8 @@ for key in config['Nodes']:
     ip, port = config['Nodes'][key].split(':')
     if not ((ip == my_ip) and (port == my_port)):
         c = SenderChannel(i, 1, g, ip, port, init_tx=m)
-        loop.create_task(c.start())
+        #loop.create_task(c.start())
+    i += 1
 
 s = ServerRecvChannel(p, g, my_port)
 loop.create_task(s.receive())
