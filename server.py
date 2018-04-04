@@ -24,16 +24,17 @@ for key in config['Nodes']:
         my_id = j
     j += 1
 
-server = Server(j, 3, storage_location="./.storage/server%s/"%my_id)
+nbr_of_servers = int(config['General']['nodes'])
+quorum_size = int(config['General']['quorumsize'])
+base_location = config['General']['storage_location']
+
+server = Server(j, quorum_size, storage_location="%sserver%s/" % (base_location, my_id))
 p = QuorumRecv(server)
 g = Gossip(server)
 
 loop = asyncio.get_event_loop()
 tag_tuple = server.get_tag_tuple()
-prp = (1,None)
-msg_all = False
-echo = (prp, msg_all)
-gossip_obj = GossipMessage(tag_tuple, prp, msg_all, echo)
+gossip_obj = GossipMessage(tag_tuple)
 m = gossip_obj.get_bytes()
 
 i = 0
