@@ -41,7 +41,7 @@ class Client:
         i = 0
         for key in config['Nodes']:
             ip, port = config['Nodes'][key].split(':')
-            c = SenderChannel(i, 0, self.p, ip, port)
+            c = SenderChannel(i, 'pingpong', self.p, ip, port)
             loop.create_task(c.start())
             i = i+1
         loop.run_forever()
