@@ -14,6 +14,20 @@ from pyeclib.ec_iface import ECDriver
 class Client:
 
     def __init__(self):
+
+        self.uid = self.get_uid()
+        self.loop = asyncio.get_event_loop()
+        config = configparser.ConfigParser()
+        config.read('config/config.ini')
+        nbr_of_servers = int(config['General']['nodes'])
+        quorum_size = int(config['General']['quorumsize'])
+        self.ec_driver = ECDriver(k=quorum_size, m=nbr_of_servers, ec_type='liberasurecode_rs_vand')
+        self.p = QuorumSend(quorum_size)
+        t = Thread(target=self.start_event_loop, args=(self.loop, config['Nodes']))
+        t.daemon = True
+        t.start()
+
+    def get_uid(self):
         with open('/sys/class/net/lo/address') as f:
             hw_addr = f.read().splitlines()[0]
             if (hw_addr == '00:00:00:00:00:00'):
@@ -25,22 +39,13 @@ class Client:
                             r.randint(0, 255),
                             r.randint(0, 255)
                             )
+        return (1, hw_addr)
 
-        self.uid = (1, hw_addr)
-        self.loop = asyncio.get_event_loop()
-        self.ec_driver = ECDriver(k=2, m=2, ec_type='liberasurecode_rs_vand')
-        self.p = QuorumSend()
-        t = Thread(target=self.start_event_loop, args=(self.loop, 'config/config.ini'))
-        t.daemon = True
-        t.start()
-
-    def start_event_loop(self, loop, config_path):
+    def start_event_loop(self, loop, nodes):
         asyncio.set_event_loop(loop)
-        config = configparser.ConfigParser()
-        config.read(config_path)
         i = 0
-        for key in config['Nodes']:
-            ip, port = config['Nodes'][key].split(':')
+        for node in nodes:
+            ip, port = nodes[node].split(':')
             c = SenderChannel(i, 'pingpong', self.p, ip, port)
             loop.create_task(c.start())
             i = i+1

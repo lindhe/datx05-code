@@ -2,9 +2,9 @@ from channel.ppProtocol import PingPongMessage
 import asyncio
 
 class QuorumSend:
-    def __init__(self):
+    def __init__(self, quorum_size):
         self.pongRx = {}
-        self.Q = 2
+        self.Q = quorum_size
         self.pingTx = None
         self.event = None
         self.aggregated = None
