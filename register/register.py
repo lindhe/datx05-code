@@ -31,7 +31,7 @@ from .fileHelper import *
 class Register:
   """ Implementation of the register which stores recrods """
 
-  def __init__(self, storage_location="./.storage/"):
+  def __init__(self, storage_size, storage_location="./.storage/"):
     """ Initiates a register with no records.
     register is a dict of Record objects: {(tag, element, phase)}
     tag is a tuple of (seq, uid)
@@ -43,6 +43,7 @@ class Register:
     """
     self.register = {}
     self.t0 = (0, None)
+    self.storage_size = storage_size
     self.storage_location = storage_location
 
   def __repr__(self):
@@ -136,6 +137,20 @@ class Register:
       return element
     else:
       return None
+
+  def relevant(self):
+    """
+    Removes all records from the register and storage
+ that is not among the 'storage_size' most recent
+    """
+    tags = list(self.register.keys())
+    tags.sort(reverse=True)
+    nbr_of_tags = range(len(tags))
+    for i in nbr_of_tags:
+      if (i >= self.storage_size):
+        filename = self.tag_to_filename(tags[i])
+        self.register.pop(tags[i], None)
+        delete_file(filename, path=self.storage_location)
 
   def tag_to_filename(self, tag):
     return '-'.join( [str(t) for t in tag] ) + '.elem'
