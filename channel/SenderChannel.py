@@ -9,14 +9,15 @@ from .GossipProtocol import GossipMessage
 
 class SenderChannel:
 
-    def __init__(self, sid, channel_type, callback_obj, ip, port, init_tx = None):
+    def __init__(self, sid, channel_type, callback_obj,
+                 ip, port, timeout = 5000, init_tx = None):
         context = zmq.asyncio.Context()
         self.sid = sid
         self.ch_type = 0 if channel_type == 'pingpong' else 1
         self.tx = init_tx
         self.socket = context.socket(zmq.DEALER)
-        self.socket.setsockopt(zmq.RCVTIMEO, 5000)
-        self.socket.connect("tcp://%s:%s" % (ip, port))
+        self.socket.setsockopt(zmq.RCVTIMEO, timeout)
+        self.socket.connect("tcp://{}:{}".format(ip, port))
         self.cb_obj = callback_obj
         self.token_size = 2*struct.calcsize("i")
 
@@ -47,7 +48,7 @@ class SenderChannel:
         while True:
             token = struct.pack("ii", self.ch_type, counter)
             msg_type, msg_cntr, msg_data = await self.receive(token)
-            print("Got response with counter %i" % msg_cntr)
+            print("Token arrival: cntr is {}".format(msg_cntr))
             if(msg_cntr >= counter):
                 self.tx = await self.cb_obj.departure(self.sid, msg_data)
                 counter = msg_cntr+1

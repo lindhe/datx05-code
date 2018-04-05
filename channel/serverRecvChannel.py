@@ -11,7 +11,7 @@ class ServerRecvChannel:
     def __init__(self, callback_obj_pp, callback_obj_gossip, port):
         context = zmq.asyncio.Context()
         self.socket = context.socket(zmq.ROUTER)
-        self.socket.bind("tcp://*:%s" % port)
+        self.socket.bind("tcp://*:{}".format(port))
         self.cb_obj_pp = callback_obj_pp
         self.cb_obj_gossip = callback_obj_gossip
         self.token_size = 2*struct.calcsize("i")
