@@ -27,6 +27,7 @@
 """ Helper functions for file io """
 
 import sys
+import os
 import pathlib
 import aiofiles
 
@@ -73,3 +74,15 @@ async def read_file(filename, path=default_path):
     return data
   except OSError as e:
     print(f"Error reading file {path}: {e}", file=sys.stderr)
+
+def delete_file(filename, path=default_path):
+  """ Deletes a file.
+
+  Args:
+    filename (string): /path/to/file.txt
+  """
+  filepath = path + filename
+  try:
+    os.remove(filepath)
+  except OSError as e:
+    print(f"Error deleting file {path}: {e}", file=sys.stderr)
