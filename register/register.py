@@ -63,6 +63,9 @@ class Register:
       element (Maybe None): If not none, it's the coded element to be stored.
       phase (string): 'pre', 'fin' or 'FIN'
     """
+    if tag == self.t0:
+      return
+
     S = self.register
     if (tag in S) and S[tag].element and not element:
       w = S[tag].element
