@@ -14,6 +14,7 @@ class ServerRecvChannel:
         self.socket.bind("tcp://*:%s" % port)
         self.cb_obj_pp = callback_obj_pp
         self.cb_obj_gossip = callback_obj_gossip
+        self.token_size = 2*struct.calcsize("i")
         self.tokens = {}
 
     async def receive(self):
@@ -22,16 +23,17 @@ class ServerRecvChannel:
             asyncio.ensure_future(self.check_msg(data, sender))
         
     async def check_msg(self, res, sender):
-        int_size = struct.calcsize("i")
-        msg_type, msg_cntr = struct.unpack("ii", res[:(2*int_size)])  
+        token = res[:self.token_size]
+        payload = res[self.token_size:]
+        msg_type, msg_cntr = struct.unpack("ii", token)
         msg = None
         
-        if len(res[(2*int_size):]):
+        if payload:
             if(msg_type == 0):
-                msg_list = PingPongMessage.set_message(res[(2*int_size):])
+                msg_list = PingPongMessage.set_message(payload)
                 msg = PingPongMessage(*msg_list)
             else:
-                msg_list = GossipMessage.set_message(res[(2*int_size):])
+                msg_list = GossipMessage.set_message(payload)
                 msg = GossipMessage(*msg_list)
 
         if(sender not in self.tokens.keys()):
@@ -40,7 +42,7 @@ class ServerRecvChannel:
 
         if(self.tokens[sender] != msg_cntr):
             self.tokens[sender] = msg_cntr
-            token = struct.pack("ii",msg_type,self.tokens[sender])
+            token = struct.pack("ii", msg_type,self.tokens[sender])
             if(msg_type == 0):
                 if msg:
                     new_msg = await self.cb_obj_pp.arrival(msg)

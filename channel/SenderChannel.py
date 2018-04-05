@@ -28,13 +28,13 @@ class SenderChannel:
                 payload = res[self.token_size:]
                 msg_type, msg_cntr = struct.unpack("ii", token)
                 msg_data = None
-                if len(payload):
-                    if not self.ch_type:
-                        msg_list = PingPongMessage.set_message(payload)
-                        msg_data = PingPongMessage(*msg_list)
-                    else:
+                if payload:
+                    if self.ch_type:
                         msg_list = GossipMessage.set_message(payload)
                         msg_data = GossipMessage(*msg_list)
+                    else:
+                        msg_list = PingPongMessage.set_message(payload)
+                        msg_data = PingPongMessage(*msg_list)
                 break
             except Exception as e:
                 msg = token+self.tx if self.tx else token
