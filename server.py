@@ -29,8 +29,9 @@ for node in config['Nodes']:
 nbr_of_servers = int(config['General']['nodes'])
 quorum_size = int(config['General']['quorumsize'])
 base_location = config['General']['storage_location']
+storage_size = int(config['General']['storage_size'])
 
-server = Server(my_id, quorum_size, storage_location="{}server{}/".format(base_location, my_id))
+server = Server(my_id, quorum_size, storage_size,  storage_location="{}server{}/".format(base_location, my_id))
 p = QuorumRecv(server)
 g = Gossip(server)
 

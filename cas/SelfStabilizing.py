@@ -33,12 +33,12 @@ from register.register import Register
 class Server:
   """ The event handlers for the server in Algorithm 2 """
 
-  def __init__(self, uid, quorum, storage_location="./.storage/"):
+  def __init__(self, uid, quorum, storage_size, storage_location="./.storage/"):
     self.uid = uid
     # Quorum size:
     self.quorum = quorum
     # Initialize with an empty register S
-    self.S = Register(storage_location)
+    self.S = Register(storage_size, storage_location)
     # Received gossip messages. Key is UID and value is tag
     self.pre = {}
     self.fin = {}
@@ -128,6 +128,8 @@ class Server:
       implicitFinalized = [fin]
     self.FIN[i] = max( FIN, self.S.max_phase(['FIN']), *implicitFinalized )
     await self.S.update_phase(self.FIN[i], None, 'FIN')
+
+    self.S.relevant()
 
   def get_tag_tuple(self):
     return self.S.tag_tuple()
