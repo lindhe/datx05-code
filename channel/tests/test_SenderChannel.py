@@ -13,7 +13,7 @@ class CallbackObj:
     async def callback(self):
         return "test"
 
-pingpong = SenderChannel(0, CallbackObj(), "127.0.0.1", "5555")
+pingpong = SenderChannel(0, 'pingpong', CallbackObj(), "127.0.0.1", "5555")
 token = struct.pack("ii", 0, 1)
 
 class TestSenderChannel(unittest.TestCase):

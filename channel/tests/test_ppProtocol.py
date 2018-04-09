@@ -1,22 +1,19 @@
 import unittest
 import struct
-from ..ppProtocol import PingPongMessage
+from channel.ppProtocol import PingPongMessage
 
 class TestPingPongMessage(unittest.TestCase):
 
     def test_pingpong_message(self):
-        tag = b'tag'
-        label = b'label'
-        uid = b'uid'
+        tag = (1, (1, None))
+        label = 'label'
+        mode = 'read'
         payload = b'payload'
-        pp_obj = PingPongMessage()
-        pp_msg = pp_obj.create_message(label, tag,
-                                       uid, payload)
-        pp_obj.set_message(pp_msg)
-        self.assertEqual(tag, pp_obj.get_tag())
-        self.assertEqual(label, pp_obj.get_label())
-        self.assertEqual(uid, pp_obj.get_id())
-        self.assertEqual(payload, pp_obj.get_data())
+        pp_msg = PingPongMessage(tag, payload, label, mode)
+        self.assertEqual(tag, pp_msg.get_tag())
+        self.assertEqual(label, pp_msg.get_label())
+        self.assertEqual(mode, pp_msg.get_mode())
+        self.assertEqual(payload, pp_msg.get_data())
 
 if __name__ == '__main__':
     unittest.main()

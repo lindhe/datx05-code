@@ -26,12 +26,14 @@
 
 import unittest
 import itertools
-from record import Record
-from register import Register
+from register.record import Record
+from register.register import Register
+from channel.tests.unittest_helper import run
 
 class TestRegister(unittest.TestCase):
   def setUp(self):
-    self.s = Register()
+    storage_size = 10
+    self.s = Register(storage_size)
     self.phases = ['pre', 'fin', 'FIN']
     pre_max = 20
     fin_max = 12
@@ -42,15 +44,15 @@ class TestRegister(unittest.TestCase):
     for i in range(2, FIN_max):
       x = ((i, 'dflt'), None, 'FIN')
       r = Record(*x)
-      self.s.update_phase(*x)
+      run(self.s.update_phase(*x))
     for i in range(FIN_max, fin_max):
       x = ((i, 'dflt'), None, 'fin')
       r = Record(*x)
-      self.s.update_phase(*x)
+      run(self.s.update_phase(*x))
     for i in range(fin_max, pre_max):
       x = ((i, 'dflt'), None, 'pre')
       r = Record(*x)
-      self.s.update_phase(*x)
+      run(self.s.update_phase(*x))
 
   def test_update_phase(self):
     """ Test that records can be updated correctly.

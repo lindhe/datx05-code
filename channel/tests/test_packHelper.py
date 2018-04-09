@@ -29,12 +29,12 @@ class TestPackHelperMethods(unittest.TestCase):
         pack_helper = PackHelper()
 
         actual = pack_helper.unpack(pack_helper.pack(tag, label, uid))
-        expected = ((tag, label, uid), None)
+        expected = ([tag, label, uid], None)
         self.assertEqual(expected, actual)
 
         actual = pack_helper.unpack(pack_helper.pack(tag, label, uid,
                                                      payload=payload))
-        expected = ((tag, label, uid), payload)
+        expected = ([tag, label, uid], payload)
         self.assertEqual(expected, actual)
 
 if __name__ == '__main__':
