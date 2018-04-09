@@ -75,14 +75,3 @@ class Client:
         except:
             decoded_msg = None
         return decoded_msg
-
-c = Client()
-time.sleep(10)
-c.write(b'hello world')
-s = c.read()
-print("CLIENT: %s" % s)
-c.write(b'(update 2) hello world')
-c.write(b'(update 3) hello world')
-s = c.read()
-print("CLIENT: %s" % s)
-time.sleep(10)
