@@ -48,7 +48,8 @@ class SenderChannel:
         while True:
             token = struct.pack("ii", self.ch_type, counter)
             msg_type, msg_cntr, msg_data = await self.receive(token)
-            print("Token arrival: cntr is {}".format(msg_cntr))
+            if __debug__:
+                print("Token arrival: cntr is {}".format(msg_cntr))
             if(msg_cntr >= counter):
                 self.tx = await self.cb_obj.departure(self.sid, msg_data)
                 counter = msg_cntr+1

@@ -24,7 +24,8 @@ class QuorumSend:
         return x
 
     async def departure(self, server_id, msg):
-        print("pingpong arrival! ")
+        if __debug__:
+            print("pingpong arrival! ")
         if (type(self.pingTx) == list):
             pingTx = self.pingTx[server_id]
         else:
@@ -38,12 +39,14 @@ class QuorumSend:
                (msg.get_tag() == msg.get_req_tag()
               )))):
                 self.pongRx[server_id] = msg
-                print("ADD to pongRx with size %s" % len(self.pongRx))
+                if __debug__:
+                    print("ADD to pongRx with size %s" % len(self.pongRx))
         elif not msg:
             self.pongRx.pop(server_id, None)
 
         if len(self.pongRx) >= self.Q:
-            print("GOT ENOUGH elements")
+            if __debug__:
+                print("GOT ENOUGH elements")
             self.aggregated = list(self.pongRx.values())
             self.pongRx.clear()
             self.pingTx = None
