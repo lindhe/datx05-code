@@ -4,6 +4,7 @@ import asyncio
 import struct
 import sys
 import configparser
+import math
 from channel.ppProtocol import PingPongMessage
 from channel.GossipProtocol import GossipMessage
 from channel.serverRecvChannel import ServerRecvChannel
@@ -25,10 +26,15 @@ def main(my_ip, my_port, cfgfile):
             break
         my_id += 1
 
-    nbr_of_servers = int(config['General']['nodes'])
-    quorum_size = int(config['General']['quorumsize'])
+    nbr_of_servers = int(config['General']['N'])
+    f = int(config['General']['f'])
+    e = int(config['General']['e'])
     base_location = config['General']['storage_location']
     storage_size = int(config['General']['storage_size'])
+    k = nbr_of_servers - 2*(f + e)
+    if(k < 1):
+        raise Exception("Coded elements less than 1")
+    quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
 
     server = Server(my_id, quorum_size, storage_size,  storage_location="{}server{}/".format(base_location, my_id))
     p = QuorumRecv(server)

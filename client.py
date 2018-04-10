@@ -4,6 +4,7 @@ import asyncio
 import configparser
 import time
 import threading
+import math
 import random as r
 from threading import Thread
 from channel.SenderChannel import SenderChannel
@@ -19,9 +20,14 @@ class Client:
         self.loop = asyncio.get_event_loop()
         config = configparser.ConfigParser()
         config.read('config/config.ini')
-        nbr_of_servers = int(config['General']['nodes'])
-        quorum_size = int(config['General']['quorumsize'])
-        self.ec_driver = ECDriver(k=quorum_size, m=nbr_of_servers, ec_type='liberasurecode_rs_vand')
+        nbr_of_servers = int(config['General']['N'])
+        f = int(config['General']['f'])
+        e = int(config['General']['e'])
+        k = nbr_of_servers - 2*(f + e)
+        if(k < 1):
+            raise Exception("Coded elements less than 1")
+        quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
+        self.ec_driver = ECDriver(k=k, m=nbr_of_servers, ec_type='liberasurecode_rs_vand')
         self.p = QuorumSend(quorum_size)
         t = Thread(target=self.start_event_loop, args=(self.loop, config['Nodes']))
         t.daemon = True
