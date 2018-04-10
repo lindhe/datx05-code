@@ -1,7 +1,9 @@
+import sys
 from client import Client
 
 def main():
-    c = Client()
+    cfgfile = sys.argv[1]
+    c = Client(cfgfile)
     while True:
         op = input('Operation (read/write): ').split(' ', 1)
         if (op[0] == 'read'):

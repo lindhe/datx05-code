@@ -14,12 +14,12 @@ from pyeclib.ec_iface import ECDriver
 
 class Client:
 
-    def __init__(self):
+    def __init__(self, cfgfile):
 
         self.uid = self.get_uid()
         self.loop = asyncio.get_event_loop()
         config = configparser.ConfigParser()
-        config.read('config/config.ini')
+        config.read(cfgfile)
         nbr_of_servers = int(config['General']['n'])
         f = int(config['General']['f'])
         e = int(config['General']['e'])
