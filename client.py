@@ -75,7 +75,7 @@ class Client:
         res = self.qrmAccess((None, None, 'qry', 'read'))
         max_tag = max([x.get_tag() for x in res])
         res = self.qrmAccess((max_tag, None, 'fin', 'read'))
-        elements = [x.get_data() for x in res]
+        elements = [x.get_data() for x in res if x.get_data()]
         try:
             decoded_msg = self.ec_driver.decode(elements)
         except:
