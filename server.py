@@ -26,7 +26,7 @@ def main(my_ip, my_port, cfgfile):
             break
         my_id += 1
 
-    nbr_of_servers = int(config['General']['N'])
+    nbr_of_servers = int(config['General']['n'])
     f = int(config['General']['f'])
     e = int(config['General']['e'])
     base_location = config['General']['storage_location']

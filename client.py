@@ -20,7 +20,7 @@ class Client:
         self.loop = asyncio.get_event_loop()
         config = configparser.ConfigParser()
         config.read('config/config.ini')
-        nbr_of_servers = int(config['General']['N'])
+        nbr_of_servers = int(config['General']['n'])
         f = int(config['General']['f'])
         e = int(config['General']['e'])
         k = nbr_of_servers - 2*(f + e)
