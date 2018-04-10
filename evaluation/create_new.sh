@@ -28,16 +28,20 @@ echo "Created macvlan's!"
 
 # 3. Run nodes with alipne ash on bridge
 echo "Creating new containers..."
-for i in $(seq 0 $n); do
-    docker run -dit --name "c$i" --network="tap-$i-net" alpine ash;
+for i in $( seq 0 $n ); do
+    docker run -dit \
+        --name "c$i" \
+        --network="tap-$i-net" \
+        --mount src=/srv/casss/,dst=/storage/,type=bind \
+        casss_server;
 done;
 
-# Install iperf3 on two nodes
-echo "Installing iperf3 on two nodes..."
-for i in {1..2}; do
-    docker network connect bridge c$i;
-    docker exec -it c$i ash -c "apk update && apk add iperf3";
-    docker network disconnect bridge c$i;
-done;
-echo "Installation done"
+# # Install iperf3 on two nodes
+# echo "Installing iperf3 on two nodes..."
+# for i in {1..2}; do
+#     docker network connect bridge c$i;
+#     docker exec -it c$i ash -c "apk update && apk add iperf3";
+#     docker network disconnect bridge c$i;
+# done;
+# echo "Installation done"
 
