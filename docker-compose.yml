@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  server:
+    build: .
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+    expose:
+    - 5555
+    volumes:
+    - storage:/storage
+    networks:
+    - ns3
+
+volumes:
+  storage:
+
+networks:
+  ns3:
+    driver: macvlan
+    ipam:
+      config:
+        - subnet: 172.16.86.0/24
