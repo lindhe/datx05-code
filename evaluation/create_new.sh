@@ -36,12 +36,8 @@ for i in $( seq 0 $n ); do
         casss_server;
 done;
 
-# # Install iperf3 on two nodes
-# echo "Installing iperf3 on two nodes..."
-# for i in {1..2}; do
-#     docker network connect bridge c$i;
-#     docker exec -it c$i ash -c "apk update && apk add iperf3";
-#     docker network disconnect bridge c$i;
-# done;
-# echo "Installation done"
-
+# Update files
+echo "Updating files..."
+for i in $( seq 0 $n ); do
+    docker cp . "c$i:/opt/project"
+done;
