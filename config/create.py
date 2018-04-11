@@ -20,6 +20,7 @@ def main(filename, nbr_of_servers, f):
     config['General']['e'] = '0'
     config['General']['storage_location'] = './.storage/'
     config['General']['storage_size'] = '10'
+    config['General']['gossip_freq'] = '1'
 
     with open(filename, 'w') as cfgfile:
         config.write(cfgfile)
