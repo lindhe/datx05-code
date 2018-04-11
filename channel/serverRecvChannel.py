@@ -8,13 +8,14 @@ from .GossipProtocol import GossipMessage
 
 class ServerRecvChannel:
 
-    def __init__(self, callback_obj_pp, callback_obj_gossip, port):
+    def __init__(self, callback_obj_pp, callback_obj_gossip, port, gossip_freq=1):
         context = zmq.asyncio.Context()
         self.socket = context.socket(zmq.ROUTER)
         self.socket.bind("tcp://*:{}".format(port))
         self.cb_obj_pp = callback_obj_pp
         self.cb_obj_gossip = callback_obj_gossip
         self.token_size = 2*struct.calcsize("i")
+        self.gsp_freq = gossip_freq
         self.tokens = {}
 
     async def receive(self):
@@ -52,9 +53,9 @@ class ServerRecvChannel:
             elif(msg_type == 1):
                 await self.cb_obj_gossip.arrival(sender, msg)
                 response = token
+                await asyncio.sleep(self.gsp_freq)
         else:
             print("NO TOKEN ARRIVAL")
             response = res
 
-        await asyncio.sleep(1)
         await self.socket.send_multipart([sender, response])
