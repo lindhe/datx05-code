@@ -32,7 +32,7 @@ for i in $( seq 0 $n ); do
     docker run -dit \
         --name "c$i" \
         --network="tap-$i-net" \
-        --mount src=/srv/casss/,dst=/storage/,type=bind \
+        --mount src=storage,dst=/storage/ \
         casss_server;
 done;
 

@@ -9,7 +9,7 @@ WORKDIR /opt/project
 RUN apt-get update &&\
     apt-get install -y \
     gcc g++ musl-dev bash software-properties-common \
-    curl
+    curl net-tools
 
 # Install python3.6
 RUN add-apt-repository ppa:deadsnakes/ppa &&\
@@ -24,3 +24,5 @@ RUN apt-get install -y libzmq-dev \
 RUN pip3 install -r requirements.txt
 
 EXPOSE 5555
+
+# CMD ["python3.6", "./server.py", "5555", "$(hostname -I)", "./config/docker.ini"]
