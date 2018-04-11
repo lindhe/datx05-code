@@ -64,7 +64,7 @@ def calc_parameters(tcfile):
         i += 1
     return (file_sizes, rounds, iterations)
 
-def convert_to_bytes(s, prefix):
+def convert_to_bytes(s, prefix='b'):
     size = int(s)
     if (prefix == 'G'):
         return size*(2**30)
@@ -73,7 +73,7 @@ def convert_to_bytes(s, prefix):
     elif (prefix == 'K'):
         return size*(2**10)
     else:
-        raise Exception("Wrong input [K, M, G]")
+        return size
 
 if __name__ == '__main__':
     tcfile = sys.argv[1]
