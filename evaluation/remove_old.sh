@@ -16,3 +16,6 @@ done;
 docker network prune -f
 echo "Removed all old containers, bridges and taps!"
 
+echo "Removing storage volume..."
+docker volume rm storage
+echo "Removed storage volume!"
