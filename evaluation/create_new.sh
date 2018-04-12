@@ -1,9 +1,9 @@
 #!/bin/bash
 
 if [ $# -eq 0 ]; then
-    n=5
+    n=4
 else
-    n=$1
+    n=$(($1-1))
 fi
 
 # 1. Create new taps
