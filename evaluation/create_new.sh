@@ -1,5 +1,9 @@
 #!/bin/bash
 
+port=5555
+defaultconf=./config/default.ini
+configfile=./config/autogen.ini
+
 if [ $# -eq 0 ]; then
     n=4
 else
@@ -34,6 +38,15 @@ for i in $( seq 0 $n ); do
         --network="tap-$i-net" \
         --mount src=storage,dst=/storage/ \
         casss_server;
+done;
+
+echo "Creating configuration file"
+cat $defaultconf > $configfile
+echo -e "n = $n\n" >> $configfile
+echo "[Nodes]" >> $configfile
+for i in $( seq 1 $n ); do
+  ip=$(docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' c$i)
+  echo "node$i = $ip:$port" >> $configfile
 done;
 
 # Update files
