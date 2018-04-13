@@ -3,30 +3,39 @@ import zmq.asyncio
 import asyncio
 import struct
 import sys
+import socket
 from .ppProtocol import PingPongMessage
 from .GossipProtocol import GossipMessage
 
 class ServerRecvChannel:
 
     def __init__(self, callback_obj_pp, callback_obj_gossip, port, gossip_freq=1):
-        context = zmq.asyncio.Context()
-        self.socket = context.socket(zmq.ROUTER)
-        self.socket.bind("tcp://*:{}".format(port))
+
+        self.tc_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.tc_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.tc_sock.setblocking(False)
+        self.tc_sock.bind(('', int(port)))
+        self.tc_sock.listen(10)
+        self.port = port
         self.cb_obj_pp = callback_obj_pp
         self.cb_obj_gossip = callback_obj_gossip
-        self.token_size = 2*struct.calcsize("i")
+        self.token_size = 2*struct.calcsize("i")+struct.calcsize("17s")
         self.gsp_freq = gossip_freq
         self.tokens = {}
 
     async def receive(self):
+        loop = asyncio.get_event_loop()
         while True:
-            sender, data = await self.socket.recv_multipart()
-            asyncio.ensure_future(self.check_msg(data, sender))
+            print("Listening")
+            conn, addr = await loop.sock_accept(self.tc_sock)
+            print("{} got connection from {}".format(self.port, addr))
+            asyncio.ensure_future(self.check_msg(conn, loop))
         
-    async def check_msg(self, res, sender):
+    async def check_msg(self, conn, loop):
+        res = await loop.sock_recv(conn, 1024)
         token = res[:self.token_size]
         payload = res[self.token_size:]
-        msg_type, msg_cntr = struct.unpack("ii", token)
+        msg_type, msg_cntr, sender = struct.unpack("ii17s", token)
         msg = None
         
         if payload:
@@ -58,4 +67,6 @@ class ServerRecvChannel:
             print("NO TOKEN ARRIVAL")
             response = res
 
-        await self.socket.send_multipart([sender, response])
+        await loop.sock_sendall(conn, response)
+        conn.close()
+        print("Connection closed")

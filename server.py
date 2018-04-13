@@ -5,6 +5,7 @@ import struct
 import sys
 import configparser
 import math
+import random as r
 from channel.ppProtocol import PingPongMessage
 from channel.GossipProtocol import GossipMessage
 from channel.serverRecvChannel import ServerRecvChannel
@@ -12,6 +13,20 @@ from channel.SenderChannel import SenderChannel
 from gossip.Gossip import Gossip
 from quorum.QuorumRecv import QuorumRecv
 from cas.SelfStabilizing import Server
+
+def get_uid():
+    with open('/sys/class/net/lo/address') as f:
+        hw_addr = f.read().splitlines()[0]
+        if (hw_addr == '00:00:00:00:00:00'):
+            hw_addr = ':'.join(['%02x']*6) % (
+                        r.randint(0, 255),
+                        r.randint(0, 255),
+                        r.randint(0, 255),
+                        r.randint(0, 255),
+                        r.randint(0, 255),
+                        r.randint(0, 255)
+                        )
+    return hw_addr
 
 def main(my_ip, my_port, cfgfile):
     my_addr = ":".join([my_ip, my_port])
@@ -50,7 +65,7 @@ def main(my_ip, my_port, cfgfile):
     for node in config['Nodes']:
         ip, port = config['Nodes'][node].split(':')
         if node_index is not my_id:
-            c = SenderChannel(node_index, 'gossip', g, ip, port, init_tx=m)
+            c = SenderChannel(node_index, get_uid(), 'gossip', g, ip, port, init_tx=m)
             loop.create_task(c.start())
         node_index += 1
 

@@ -52,8 +52,9 @@ class Client:
         i = 0
         for node in nodes:
             ip, port = nodes[node].split(':')
-            c = SenderChannel(i, 'pingpong', self.p, ip, port)
-            loop.create_task(c.start())
+            c = SenderChannel(i, self.get_uid()[1], 'pingpong', self.p, ip, port)
+            asyncio.ensure_future(c.start())
+            print("Create channel to {}:{}".format(ip, port))
             i = i+1
         loop.run_forever()
 
