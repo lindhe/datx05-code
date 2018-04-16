@@ -53,6 +53,18 @@ class QuorumSend:
             self.event.set()
 
         if (type(self.pingTx) == list):
-            return self.pingTx[server_id].get_bytes()
+            data = self.pingTx[server_id].get_bytes()
+            return (data, not self.use_tcp(self.pingTx[server_id]))
         else:
-            return self.pingTx.get_bytes() if self.pingTx else None
+            data = self.pingTx.get_bytes() if self.pingTx else None
+            return (data, not self.use_tcp(self.pingTx))
+
+    def use_tcp(self, tx):
+        if not tx:
+            return False
+        if (len(tx.get_bytes()) > 1024):
+           return True
+        elif ((tx.get_label() == 'fin' or tx.get_label() == 'FIN') and tx.get_mode() == 'read'):
+            return True
+        else:
+            return False

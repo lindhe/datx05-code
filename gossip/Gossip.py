@@ -12,7 +12,8 @@ class Gossip:
         msg_all = False
         echo = (prp, msg_all)
         gossip_obj = GossipMessage(tag_tuple, prp, msg_all, echo)
-        return gossip_obj.get_bytes()
+        data = gossip_obj.get_bytes()
+        return (data, not self.use_tcp(data))
 
     async def arrival(self, uid, msg_data):
         print("Gossip CALLBACK RECV")
@@ -22,3 +23,11 @@ class Gossip:
             await self.server.gossip(uid, *msg_data.get_tag_tuple())
         else:
             print("Got empty message")
+
+    def use_tcp(self, tx):
+        if not tx:
+            return False
+        if (len(tx) > 1024):
+           return True
+        else:
+            return False

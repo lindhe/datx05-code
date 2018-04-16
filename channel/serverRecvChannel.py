@@ -43,7 +43,6 @@ class ServerRecvChannel:
     async def udp_response(self, data, addr):
         response = await self.check_msg(data)
         await self.udp_sock.sendto(response, addr)
-        print("Connection closed")
 
     async def tcp_response(self, conn):
         res = await self.loop.sock_recv(conn, 1024)

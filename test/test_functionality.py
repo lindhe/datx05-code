@@ -6,7 +6,7 @@ from client import Client
 class TestFunctionality(unittest.TestCase):
     
     def setUp(self):
-        self.c = Client()
+        self.c = Client('config/local.ini')
         self.c.read()
 
     def test_read_write(self):
