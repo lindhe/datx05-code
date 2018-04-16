@@ -18,7 +18,7 @@ class ServerRecvChannel:
         self.tc_sock.setblocking(False)
         self.tc_sock.bind(('', int(port)))
         self.tc_sock.listen(10)
-        self.udp_sock = UdpSender(self.loop, '', int(port)+1)
+        self.udp_sock = UdpSender(self.loop, '', int(port))
         self.port = port
         self.cb_obj_pp = callback_obj_pp
         self.cb_obj_gossip = callback_obj_gossip

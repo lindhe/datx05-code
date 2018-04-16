@@ -7,7 +7,7 @@ under MIT license
 '''
 class UdpSender:
 
-    def __init__(self, loop, ip, port):
+    def __init__(self, loop, ip='', port=0):
         self.loop = loop
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

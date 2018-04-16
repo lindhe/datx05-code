@@ -71,6 +71,7 @@ def main(my_ip, my_port, cfgfile):
 
     s = ServerRecvChannel(p, g, my_port, gossip_freq=gossip_freq)
     loop.create_task(s.tcp_listen())
+    loop.create_task(s.udp_listen())
 
     loop.run_forever()
     loop.close()
