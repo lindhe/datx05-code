@@ -70,7 +70,7 @@ def main(my_ip, my_port, cfgfile):
         node_index += 1
 
     s = ServerRecvChannel(p, g, my_port, gossip_freq=gossip_freq)
-    loop.create_task(s.receive())
+    loop.create_task(s.tcp_listen())
 
     loop.run_forever()
     loop.close()

@@ -1,4 +1,5 @@
 import asyncio
+import socket
 '''
 recvfrom and sendto are taken from:
 https://github.com/crazyguitar/pysheeet/blob/master/docs/notes/python-asyncio.rst#simple-asyncio-udp-echo-server
@@ -6,7 +7,7 @@ under MIT license
 '''
 class UdpSender:
 
-    def __init__(loop, ip, port):
+    def __init__(self, loop, ip, port):
         self.loop = loop
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
