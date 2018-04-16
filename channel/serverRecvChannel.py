@@ -4,6 +4,7 @@ import asyncio
 import struct
 import sys
 import socket
+import io
 from .ppProtocol import PingPongMessage
 from .GossipProtocol import GossipMessage
 from .UdpSender import UdpSender
@@ -30,14 +31,14 @@ class ServerRecvChannel:
         while True:
             print("Listening")
             conn, addr = await self.loop.sock_accept(self.tc_sock)
-            print("{} got connection from {}".format(self.port, addr))
+            print("{} got tcp connection from {}".format(self.port, addr))
             asyncio.ensure_future(self.tcp_response(conn))
 
     async def udp_listen(self):
         while True:
             print("Listening")
             data, addr = await self.udp_sock.recvfrom(1024)
-            print("{} got connection from {}".format(self.port, addr))
+            print("{} got udp request from {}".format(self.port, addr))
             asyncio.ensure_future(self.udp_response(data, addr))
 
     async def udp_response(self, data, addr):
@@ -45,9 +46,18 @@ class ServerRecvChannel:
         await self.udp_sock.sendto(response, addr)
 
     async def tcp_response(self, conn):
-        res = await self.loop.sock_recv(conn, 1024)
+        int_size = struct.calcsize("i")
+        recv_msg_size = await self.loop.sock_recv(conn, int_size)
+        msg_size = struct.unpack("i", recv_msg_size)[0]
+        res = b''
+        while (len(res) < msg_size):
+            res += await self.loop.sock_recv(conn, 1024)
         response = await self.check_msg(res)
-        await self.loop.sock_sendall(conn, response)
+        response_stream = io.BytesIO(response)
+        stream = True
+        while stream:
+            stream = response_stream.read(1024)
+            await self.loop.sock_sendall(conn, stream)
         conn.close()
         print("Connection closed")
         

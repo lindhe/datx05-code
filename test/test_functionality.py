@@ -10,11 +10,11 @@ class TestFunctionality(unittest.TestCase):
         self.c.read()
 
     def test_read_write(self):
-        for i in range(50): 
-            expected = os.urandom(1024)
+        for i in range(10):
+            expected = os.urandom(4096)
             self.c.write(expected)
             actual = self.c.read()
             self.assertEqual(expected, actual)
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(warnings='ignore')
