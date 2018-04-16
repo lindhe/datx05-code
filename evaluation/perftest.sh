@@ -6,6 +6,10 @@ else
     nodes=$1
 fi
 
+resfile=perf_result.txt
+echo "Result of test with $nodes nodes at $(date +'%F_%T')" >> $resfile
+echo "==================================================" >> $resfile
+
 echo "Setting up test environment..."
 /home/andreas/thesis-code/evaluation/create_new.sh $nodes
 
@@ -28,11 +32,12 @@ done
 
 i=0
 for ip in $ips; do
-  docker exec c$i iperf3 -c $ip | grep -E "sender|receiver" &
+  docker exec c$i iperf3 -c $ip | grep -E "sender|receiver" | tee -a $resfile &
   i=$((i+1))
 done
 
 wait;
+echo "" >> $resfile
 
 echo "Please stop NS-3!"
 read -p "Press enter after you have stopped NS-3:"
