@@ -47,8 +47,10 @@ done
 
 echo "" >> $resfile
 
-echo "Stopping NS-3..."
-kill $waf
+echo "Stopping NS-3: $waf"
+sudo kill -2 $waf $(pgrep -P $waf)
 
 echo "Tearing down test environment..."
+~/thesis-code/evaluation/remove_old.sh $nodes
+~/thesis-code/evaluation/remove_old.sh $nodes
 ~/thesis-code/evaluation/remove_old.sh $nodes

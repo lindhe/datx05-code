@@ -11,6 +11,8 @@ echo "Removing old setup..."
 for i in $( seq 0 $n ); do
     docker container stop "c$i"
     docker container rm "/c$i"
+    sudo ip link set "tap-$i" "up"
+    sudo ip link set "tap-$i" "down"
     sudo tunctl -d tap-$i
 done;
 docker network prune -f
