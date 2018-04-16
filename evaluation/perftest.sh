@@ -16,13 +16,16 @@ echo "Setting up test environment..."
 n=$(grep -E "^n =" ~/thesis-code/config/autogen.ini | cut -f 3 -d ' ')
 n=$(((n+1)/2))
 
-echo "Please start NS-3!"
-read -p "Press enter after you have started NS-3:"
-echo ""
-
 ips=$(tail -n $n ~/thesis-code/config/autogen.ini |\
   cut -d ' ' -f 3 |\
   cut -d ':' -f 1)
+
+# Start NS-3
+echo "Starting NS-3..."
+pushd ~/ns3_dir
+sudo ./waf --run "casss-tap-csma --n=$nodes" &
+waf=$!
+popd
 
 i=$n
 for ip in $ips; do
@@ -30,18 +33,22 @@ for ip in $ips; do
   i=$((i+1))
 done
 
+pids=()
 i=0
 for ip in $ips; do
   docker exec c$i iperf3 -c $ip | grep -E "sender|receiver" | tee -a $resfile &
+  pids+=("$!")
   i=$((i+1))
 done
 
-wait;
+for p in "${pids[@]}"; do
+  wait $p
+done
+
 echo "" >> $resfile
 
-echo "Please stop NS-3!"
-read -p "Press enter after you have stopped NS-3:"
-echo ""
+echo "Stopping NS-3..."
+kill $waf
 
-echo "Tear down test environment..."
+echo "Tearing down test environment..."
 ~/thesis-code/evaluation/remove_old.sh $nodes
