@@ -8,7 +8,8 @@ WORKDIR /opt/project
 RUN apt-get update &&\
     apt-get install -y \
     gcc g++ musl-dev bash software-properties-common \
-    curl net-tools python3.6-dev python3-pip
+    curl net-tools iperf3 iputils-ping \
+    python3.6-dev python3-pip
 
 # Install dependencies
 RUN apt-get install -y python3-zmq \
