@@ -2,3 +2,4 @@
 __pycache__*
 .storage/
 autogen.ini
+perf_result.txt

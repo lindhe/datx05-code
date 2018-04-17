@@ -23,7 +23,7 @@ ips=$(tail -n $n ~/thesis-code/config/autogen.ini |\
 # Start NS-3
 echo "Starting NS-3..."
 pushd ~/ns3_dir
-sudo ./waf --run "casss-tap-csma --n=$nodes" &
+sudo ./waf --run "tap-csma-virtual-machine --n=$nodes" &
 waf=$!
 popd
 
@@ -36,7 +36,7 @@ done
 pids=()
 i=0
 for ip in $ips; do
-  docker exec c$i iperf3 -c $ip | grep -E "sender|receiver" | tee -a $resfile &
+  docker exec c$i iperf3 -c $ip | tee /dev/tty | grep -E "receiver" >> $resfile &
   pids+=("$!")
   i=$((i+1))
 done
