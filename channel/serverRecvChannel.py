@@ -9,22 +9,25 @@ from .UdpSender import UdpSender
 
 class ServerRecvChannel:
 
-    def __init__(self, callback_obj_pp, callback_obj_gossip, port, gossip_freq=1):
+    def __init__(self, callback_obj_pp, callback_obj_gossip, port,
+                 gossip_freq=1, chunks_size=1024):
+
+        self.cb_obj_pp = callback_obj_pp
+        self.cb_obj_gossip = callback_obj_gossip
+        self.port = port
+        self.gsp_freq = gossip_freq
+        self.chunks_size = chunks_size
+
         self.loop = asyncio.get_event_loop()
+        self.udp_sock = UdpSender(self.loop, '', int(port))
+        self.token_size = 2*struct.calcsize("i")+struct.calcsize("17s")
+        self.tokens = {}
 
         self.tc_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.tc_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.tc_sock.setblocking(False)
         self.tc_sock.bind(('', int(port)))
         self.tc_sock.listen(10)
-        self.udp_sock = UdpSender(self.loop, '', int(port))
-        self.port = port
-        self.cb_obj_pp = callback_obj_pp
-        self.cb_obj_gossip = callback_obj_gossip
-        self.token_size = 2*struct.calcsize("i")+struct.calcsize("17s")
-        self.gsp_freq = gossip_freq
-        self.tokens = {}
-        self.chunks_size = 1024
 
     async def tcp_listen(self):
         while True:

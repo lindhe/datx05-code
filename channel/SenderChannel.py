@@ -10,21 +10,22 @@ from .UdpSender import UdpSender
 class SenderChannel:
 
     def __init__(self, sid, uid, channel_type, callback_obj,
-                 ip, port, timeout = 5, init_tx = None):
-        self.loop = asyncio.get_event_loop()
+                 ip, port, timeout = 5, init_tx = None, chunks_size = 1024):
         self.sid = sid
         self.uid = uid.encode()
         self.ch_type = 0 if channel_type == 'pingpong' else 1
-        self.tx = init_tx
-        self.udp = True
         self.cb_obj = callback_obj
-        self.token_size = 2*struct.calcsize("i")
         self.ip = ip
         self.port = int(port)
-        self.addr  = (ip, int(port))
         self.timeout = timeout
+        self.tx = init_tx
+        self.chunks_size = chunks_size
+
+        self.loop = asyncio.get_event_loop()
+        self.udp = True
+        self.token_size = 2*struct.calcsize("i")
+        self.addr  = (ip, int(port))
         self.udp_sock = UdpSender(self.loop)
-        self.chunks_size = 1024
 
     async def receive(self, token):
         while True:
@@ -32,13 +33,7 @@ class SenderChannel:
                 if self.udp:
                     res, addr = await asyncio.wait_for(self.udp_sock.recvfrom(self.chunks_size), self.timeout)
                 else:
-                    res = b''
-                    while True:
-                        res_part = await asyncio.wait_for(self.loop.sock_recv(self.tc_sock, self.chunks_size), self.timeout)
-                        if not res_part:
-                            break
-                        else:
-                            res += res_part
+                    res = await self.tcp_recv()
                 token = res[:self.token_size]
                 payload = res[self.token_size:]
                 msg_type, msg_cntr = struct.unpack("ii", token)
@@ -58,23 +53,10 @@ class SenderChannel:
                     print("Sending udp to %s" % str(self.addr))
                     await self.udp_sock.sendto(msg, self.addr)
                 else:
-                    await self.connect()
-                    await self.tcp_send(self.tc_sock, msg)
+                    await self.tcp_send(msg)
                 print("TIMEOUT: no response within {}s".format(self.timeout))
         return (msg_type, msg_cntr, msg_data)
 
-    async def connect(self):
-        self.tc_sock = socket.socket()
-        self.tc_sock.setblocking(False)
-        while True:
-            try:
-                await self.loop.sock_connect(self.tc_sock, (self.ip, self.port))
-            except OSError as e:
-                print("Trying to connect to ({}, {})".format(self.ip, self.port))
-                await asyncio.sleep(2)
-            else:
-                break
-    
     async def start(self):
         counter = 1
         while True:
@@ -90,13 +72,35 @@ class SenderChannel:
                 if self.udp:
                     await self.udp_sock.sendto(msg, self.addr)
                 else:
-                    await self.connect()
-                    await self.tcp_send(self.tc_sock, msg)
+                    await self.tcp_send(msg)
+
+    async def tcp_connect(self):
+        self.tc_sock = socket.socket()
+        self.tc_sock.setblocking(False)
+        while True:
+            try:
+                await self.loop.sock_connect(self.tc_sock, (self.ip, self.port))
+            except OSError as e:
+                print("Trying to connect to ({}, {})".format(self.ip, self.port))
+                await asyncio.sleep(2)
+            else:
+                break
+    
+    async def tcp_recv(self):
+        msg = b''
+        while True:
+            res_part = await asyncio.wait_for(self.loop.sock_recv(self.tc_sock, self.chunks_size), self.timeout)
+            if not res_part:
+                break
+            else:
+                msg += res_part
+        return msg
  
-    async def tcp_send(self, conn, msg):
+    async def tcp_send(self, msg):
+        await self.tcp_connect()
         msg_size = struct.pack("i", len(msg))
         response_stream = io.BytesIO(msg_size+msg)
         stream = True
         while stream:
             stream = response_stream.read(self.chunks_size)
-            await self.loop.sock_sendall(conn, stream)
+            await self.loop.sock_sendall(self.tc_sock, stream)
