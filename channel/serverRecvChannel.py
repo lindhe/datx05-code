@@ -1,5 +1,3 @@
-import zmq
-import zmq.asyncio
 import asyncio
 import struct
 import sys
@@ -26,6 +24,7 @@ class ServerRecvChannel:
         self.token_size = 2*struct.calcsize("i")+struct.calcsize("17s")
         self.gsp_freq = gossip_freq
         self.tokens = {}
+        self.chunks_size = 1024
 
     async def tcp_listen(self):
         while True:
@@ -37,7 +36,7 @@ class ServerRecvChannel:
     async def udp_listen(self):
         while True:
             print("Listening")
-            data, addr = await self.udp_sock.recvfrom(1024)
+            data, addr = await self.udp_sock.recvfrom(self.chunks_size)
             print("{} got udp request from {}".format(self.port, addr))
             asyncio.ensure_future(self.udp_response(data, addr))
 
@@ -51,12 +50,12 @@ class ServerRecvChannel:
         msg_size = struct.unpack("i", recv_msg_size)[0]
         res = b''
         while (len(res) < msg_size):
-            res += await self.loop.sock_recv(conn, 1024)
+            res += await self.loop.sock_recv(conn, self.chunks_size)
         response = await self.check_msg(res)
         response_stream = io.BytesIO(response)
         stream = True
         while stream:
-            stream = response_stream.read(1024)
+            stream = response_stream.read(self.chunks_size)
             await self.loop.sock_sendall(conn, stream)
         conn.close()
         print("Connection closed")
