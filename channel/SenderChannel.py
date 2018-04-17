@@ -1,6 +1,5 @@
 import asyncio
 import struct
-import time
 import socket
 import io
 from .ppProtocol import PingPongMessage
