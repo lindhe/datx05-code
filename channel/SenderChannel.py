@@ -7,9 +7,13 @@ from .GossipProtocol import GossipMessage
 from .UdpSender import UdpSender
 
 class SenderChannel:
+    """ Creates an instance of a sender channel"""
 
     def __init__(self, sid, uid, channel_type, callback_obj,
                  ip, port, timeout = 5, init_tx = None, chunks_size = 1024):
+        """
+        Define all parameters that is specific to this channel
+        """
         self.sid = sid
         self.uid = uid.encode()
         self.ch_type = 0 if channel_type == 'pingpong' else 1
@@ -27,6 +31,11 @@ class SenderChannel:
         self.udp_sock = UdpSender(self.loop)
 
     async def receive(self, token):
+        """
+        Waits for data on either tcp or udp port to be received and then return the data.
+        If no data is received in self.timeout seconds, assume msg is lost and
+resend it.
+        """
         while True:
             try:
                 if self.udp:
@@ -57,6 +66,10 @@ class SenderChannel:
         return (msg_type, msg_cntr, msg_data)
 
     async def start(self):
+        """
+        main loop for a sender channel. Receive data and if it is a token
+arrival construct a new message and send it.
+        """
         counter = 1
         while True:
             token = struct.pack("ii17s", self.ch_type, counter, self.uid)
@@ -74,6 +87,9 @@ class SenderChannel:
                     await self.tcp_send(msg)
 
     async def tcp_connect(self):
+        """
+        Create a new tcp socket and wait until there is a connection
+        """
         self.tc_sock = socket.socket()
         self.tc_sock.setblocking(False)
         while True:
@@ -86,6 +102,9 @@ class SenderChannel:
                 break
     
     async def tcp_recv(self):
+        """
+        Read a stream of tcp messages until the server closes the socket
+        """
         msg = b''
         while True:
             res_part = await asyncio.wait_for(self.loop.sock_recv(self.tc_sock, self.chunks_size), self.timeout)
@@ -96,6 +115,9 @@ class SenderChannel:
         return msg
  
     async def tcp_send(self, msg):
+        """
+        Send tcp stream in chunks defined by chunk_size
+        """
         await self.tcp_connect()
         msg_size = struct.pack("i", len(msg))
         response_stream = io.BytesIO(msg_size+msg)

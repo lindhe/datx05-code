@@ -7,9 +7,13 @@ from .GossipProtocol import GossipMessage
 from .UdpSender import UdpSender
 
 class ServerRecvChannel:
+    """ Creates a server recv channel for pingpong and gossip"""
 
     def __init__(self, callback_obj_pp, callback_obj_gossip, port,
                  gossip_freq=1, chunks_size=1024):
+        """
+        Initialize callbacks, parameters and create tcp/udp sockets
+        """
 
         self.cb_obj_pp = callback_obj_pp
         self.cb_obj_gossip = callback_obj_gossip
@@ -29,6 +33,9 @@ class ServerRecvChannel:
         self.tc_sock.listen(10)
 
     async def tcp_listen(self):
+        """
+        Wait for tcp connections to arrive
+        """
         while True:
             print("Listening")
             conn, addr = await self.loop.sock_accept(self.tc_sock)
@@ -36,6 +43,9 @@ class ServerRecvChannel:
             asyncio.ensure_future(self.tcp_response(conn))
 
     async def udp_listen(self):
+        """
+        Wait until udp message arrives.
+        """
         while True:
             print("Listening")
             data, addr = await self.udp_sock.recvfrom(self.chunks_size)
@@ -43,10 +53,16 @@ class ServerRecvChannel:
             asyncio.ensure_future(self.udp_response(data, addr))
 
     async def udp_response(self, data, addr):
+        """
+        Create udp response and send it.
+        """
         response = await self.check_msg(data)
         await self.udp_sock.sendto(response, addr)
 
     async def tcp_response(self, conn):
+        """
+        Receive tcp stream, create response and send it
+        """
         int_size = struct.calcsize("i")
         recv_msg_size = await self.loop.sock_recv(conn, int_size)
         msg_size = struct.unpack("i", recv_msg_size)[0]
@@ -63,6 +79,9 @@ class ServerRecvChannel:
         print("Connection closed")
         
     async def check_msg(self, res):
+        """
+        Determine message type and create response message accordingly
+        """
         token = res[:self.token_size]
         payload = res[self.token_size:]
         msg_type, msg_cntr, sender = struct.unpack("ii17s", token)
