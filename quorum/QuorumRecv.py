@@ -1,3 +1,4 @@
+import struct
 from channel.ppProtocol import PingPongMessage
 
 class QuorumRecv:
@@ -24,6 +25,11 @@ class QuorumRecv:
                     res = await self.server.read_finalize(tag, label)
                 else:
                     res = await self.server.write_finalize(tag, label)
+            elif (label == 'cntrQry'):
+                res = self.server.counter_query()
+            elif (label == 'incCntr'):
+                nbr = struct.unpack("i", data)[0]
+                res = self.server.set_counter(nbr)
             else:
                 return None
             new_msg = PingPongMessage(*res, mode, req_tag=msg_data.get_tag())
