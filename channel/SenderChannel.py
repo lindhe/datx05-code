@@ -71,6 +71,8 @@ resend it.
 arrival construct a new message and send it.
         """
         counter = 1
+        token = struct.pack("ii17s", self.ch_type, counter, self.uid)
+        await self.udp_sock.sendto(token, self.addr)
         while True:
             token = struct.pack("ii17s", self.ch_type, counter, self.uid)
             msg_type, msg_cntr, msg_data = await self.receive(token)
