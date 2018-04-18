@@ -58,7 +58,8 @@ def main(my_ip, my_port, cfgfile):
 
     loop = asyncio.get_event_loop()
     tag_tuple = server.get_tag_tuple()
-    gossip_obj = GossipMessage(tag_tuple)
+    cntr = server.get_counter()
+    gossip_obj = GossipMessage(tag_tuple, cntr)
     m = gossip_obj.get_bytes()
 
     node_index = 0

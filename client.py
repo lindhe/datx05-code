@@ -88,7 +88,6 @@ class Client:
     def restart(self):
         res = self.qrmAccess((None, None, 'cntrQry', None))
         max_cntr = max([struct.unpack("i", x.get_data()) for x in res])[0]
-        print(max_cntr)
         new_cntr = struct.pack("i", max_cntr+1)
         self.qrmAccess((None, new_cntr, 'incCntr', None))
         self.uid = (max_cntr+1, self.hw_addr)

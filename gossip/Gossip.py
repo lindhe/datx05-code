@@ -8,19 +8,20 @@ class Gossip:
     async def departure(self, uid, msg_data):
         print("Gossip CALLBACK SEND")
         tag_tuple = self.server.get_tag_tuple()
-        prp = (1,None)
+        cntr = self.server.get_counter()
+        prp = (1, None)
         msg_all = False
         echo = (prp, msg_all)
-        gossip_obj = GossipMessage(tag_tuple, prp, msg_all, echo)
+        gossip_obj = GossipMessage(tag_tuple, cntr, prp, msg_all, echo)
         data = gossip_obj.get_bytes()
         return (data, not self.use_tcp(data))
 
     async def arrival(self, uid, msg_data):
         print("Gossip CALLBACK RECV")
         if msg_data:
-            print("Got message with tag_tuple:")
+            print("Got message with tag_tuple: {}".format(msg_data.get_cntr()))
             print(msg_data.get_tag_tuple())
-            await self.server.gossip(uid, *msg_data.get_tag_tuple())
+            await self.server.gossip(uid, *msg_data.get_tag_tuple(), msg_data.get_cntr())
         else:
             print("Got empty message")
 

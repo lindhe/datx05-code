@@ -111,7 +111,7 @@ class Server:
     await self.S.update_phase(t, None, d)
     return (t, None, d)
 
-  async def gossip(self, k, pre, fin, FIN):
+  async def gossip(self, k, pre, fin, FIN, cntr):
     """ Reply to gossip arrival event, from pj's server to pi's server.
 
     Updates the class variables pre, fin and FIN to include the content of the
@@ -141,8 +141,16 @@ class Server:
       implicitFinalized = [fin]
     self.FIN[i] = max( FIN, self.S.max_phase(['FIN']), *implicitFinalized )
     await self.S.update_phase(self.FIN[i], None, 'FIN')
+    
+    # Update counter
+    if (cntr > self.cntr):
+        self.cntr = cntr
 
+    # Remove not relevant records
     self.S.relevant()
 
   def get_tag_tuple(self):
     return self.S.tag_tuple()
+
+  def get_counter(self):
+    return self.cntr

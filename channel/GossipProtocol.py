@@ -1,3 +1,4 @@
+import struct
 from .packHelper import PackHelper
 from ast import literal_eval
 
@@ -5,8 +6,9 @@ class GossipMessage:
 
     pack_helper = PackHelper()
     
-    def __init__(self, tag_tuple, prp=None, msg_all=None, echo=None):
+    def __init__(self, tag_tuple, cntr, prp=None, msg_all=None, echo=None):
         self.tag_tuple = str(tag_tuple).encode() if type(tag_tuple) != bytes else tag_tuple
+        self.cntr = struct.pack("i", cntr) if type(cntr) != bytes else cntr
         self.prp = str(prp).encode() if type(prp) != bytes else prp
         self.msg_all = str(msg_all).encode() if type(msg_all) != bytes else msg_all
         self.echo = str(echo).encode() if type(echo) != bytes else echo
@@ -15,18 +17,22 @@ class GossipMessage:
         res_tuple = GossipMessage.pack_helper.unpack(msg)
         ctrl_data = res_tuple[0]
         tag_tuple = ctrl_data[0]
-        prp = ctrl_data[1]
-        msg_all = ctrl_data[2]
-        echo = ctrl_data[3]
-        return [tag_tuple, prp, msg_all, echo]
+        cntr = ctrl_data[1]
+        prp = ctrl_data[2]
+        msg_all = ctrl_data[3]
+        echo = ctrl_data[4]
+        return [tag_tuple, cntr, prp, msg_all, echo]
 
     def get_bytes(self):
         msg = GossipMessage. \
-              pack_helper.pack(self.tag_tuple, self.prp, self.msg_all, self.echo)
+              pack_helper.pack(self.tag_tuple, self.cntr, self.prp, self.msg_all, self.echo)
         return msg
 
     def get_tag_tuple(self):
         return literal_eval(self.tag_tuple.decode())
+
+    def get_cntr(self):
+        return struct.unpack("i", self.cntr)[0]
 
     def get_prp(self):
         return literal_eval(self.prp.decode())
