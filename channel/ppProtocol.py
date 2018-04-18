@@ -6,10 +6,10 @@ class PingPongMessage:
     pack_helper = PackHelper()
     
     def __init__(self, tag, data, label, mode, req_tag=None):
-        self.tag = str(tag).encode() if type(tag) != bytes else tag
+        self.tag = str(tag).encode() if type(tag) != bytes and tag else tag
         self.data = data
-        self.label = label.encode() if type(label) != bytes else label
-        self.mode = str(mode).encode() if type(mode) != bytes else mode
+        self.label = label.encode() if type(label) != bytes and label else label
+        self.mode = str(mode).encode() if type(mode) != bytes and mode else mode
         self.req_tag = str(req_tag).encode() if type(req_tag) != bytes else req_tag
 
     def set_message(msg):
@@ -28,17 +28,17 @@ class PingPongMessage:
         return msg
 
     def get_tag(self):
-        return literal_eval(self.tag.decode())
+        return literal_eval(self.tag.decode()) if self.tag else self.tag
 
     def get_data(self):
         return self.data
 
     def get_label(self):
-        return self.label.decode()
+        return self.label.decode() if self.label else self.label
 
     def get_req_tag(self):
         return literal_eval(self.req_tag.decode())
 
     def get_mode(self):
         """ Mode is 'write' or 'read' """
-        return self.mode.decode()
+        return self.mode.decode() if self.mode else self.mode
