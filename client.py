@@ -5,6 +5,7 @@ import configparser
 import time
 import threading
 import math
+import struct
 import random as r
 from threading import Thread
 from channel.SenderChannel import SenderChannel
@@ -16,7 +17,8 @@ class Client:
 
     def __init__(self, cfgfile):
 
-        self.uid = self.get_uid()
+        self.hw_addr = self.get_hwaddr()
+        self.uid = (1, self.hw_addr)
         self.loop = asyncio.get_event_loop()
         config = configparser.ConfigParser()
         config.read(cfgfile)
@@ -33,7 +35,7 @@ class Client:
         t.daemon = True
         t.start()
 
-    def get_uid(self):
+    def get_hwaddr(self):
         with open('/sys/class/net/lo/address') as f:
             hw_addr = f.read().splitlines()[0]
             if (hw_addr == '00:00:00:00:00:00'):
@@ -45,14 +47,14 @@ class Client:
                             r.randint(0, 255),
                             r.randint(0, 255)
                             )
-        return (1, hw_addr)
+        return hw_addr
 
     def start_event_loop(self, loop, nodes):
         asyncio.set_event_loop(loop)
         i = 0
         for node in nodes:
             ip, port = nodes[node].split(':')
-            c = SenderChannel(i, self.get_uid()[1], 'pingpong', self.p, ip, port)
+            c = SenderChannel(i, self.hw_addr, 'pingpong', self.p, ip, port)
             asyncio.ensure_future(c.start())
             print("Create channel to {}:{}".format(ip, port))
             i = i+1
@@ -82,3 +84,11 @@ class Client:
         except:
             decoded_msg = None
         return decoded_msg
+
+    def restart(self):
+        res = self.qrmAccess((None, None, 'cntrQry', None))
+        max_cntr = max([struct.unpack("i", x.get_data()) for x in res])[0]
+        print(max_cntr)
+        new_cntr = struct.pack("i", max_cntr+1)
+        self.qrmAccess((None, new_cntr, 'incCntr', None))
+        self.uid = (max_cntr+1, self.hw_addr)
