@@ -24,6 +24,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import struct
 from channel.GossipProtocol import GossipMessage
 from channel.ppProtocol import PingPongMessage
 from register.record import Record
@@ -35,6 +36,7 @@ class Server:
 
   def __init__(self, uid, quorum, storage_size, storage_location="./.storage/"):
     self.uid = uid
+    self.cntr = 1
     # Quorum size:
     self.quorum = quorum
     # Initialize with an empty register S
@@ -43,6 +45,17 @@ class Server:
     self.pre = {}
     self.fin = {}
     self.FIN = {}
+
+  def counter_query(self):
+    """ Reply to queries with current counter value """
+    cntr = struct.pack("i", self.cntr)
+    return (None, cntr, None)
+
+  def set_counter(self, new_value):
+    """ Replace counter value if larger """
+    if (new_value > self.cntr):
+      self.cntr = new_value
+    return (None, None, None)
 
   def read_query(self):
     """ Reply to read query arrival event, from pj's client to pi's server.
