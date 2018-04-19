@@ -7,11 +7,15 @@ import sys
 import os
 import configparser
 from client import Client
+import pathlib
 
 def now():
   return f"{datetime.datetime.now():%Y-%m-%d_%H:%M:%S}"
 
-result_file = "./result/"+now()+"-average_time.csv"
+path = "./result/"
+
+pathlib.Path(path).mkdir(exist_ok=True, parents=True)
+result_file = path + now() + "-average_time.csv"
 
 def note_result(writer_avg, reader_avg, file_size):
   result = f"\
