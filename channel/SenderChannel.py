@@ -10,7 +10,7 @@ class SenderChannel:
     """ Creates an instance of a sender channel"""
 
     def __init__(self, sid, uid, channel_type, callback_obj,
-                 ip, port, timeout = 5, init_tx = None, chunks_size = 1024):
+                 ip, port, timeout = 5, init_tx = None, chunks_size = 1024*1024):
         """
         Define all parameters that is specific to this channel
         """
@@ -117,8 +117,7 @@ arrival construct a new message and send it.
         return msg
  
     async def tcp_send(self, msg):
-        """
-        Send tcp stream in chunks defined by chunk_size
+        """ Send tcp stream in chunks defined by chunks_size.
         """
         await self.tcp_connect()
         msg_size = struct.pack("i", len(msg))
