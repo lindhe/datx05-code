@@ -18,7 +18,7 @@ class Client:
     def __init__(self, cfgfile):
 
         self.hw_addr = self.get_hwaddr()
-        self.uid = (1, self.hw_addr)
+        self.uid = (0, self.hw_addr)
         self.loop = asyncio.get_event_loop()
         config = configparser.ConfigParser()
         config.read(cfgfile)
@@ -85,9 +85,10 @@ class Client:
             decoded_msg = None
         return decoded_msg
 
-    def restart(self):
+    def check_uid(self):
         res = self.qrmAccess((None, None, 'cntrQry', None))
         max_cntr = max([struct.unpack("i", x.get_data()) for x in res])[0]
-        new_cntr = struct.pack("i", max_cntr+1)
-        self.qrmAccess((None, new_cntr, 'incCntr', None))
-        self.uid = (max_cntr+1, self.hw_addr)
+        if (max_cntr != self.uid[0]):
+            new_cntr = struct.pack("i", max_cntr+1)
+            self.qrmAccess((None, new_cntr, 'incCntr', None))
+            self.uid = (max_cntr+1, self.hw_addr)
