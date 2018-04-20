@@ -29,11 +29,18 @@ def k_table(nmax, fmax, latex=False):
   return
 
 def print_table(matrix, nmax, fmax, latex):
-  matrix.append(['n'])
-  matrix[0].append('f')
-  for row in matrix:
-    row_format = "{:>2} " * len(row)
-    print(row_format.format( *row ))
+  if latex:
+    matrix.append(['n'])
+    matrix[0].append('f')
+    for row in matrix:
+      row_format = "{:>2} " * len(row)
+      print(row_format.format( *row ))
+  else:
+    matrix.append(['n'])
+    matrix[0].append('f')
+    for row in matrix:
+      row_format = "{:>2} " * len(row)
+      print(row_format.format( *row ))
 
 if __name__ == '__main__':
   program = sys.argv[0]
