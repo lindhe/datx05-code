@@ -5,9 +5,7 @@
 # Author: Andreas Lindhé
 
 import sys
-import time
 import math
-import numpy as np
 
 def main(nmax=19):
   n = nmax
@@ -33,16 +31,6 @@ def k_table(nmax, fmax):
     row_format = "{:>2} " * len(row)
     print(row_format.format( *row ))
   return
-
-def maximal_k(n, f):
-  return [ k for k in range(1, n-2*f +1) ]
-
-def legal_k(n, f):
-  return [ k for k in range(1, n-2*f +1) ]
-
-def legal_f(n):
-  fs = [ f for f in range(0, n +1) if n-2*f >= 1 ]
-  return max(fs)
 
 if __name__ == '__main__':
   program = sys.argv[0]
