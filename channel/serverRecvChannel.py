@@ -10,7 +10,7 @@ class ServerRecvChannel:
     """ Creates a server recv channel for pingpong and gossip"""
 
     def __init__(self, callback_obj_pp, callback_obj_gossip, port,
-                 gossip_freq=1, chunks_size=1024*1024):
+                 gossip_freq=1, chunks_size=1024):
         """
         Initialize callbacks, parameters and create tcp/udp sockets
         """
@@ -67,10 +67,7 @@ class ServerRecvChannel:
         recv_msg_size = await self.loop.sock_recv(conn, int_size)
         msg_size = struct.unpack("i", recv_msg_size)[0]
         res = b''
-        i = 0
         while (len(res) < msg_size):
-            print(f"{i} thigs arehellppeaflj saldjfs")
-            i = i+1
             res += await self.loop.sock_recv(conn, self.chunks_size)
         response = await self.check_msg(res)
         response_stream = io.BytesIO(response)
@@ -95,12 +92,8 @@ class ServerRecvChannel:
                 msg_list = PingPongMessage.set_message(payload)
                 msg = PingPongMessage(*msg_list)
             else:
-                try:
-                    msg_list = GossipMessage.set_message(payload)
-                    msg = GossipMessage(*msg_list)
-                except Exception as e:
-                    raise Exception( "Got an error at set_message, with res {}".format(res) )
-
+                msg_list = GossipMessage.set_message(payload)
+                msg = GossipMessage(*msg_list)
 
         if(sender not in self.tokens.keys()):
             print("Add to token list")
