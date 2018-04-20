@@ -36,7 +36,7 @@ class Server:
 
   def __init__(self, uid, quorum, storage_size, storage_location="./.storage/"):
     self.uid = uid
-    self.cntr = 1
+    self.inc_nbrs = {}
     # Quorum size:
     self.quorum = quorum
     # Initialize with an empty register S
@@ -46,15 +46,17 @@ class Server:
     self.fin = {}
     self.FIN = {}
 
-  def counter_query(self):
+  def counter_query(self, sender):
     """ Reply to queries with current counter value """
-    cntr = struct.pack("i", self.cntr)
+    if (sender not in self.inc_nbrs.keys()):
+      self.inc_nbrs[sender] = 1
+    cntr = struct.pack("i", self.inc_nbrs[sender])
     return (None, cntr, None)
 
-  def set_counter(self, new_value):
+  def set_counter(self, sender, new_value):
     """ Replace counter value if larger """
-    if (new_value > self.cntr):
-      self.cntr = new_value
+    if ((sender not in self.inc_nbrs.keys()) or (new_value > self.inc_nbrs[sender])):
+      self.inc_nbrs[sender] = new_value
     return (None, None, None)
 
   def read_query(self):
@@ -111,7 +113,7 @@ class Server:
     await self.S.update_phase(t, None, d)
     return (t, None, d)
 
-  async def gossip(self, k, pre, fin, FIN, cntr):
+  async def gossip(self, k, pre, fin, FIN, inc_nbrs):
     """ Reply to gossip arrival event, from pj's server to pi's server.
 
     Updates the class variables pre, fin and FIN to include the content of the
@@ -143,8 +145,10 @@ class Server:
     await self.S.update_phase(self.FIN[i], None, 'FIN')
     
     # Update counter
-    if (cntr > self.cntr):
-        self.cntr = cntr
+    if inc_nbrs:
+      for hw_addr, number in inc_nbrs:
+        if ((hw_addr not in self.inc_nbrs.keys()) or (number > self.inc_nbrs[hw_addr])):
+          self.inc_nbrs[hw_addr] = number
 
     # Remove not relevant records
     self.S.relevant()
@@ -153,4 +157,4 @@ class Server:
     return self.S.tag_tuple()
 
   def get_counter(self):
-    return self.cntr
+    return list(self.inc_nbrs.items()) if self.inc_nbrs.values() else None

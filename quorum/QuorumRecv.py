@@ -6,7 +6,7 @@ class QuorumRecv:
     def __init__(self, server):
         self.server = server
 
-    async def arrival(self, msg_data):
+    async def arrival(self, sender, msg_data):
         print("pingpong CALLBACK")
         if msg_data:
             tag = msg_data.get_tag()
@@ -26,10 +26,10 @@ class QuorumRecv:
                 else:
                     res = await self.server.write_finalize(tag, label)
             elif (label == 'cntrQry'):
-                res = self.server.counter_query()
+                res = self.server.counter_query(sender)
             elif (label == 'incCntr'):
                 nbr = struct.unpack("i", data)[0]
-                res = self.server.set_counter(nbr)
+                res = self.server.set_counter(sender, nbr)
             else:
                 return None
             new_msg = PingPongMessage(*res, mode, req_tag=msg_data.get_tag())

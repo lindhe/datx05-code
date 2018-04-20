@@ -19,9 +19,9 @@ class Gossip:
     async def arrival(self, uid, msg_data):
         print("Gossip CALLBACK RECV")
         if msg_data:
-            print("Got message with tag_tuple: {}".format(msg_data.get_cntr()))
+            print("Got message with counters: {}".format(msg_data.get_cntrs()))
             print(msg_data.get_tag_tuple())
-            await self.server.gossip(uid, *msg_data.get_tag_tuple(), msg_data.get_cntr())
+            await self.server.gossip(uid, *msg_data.get_tag_tuple(), msg_data.get_cntrs())
         else:
             print("Got empty message")
 
