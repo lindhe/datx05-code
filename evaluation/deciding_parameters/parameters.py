@@ -25,12 +25,15 @@ def k_table(nmax, fmax):
       kmax = n-2*f
       if kmax > 0:
         matrix[i+1].append(kmax)
+  print_table(matrix, nmax, fmax)
+  return
+
+def print_table(matrix, nmax, fmax):
   matrix.append(['n'])
   matrix[0].append('f')
   for row in matrix:
     row_format = "{:>2} " * len(row)
     print(row_format.format( *row ))
-  return
 
 if __name__ == '__main__':
   program = sys.argv[0]
