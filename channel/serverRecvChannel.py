@@ -121,6 +121,7 @@ class ServerRecvChannel:
                 await asyncio.sleep(self.gsp_freq)
         else:
             print("NO TOKEN ARRIVAL")
-            response = res
+            token = struct.pack("ii", msg_type,self.tokens[sender])
+            response = token
 
         return response
