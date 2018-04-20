@@ -30,10 +30,14 @@ def k_table(nmax, fmax, latex=False):
 
 def print_table(matrix, nmax, fmax, latex):
   if latex:
-    matrix.append(['n'])
-    matrix[0].append('f')
     for row in matrix:
-      row_format = "{:>2} " * len(row)
+      row_len = len(row)
+      fmt = " {:>3} &"
+      row_format = fmt * (row_len)
+      for i in range(fmax - (row_len-1) +1):
+        row.append('')
+        row_format = row_format + fmt
+      row_format = row_format + "\\\\"
       print(row_format.format( *row ))
   else:
     matrix.append(['n'])
