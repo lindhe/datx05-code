@@ -33,11 +33,11 @@ def print_table(matrix, nmax, fmax, latex):
     for row in matrix:
       row_len = len(row)
       fmt = " {:>3} &"
-      row_format = fmt * (row_len)
-      for i in range(fmax - (row_len-1) +1):
+      row_format = fmt * (row_len-1)
+      for i in range(fmax - (row_len-1) + 1):
         row.append('')
         row_format = row_format + fmt
-      row_format = row_format + "\\\\"
+      row_format = row_format + " {:>3}\\\\"
       print(row_format.format( *row ))
   else:
     matrix.append(['n'])
