@@ -24,10 +24,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from register.register import Register
+
 class GlobalReset:
   """ Handle global reset (wrap-around) procedure. """
 
-  def __init__(self, uid, config):
+  def __init__(self, uid, config, register):
     """ Initialize the global reset procedure.
 
     Args:
@@ -40,6 +42,7 @@ class GlobalReset:
     self.all = []
     self.echo = []
     self.all_seen_set = []
+    self.register = register
     while True:
       if self.transient_fault():
         self.prp_set(None)
@@ -207,4 +210,5 @@ class GlobalReset:
     Args:
       tag (tuple): the record to keep.
     """
+    self.register.reset(tag)
     return
