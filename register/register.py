@@ -29,7 +29,7 @@ from .fileHelper import *
 
 
 class Register:
-  """ Implementation of the register which stores recrods """
+  """ Implementation of the register which stores records """
 
   def __init__(self, max_clients, delta, storage_location="./.storage/"):
     """ Initiates a register with no records.
@@ -46,6 +46,7 @@ class Register:
     self.max_clients = max_clients
     self.delta = delta
     self.storage_location = storage_location
+    self.init_nbr = 0
 
   def __repr__(self):
     """ String representation prints the entire register dict """
@@ -154,16 +155,16 @@ class Register:
       return None
 
   def relevant(self):
-    """
-    Removes all records from the register and storage
- that is not considered relevant
+    """ Removes all records which are no longer relevant.
+
+    Removes all records from the register and storage that are not among the
+    storage_size most recent.
     """
     write_query_set = self.max_set(['pre','fin','FIN'], 1)
     read_query_set = self.max_set(['fin','FIN'], 1)
     not_yet_fin_set = self.max_set(['pre','fin'], self.max_clients)
     FIN_set = self.max_set(['FIN'], self.delta+1)
     relevant = list(set().union(write_query_set, read_query_set, not_yet_fin_set, FIN_set))
-
     tags = list(self.register.keys())
     for tag in tags:
       if (tag not in relevant):
@@ -173,3 +174,19 @@ class Register:
 
   def tag_to_filename(self, tag):
     return '-'.join( [str(t) for t in tag] ) + '.elem'
+
+  def reset(self, tag):
+    """ Removes all records except for tag, and reset its sequence number.
+
+    Args:
+      tag (tuple): The tag to preserve.
+    """
+    saved = self.register.pop(tag)
+    # Remove all other records, both from disk and from register:
+    for tag in self.register:
+      filename = self.tag_to_filename(tag)
+      delete_file(filename, path=self.storage_location)
+    self.register = {tag: saved}
+    # Update the sequence number:
+    self.register[tag].tag = (self.init_nbr, tag[uid])
+    return
