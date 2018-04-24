@@ -63,21 +63,13 @@ class Server:
       self.inc_nbrs[sender] = new_value
     return (None, None, None)
 
-  def read_query(self):
+  def query(self):
     """ Reply to read query arrival event, from pj's client to pi's server.
 
     Returns:
-      tuple (t, None, 'qry') where t is max_phase of ['fin', 'FIN']
+      tuple (t, None, 'qry') where t is max_phase of ['fin']
     """
-    return (self.S.max_phase(['fin', 'FIN']), None, 'qry')
-
-  def write_query(self):
-    """ Reply to write query arrival event, from pj's client to pi's server.
-
-    Returns:
-      tuple (t, None, 'qry') where t is max_phase of ['pre', 'fin', 'FIN']
-    """
-    return (self.S.max_phase(['pre', 'fin', 'FIN']), None, 'qry')
+    return (self.S.max_phase(['fin']), None, 'qry')
 
   async def pre_write(self, t, w):
     """ Reply to pre-write arrival event, from pj's writer to pi's server.
