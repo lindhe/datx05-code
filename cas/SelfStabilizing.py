@@ -25,6 +25,8 @@
 # SOFTWARE.
 
 import struct
+from collections import deque
+from .IncNbrHelper import IncNbrHelper
 from channel.GossipProtocol import GossipMessage
 from channel.ppProtocol import PingPongMessage
 from register.record import Record
@@ -36,7 +38,7 @@ class Server:
 
   def __init__(self, uid, quorum, storage_size, storage_location="./.storage/"):
     self.uid = uid
-    self.inc_nbrs = {}
+    self.inc_nbrs = deque(maxlen=storage_size)
     # Quorum size:
     self.quorum = quorum
     # Initialize with an empty register S
@@ -48,15 +50,15 @@ class Server:
 
   def counter_query(self, sender):
     """ Reply to queries with current counter value """
-    if (sender not in self.inc_nbrs.keys()):
-      self.inc_nbrs[sender] = 1
-    cntr = struct.pack("i", self.inc_nbrs[sender])
+    if (IncNbrHelper.max_reached(self.inc_nbrs, 100)):
+      print("max reached")
+    inc_nbr = IncNbrHelper.get(self.inc_nbrs, sender)
+    cntr = struct.pack("i", inc_nbr)
     return (None, cntr, None)
 
   def set_counter(self, sender, new_value):
     """ Replace counter value if larger """
-    if ((sender not in self.inc_nbrs.keys()) or (new_value > self.inc_nbrs[sender])):
-      self.inc_nbrs[sender] = new_value
+    IncNbrHelper.set(self.inc_nbrs, sender, new_value)
     return (None, None, None)
 
   def read_query(self):
@@ -146,10 +148,7 @@ class Server:
     
     # Update counter
     if inc_nbrs:
-      for hw_addr, number in inc_nbrs:
-        if ((hw_addr not in self.inc_nbrs.keys()) or (number > self.inc_nbrs[hw_addr])):
-          self.inc_nbrs[hw_addr] = number
-
+      IncNbrHelper.merge(self.inc_nbrs, inc_nbrs)
     # Remove not relevant records
     self.S.relevant()
 
@@ -157,4 +156,4 @@ class Server:
     return self.S.tag_tuple()
 
   def get_counter(self):
-    return list(self.inc_nbrs.items()) if self.inc_nbrs.values() else None
+    return IncNbrHelper.to_list(self.inc_nbrs) if len(self.inc_nbrs) else None
