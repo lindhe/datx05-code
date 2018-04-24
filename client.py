@@ -60,8 +60,8 @@ class Client:
             i = i+1
         loop.run_forever()
 
-    def qrmAccess(self, msg):
-        fut = asyncio.run_coroutine_threadsafe(self.p.phaseInit(msg), self.loop)
+    def qrmAccess(self, msg, opt_size=None):
+        fut = asyncio.run_coroutine_threadsafe(self.p.phaseInit(msg, opt_size), self.loop)
         return fut.result()
 
     def write(self, msg):

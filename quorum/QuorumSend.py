@@ -5,11 +5,16 @@ class QuorumSend:
     def __init__(self, quorum_size):
         self.pongRx = {}
         self.Q = quorum_size
+        self.replies = quorum_size
         self.pingTx = None
         self.event = None
         self.aggregated = None
 
-    async def phaseInit(self, m):
+    async def phaseInit(self, m, opt_size=None):
+        if opt_size:
+            self.replies = opt_size
+        else:
+            self.replies = self.Q
         self.pongRx.clear()
         if (type(m[1]) == list):
             self.pingTx = []
@@ -44,7 +49,7 @@ class QuorumSend:
         elif not msg:
             self.pongRx.pop(server_id, None)
 
-        if len(self.pongRx) >= self.Q:
+        if len(self.pongRx) >= self.replies:
             if __debug__:
                 print("GOT ENOUGH elements")
             self.aggregated = list(self.pongRx.values())
