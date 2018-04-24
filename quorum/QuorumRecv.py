@@ -27,6 +27,8 @@ class QuorumRecv:
                     res = await self.server.write_finalize(tag, label)
             elif (label == 'cntrQry'):
                 res = self.server.counter_query(sender)
+                if not res:
+                    return None
             elif (label == 'incCntr'):
                 nbr = struct.unpack("i", data)[0]
                 res = self.server.set_counter(sender, nbr)

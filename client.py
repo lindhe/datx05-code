@@ -18,7 +18,7 @@ class Client:
     def __init__(self, cfgfile):
 
         self.hw_addr = self.get_hwaddr()
-        self.uid = (0, self.hw_addr)
+        self.uid = (-1, self.hw_addr)
         self.loop = asyncio.get_event_loop()
         config = configparser.ConfigParser()
         config.read(cfgfile)
@@ -29,6 +29,7 @@ class Client:
         if(k < 1):
             raise Exception("Coded elements less than 1")
         quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
+        self.majority = math.ceil((nbr_of_servers+1)/2)
         self.ec_driver = ECDriver(k=k, m=nbr_of_servers, ec_type='liberasurecode_rs_vand')
         self.p = QuorumSend(quorum_size)
         t = Thread(target=self.start_event_loop, args=(self.loop, config['Nodes']))
@@ -60,8 +61,8 @@ class Client:
             i = i+1
         loop.run_forever()
 
-    def qrmAccess(self, msg):
-        fut = asyncio.run_coroutine_threadsafe(self.p.phaseInit(msg), self.loop)
+    def qrmAccess(self, msg, opt_size=None):
+        fut = asyncio.run_coroutine_threadsafe(self.p.phaseInit(msg, opt_size), self.loop)
         return fut.result()
 
     def write(self, msg):
@@ -86,9 +87,10 @@ class Client:
         return decoded_msg
 
     def check_uid(self):
-        res = self.qrmAccess((None, None, 'cntrQry', None))
+        res = self.qrmAccess((None, None, 'cntrQry', None), opt_size=self.majority)
         max_cntr = max([struct.unpack("i", x.get_data()) for x in res])[0]
         if (max_cntr != self.uid[0]):
-            new_cntr = struct.pack("i", max_cntr+1)
-            self.qrmAccess((None, new_cntr, 'incCntr', None))
-            self.uid = (max_cntr+1, self.hw_addr)
+            new_inc_nbr = max(max_cntr, self.uid[0])+1
+            new_cntr = struct.pack("i", new_inc_nbr)
+            self.qrmAccess((None, new_cntr, 'incCntr', None), opt_size=self.majority)
+            self.uid = (new_inc_nbr, self.hw_addr)
