@@ -51,7 +51,7 @@ class Server:
   def counter_query(self, sender):
     """ Reply to queries with current counter value """
     if (IncNbrHelper.max_reached(self.inc_nbrs, 100)):
-      print("max reached")
+      return None
     inc_nbr = IncNbrHelper.get(self.inc_nbrs, sender)
     cntr = struct.pack("i", inc_nbr)
     return (None, cntr, None)

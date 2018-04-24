@@ -105,7 +105,7 @@ class ServerRecvChannel:
             if(msg_type == 0):
                 if msg:
                     new_msg = await self.cb_obj_pp.arrival(sender, msg)
-                    response = token+new_msg
+                    response = token+new_msg if new_msg else token
                 else:
                     response = token
             elif(msg_type == 1):
