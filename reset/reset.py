@@ -27,14 +27,34 @@
 class GlobalReset:
   """ Handle global reset (wrap-around) procedure. """
 
-  def __init__(self, config):
+  def __init__(self, uid, config):
     """ Initialize the global reset procedure.
 
     Args:
       config (list): list of all servers in configuration
     """
+    self.uid = uid
     self.config = config
     self.dflt_prp = (0, None)
+    self.prp = []
+    self.all = []
+    self.echo = []
+    self.all_seen_set = []
+    while True:
+      if self.transient_fault():
+        self.prp_set(None)
+      # Update all[i]:
+      (prp[uid], self.all[uid]) = (max_prp(), and_every(echo_no_all))
+      if (prp[uid] == None and self.all[uid]):
+        prp[uid] = self.dflt_prp
+      if self.no_default_no_bot():
+        for k in self.config:
+          if (self.echo(k) and self.my_all(k)):
+            all_seen_set.append(k)
+        if self.all_seen():
+          (prp[uid], all_seen_set) = (self.increment(prp[uid]), [])
+        if prp[uid].phase == 2:
+          self.local_reset(prp[uid].tag)
 
   def propose(self, tag):
     """ Proposes to reset register to only hold the Record with tag tag.
@@ -149,3 +169,42 @@ class GlobalReset:
       list: list of all proposals
     """
     return []
+
+  def and_every(self, macro):
+    """ Logical AND of every return value for macro[k] such that k is in config.
+
+    Args:
+      macro (function): macro must refer to a function which can take argument k
+        and return a bool.
+    Returns:
+      bool: True if all macro[k]==True, False otherwise.
+    """
+    for k in self.config:
+      if not macro(k):
+        return False
+    return True
+
+  def transient_fault(self):
+    """ Checks for all possible transient faults.
+
+    Returns:
+      bool: True if there is a transient fault detected, False otherwise.
+    """
+    return False
+
+  def no_default_no_bot(self):
+    """ Checks that no proposal holds dfltPrp or None (bot).
+
+    Returns:
+      bool: True if no proposal is dfltPrp and no proposal is None. False
+        otherwise.
+    """
+    return False
+
+  def local_reset(self, tag):
+    """ Reset the local environment to only hold the Record with tag tag.
+
+    Args:
+      tag (tuple): the record to keep.
+    """
+    return
