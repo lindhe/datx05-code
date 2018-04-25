@@ -92,7 +92,7 @@ class GlobalReset:
       int: a phase represented by 0, 1 or 2
     """
     phs = set()
-    for k in config:
+    for k in self.config:
       phs.add(self.prp[k].phase)
     if not phs in set(0, 2):
       return max(phs)
