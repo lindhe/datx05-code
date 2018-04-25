@@ -187,7 +187,8 @@ class GlobalReset:
     Returns:
       bool: True if all is True and all active processors are in all_seen_processors
     """
-    return True
+    return self.all[self.uid] \
+        and set(self.config) <= self.all_seen_processors | set(uid)
 
   def proposal_set(self):
     """ Returns the set of all active proposals.
