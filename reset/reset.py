@@ -155,7 +155,7 @@ class GlobalReset:
     Return
       bool: True if my proposal is the echoed proposal from processor k
     """
-    return True
+    return prp[self.uid] == self.echo_answers[k].prp
 
   def echo(self, k):
     """ Checks if my proposal and my_all variable are echoed by processor k.
