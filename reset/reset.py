@@ -116,7 +116,12 @@ class GlobalReset:
     Returns:
       bool: True if they correlate, False otherwise.
     """
-    return True
+    a = self.degree(k)
+    b = self.degree(l)
+    correlating_degrees = set()
+    for i in range(self.degrees):
+      correlating_degrees |= set([ (i, i), (i, (i+1)%self.degrees) ])
+    return tuple(sorted((a, b))) in correlating_degrees
 
   def max_prp(self):
     """ Returns the maximal proposal.
