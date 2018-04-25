@@ -37,14 +37,17 @@ class GlobalReset:
       config (list): list of all servers in configuration
     """
     self.uid = uid
-    self.config = config # List of uid
-    self.dflt_prp = prp(0, None)
-    self.prp = {} # {uid: Proposal} or {uid: None}
-    self.all = []
-    self.echo_answers = {}
-    self.all_seen_processors = set()
     self.register = register
+    # Algorithm variables:
+    self.config = config # List of uid
+    self.prp = {} # {uid: Proposal} or {uid: None}
+    self.all = [] # [bool]
+    self.echo_answers = {} # {uid: echo_msg}
+    self.all_seen_processors = set()
+    # Algorithm constants:
+    self.dflt_prp = prp(0, None)
     self.degrees = 6
+    # Main loop
     while True:
       if self.transient_fault():
         self.prp_set(None)
