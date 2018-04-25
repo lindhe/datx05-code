@@ -126,10 +126,18 @@ class GlobalReset:
   def max_prp(self):
     """ Returns the maximal proposal.
 
+    The loop does double duty: it collects a list of proposed tags, but will
+    also return if phases are not synchronized.
+
     Returns:
       tuple: proposal
     """
-    return prp(0, None)
+    prp_tags = []
+    for k in self.config:
+      tags.append(self.prp[k].tag)
+      if ((self.degree(k) - self.degree(self.uid))%self.degrees not in set(0, 1)):
+        return self.prp[self.uid]
+    return prp(self.mod_max(), max(prp_tags))
 
   def my_all(self, k):
     """ The myAll macro.
