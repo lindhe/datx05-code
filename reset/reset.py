@@ -166,7 +166,7 @@ class GlobalReset:
       bool: True if my proposal and my_all are what's echoed back by processor
         k, false otherwise
     """
-    return True
+    return (self.prp[self.uid], self.my_all[self.uid]) == self.echo_answers[k]
 
   def increment(self, proposal):
     """ Returns the appropriate incremented new proposal based on its phase.
