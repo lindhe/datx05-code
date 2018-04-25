@@ -145,7 +145,7 @@ class GlobalReset:
     Returns:
       bool: processor k is in all_seen_processors or all[k]==True
     """
-    return True
+    return k in self.all_seen_processors or self.all[k]
 
   def echo_no_all(self, k):
     """ Checks the echoed proposal from processor k.
