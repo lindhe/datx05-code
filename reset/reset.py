@@ -177,6 +177,8 @@ class GlobalReset:
       tuple: Proposal which is (2, prp) if prp.phase == 1, or self.dflt_prp
       otherwise.
     """
+    if proposal.phase == 1:
+      return prp(2, proposal.tag)
     return self.dflt_prp
 
   def all_seen(self):
