@@ -25,6 +25,7 @@
 # SOFTWARE.
 
 from register.register import Register
+from proposal import Proposal as prp
 
 class GlobalReset:
   """ Handle global reset (wrap-around) procedure. """
@@ -37,8 +38,8 @@ class GlobalReset:
     """
     self.uid = uid
     self.config = config
-    self.dflt_prp = (0, None)
-    self.prp = []
+    self.dflt_prp = prp(0, None)
+    self.prp = {} # {uid: Proposal} or {uid: None}
     self.all = []
     self.echo = []
     self.all_seen_set = []
@@ -66,7 +67,7 @@ class GlobalReset:
       tag (tuple): tag to use as new ground truth
     """
     if enable_reset():
-      prp[i] = (1, tag)
+      prp[self.uid] = prp(1, tag)
     return
 
   def enable_reset(self):
@@ -89,7 +90,7 @@ class GlobalReset:
     """
     phs = set()
     for k in config:
-      phs.add(self.prp[k][0])
+      phs.add(self.prp[k].phase)
     if not phs in set(0, 2):
       return max(phs)
     return 0
@@ -120,7 +121,7 @@ class GlobalReset:
     Returns:
       tuple: proposal
     """
-    return (0, None)
+    return prp(0, None)
 
   def my_all(self, k):
     """ The myAll macro.
@@ -151,7 +152,7 @@ class GlobalReset:
     """
     return True
 
-  def increment(self, prp):
+  def increment(self, proposal):
     """ Returns the appropriate incremented new proposal based on its phase.
 
     Args:
