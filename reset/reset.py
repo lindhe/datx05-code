@@ -193,10 +193,13 @@ class GlobalReset:
   def proposal_set(self):
     """ Returns the set of all active proposals.
 
+    Set of proposed tags, if there is an l in config for which prp[l]=(2, *)
+
     Return:
-      list: list of all proposals
+      list: list of all proposals, or empty list
     """
-    return []
+    proposal_phases [self.prp[k].phase for k in config]
+    return [self.prp[k].tag for k in self.config if 2 in proposal_phases]
 
   def and_every(self, macro):
     """ Logical AND of every return value for macro[k] such that k is in config.
