@@ -41,7 +41,7 @@ class GlobalReset:
     self.dflt_prp = prp(0, None)
     self.prp = {} # {uid: Proposal} or {uid: None}
     self.all = []
-    self.echo = []
+    self.echo_answers = {}
     self.all_seen_processors = []
     self.register = register
     self.degrees = 6
