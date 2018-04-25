@@ -42,7 +42,7 @@ class GlobalReset:
     self.prp = {} # {uid: Proposal} or {uid: None}
     self.all = []
     self.echo = []
-    self.all_seen_set = []
+    self.all_seen_processors = []
     self.register = register
     self.degrees = 6
     while True:
@@ -55,9 +55,9 @@ class GlobalReset:
       if self.no_default_no_bot():
         for k in self.config:
           if (self.echo(k) and self.my_all(k)):
-            all_seen_set.append(k)
+            all_seen_processors.append(k)
         if self.all_seen():
-          (prp[uid], all_seen_set) = (self.increment(prp[uid]), [])
+          (prp[uid], all_seen_processors) = (self.increment(prp[uid]), [])
         if prp[uid].phase == 2:
           self.local_reset(prp[uid].tag)
 
@@ -143,7 +143,7 @@ class GlobalReset:
     """ The myAll macro.
 
     Returns:
-      bool: processor k is in all_seen_set or all[k]==True
+      bool: processor k is in all_seen_processors or all[k]==True
     """
     return True
 
@@ -183,7 +183,7 @@ class GlobalReset:
     """ Reports if everyone have seen my proposal.
 
     Returns:
-      bool: True if all is True and all active processors are in all_seen
+      bool: True if all is True and all active processors are in all_seen_processors
     """
     return True
 
