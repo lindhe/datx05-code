@@ -81,6 +81,8 @@ class GlobalReset:
 
   def prp_set(self, val):
     """ Sets prp[k] to val for each k in self.config. """
+    for k in self.config:
+      prp[k] = None
     return
 
   def mod_max(self):
@@ -104,7 +106,7 @@ class GlobalReset:
     Returns:
       int: the degree of prp[k]
     """
-    return 0
+    return 2*prp[k].phase + (1 if my_all(k) else 0)
 
   def corr_deg(self, k, l):
     """ Returns whether the degrees of prp[k] and prp[l] correlates.
