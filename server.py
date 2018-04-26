@@ -28,15 +28,16 @@ def get_uid():
                         )
     return hw_addr
 
-def main(my_ip, my_port, cfgfile):
+def read_cfgfile(my_ip, my_port, cfgfile):
     my_addr = ":".join([my_ip, my_port])
 
     config = configparser.ConfigParser()
     config.read(cfgfile)
+    nodes = list(config['Nodes'].values())
 
     my_id = 0
-    for node in config['Nodes']:
-        addr = config['Nodes'][node]
+    for node in nodes:
+        addr = node
         if (addr == my_addr):
             break
         my_id += 1
@@ -49,6 +50,11 @@ def main(my_ip, my_port, cfgfile):
     delta = int(config['General']['concurrent_clients'])
     queue_size = int(config['General']['queue_size'])
     gossip_freq = int(config['General']['gossip_freq'])
+    return [my_id, nbr_of_servers, f, e, base_location, max_clients,
+            delta, queue_size, gossip_freq, nodes]
+
+def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_clients,
+         delta, queue_size, gossip_freq, nodes):
     k = nbr_of_servers - 2*(f + e)
     if(k < 1):
         raise Exception("Coded elements less than 1")
@@ -65,8 +71,8 @@ def main(my_ip, my_port, cfgfile):
     m = gossip_obj.get_bytes()
 
     node_index = 0
-    for node in config['Nodes']:
-        ip, port = config['Nodes'][node].split(':')
+    for node in nodes:
+        ip, port = node.split(':')
         if node_index is not my_id:
             c = SenderChannel(node_index, get_uid(), 'gossip', g, ip, port, init_tx=m)
             loop.create_task(c.start())
@@ -78,6 +84,10 @@ def main(my_ip, my_port, cfgfile):
 
     loop.run_forever()
     loop.close()
+
+def main(my_ip, my_port, cfgfile):
+    parameters = read_cfgfile(my_ip, my_port, cfgfile)
+    start(my_ip, my_port, *parameters)
 
 if __name__ == '__main__':
     my_port = sys.argv[1]
