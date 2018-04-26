@@ -52,17 +52,19 @@ class GlobalReset:
       if self.transient_fault():
         self.prp_set(None)
       # Update all[i]:
-      (prp[uid], self.all[uid]) = (max_prp(), and_every(echo_no_all))
-      if (prp[uid] == None and self.all[uid]):
-        prp[uid] = self.dflt_prp
+      (self.prp[uid], self.all[uid]) = \
+          (self.max_prp(), self.and_every(self.echo_no_all))
+      if (self.prp[uid] == None and self.all[uid]):
+        self.prp[uid] = self.dflt_prp
       if self.no_default_no_bot():
         for k in self.config:
           if (self.echo(k) and self.my_all(k)):
-            all_seen_processors.add(k)
+            self.all_seen_processors.add(k)
         if self.all_seen():
-          (prp[uid], all_seen_processors) = (self.increment(prp[uid]), set())
-        if prp[uid].phase == 2:
-          self.local_reset(prp[uid].tag)
+          (self.prp[uid], self.all_seen_processors) = \
+              (self.increment(self.prp[uid]), set())
+        if self.prp[uid].phase == 2:
+          self.local_reset(self.prp[uid].tag)
 
   def propose(self, tag):
     """ Proposes to reset register to only hold the Record with tag tag.
