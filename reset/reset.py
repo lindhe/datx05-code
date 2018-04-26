@@ -27,6 +27,7 @@
 from register.register import Register
 from .proposal import Proposal as Prp
 from itertools import combinations
+import time
 
 
 class GlobalReset:
@@ -43,7 +44,7 @@ class GlobalReset:
     # Algorithm variables:
     self.config = config # List of uid
     self.prp = {} # {uid: Proposal} or {uid: None}
-    self.all = [] # [bool]
+    self.all = {} # {uid: bool}
     self.echo_answers = {} # {uid: (prp, msg_all)}
     self.all_seen_processors = set()
     # Algorithm constants:
@@ -57,11 +58,11 @@ class GlobalReset:
       if self.transient_fault():
         self.prp_set(None)
       # Update all[i]:
-      (self.prp[uid], self.all[uid]) = \
-          (self.max_prp(), self.and_every(self.echo_no_all))
+      self.all[uid] = self.and_every(self.echo_no_all)
       if (self.prp[uid] == None and self.all[uid]):
         self.prp[uid] = self.dflt_prp
       if self.no_default_no_bot():
+        self.prp[uid] = self.max_prp()
         for k in self.config:
           if (self.echo(k) and self.my_all(k)):
             self.all_seen_processors.add(k)
@@ -70,6 +71,7 @@ class GlobalReset:
               (self.increment(self.prp[uid]), set())
         if self.prp[uid].phase == 2:
           self.local_reset(self.prp[uid].tag)
+      time.sleep(1)
 
   def propose(self, tag):
     """ Proposes to reset register to only hold the Record with tag tag.
@@ -148,8 +150,12 @@ class GlobalReset:
     """
     prp_tags = []
     for k in self.config:
-      tags.append(self.prp[k].tag)
-      if ((self.degree(k) - self.degree(self.uid))%self.degrees not in set(0, 1)):
+      if self.prp[k]:
+        prp_tags.append(self.prp[k].tag)
+        if ((self.degree(k) - self.degree(self.uid))%self.degrees not in set([0, 1])):
+          return self.prp[self.uid]
+      else:
+        # If there was a None proposal, let's not progress
         return self.prp[self.uid]
     return Prp(self.mod_max(), max(prp_tags))
 
@@ -212,8 +218,11 @@ class GlobalReset:
     Return:
       list: list of all proposals, or empty list
     """
-    proposal_phases [self.prp[k].phase for k in config]
-    return [self.prp[k].tag for k in self.config if 2 in proposal_phases]
+    proposal_phases = [self.prp[k].phase if self.prp[k] else None for k in self.config]
+    if 2 in proposal_phases:
+      return set([self.prp[k].tag if self.prp[k] else None for k in self.config])
+    else:
+      return []
 
   def and_every(self, macro):
     """ Logical AND of every return value for macro[k] such that k is in config.
@@ -235,8 +244,15 @@ class GlobalReset:
     Returns:
       bool: True if there is a transient fault detected, False otherwise.
     """
+    # (∃pk ∈ config : prp[k] = ⊥)
+    is_bot_prp = [k for k in self.config if self.prp[k] == None]
+    # (prp[i] != {dfltPrp})
+    prp_other_than_dflt = self.prp[self.uid] != self.dflt_prp
+    if (is_bot_prp and prp_other_than_dflt):
+      return True
     # (∃pk : ((prp[k] =< 0, s >) ∧ (s != ⊥))
-    zero_s_not_bot = [self.prp[k] for k in self.config if self.prp[k][1]]
+    zero_s_not_bot = [self.prp[k] for k in self.config \
+        if self.prp[k] and self.prp[k].tag and self.prp[k].phase == 0]
     # (∃pk, pk' ∈ config : ¬corrDeg(k, k'))
     differing_deg = False
     for k in combinations(self.config, 2):
@@ -245,17 +261,13 @@ class GlobalReset:
     # {pk ∈ config : degree(i)+1 mod 6 = degree(k)}
     k_with_diff_deg = [k for k in self.config\
         if (self.degree(self.uid)+1 % self.degrees == self.degree(k))]
-    # (pk ∈ config : degree(i)+1 mod 6 = degree(k)} ⊆ allSeenProcessors)
-    close_deg_seen = set(k_with_diff_deg) <= self.all_seen_processors
-    # (∃pk ∈ config : prp[k] = ⊥)
-    is_bot_prp = [k for k in config if self.prp[k] == None]
-    # (prp[i] != {dfltPrp})
-    prp_other_than_dflt = self.prp[uid] != self.dflt_prp
+    # (k_with_diff_deg ⊆ allSeenProcessors)
+    close_deg_seen = set(k_with_diff_deg) <= self.all_seen_processors \
+        if k_with_diff_deg else False
     return zero_s_not_bot \
         or differing_deg \
         or close_deg_seen \
-        or (len(self.proposal_set()) > 1) \
-        or (is_bot_prp and prp_other_than_dflt)
+        or (len(self.proposal_set()) > 1)
 
   def no_default_no_bot(self):
     """ Checks that no proposal holds dfltPrp or None (bot).
