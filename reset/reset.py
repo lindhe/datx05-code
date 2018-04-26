@@ -42,7 +42,7 @@ class GlobalReset:
     self.config = config # List of uid
     self.prp = {} # {uid: Proposal} or {uid: None}
     self.all = [] # [bool]
-    self.echo_answers = {} # {uid: echo_msg}
+    self.echo_answers = {} # {uid: (prp, msg_all)}
     self.all_seen_processors = set()
     # Algorithm constants:
     self.dflt_prp = prp(0, None)
@@ -158,7 +158,7 @@ class GlobalReset:
     Return
       bool: True if my proposal is the echoed proposal from processor k
     """
-    return prp[self.uid] == self.echo_answers[k].prp
+    return prp[self.uid] == self.echo_answers[k][0]
 
   def echo(self, k):
     """ Checks if my proposal and my_all variable are echoed by processor k.
