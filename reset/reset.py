@@ -239,7 +239,8 @@ class GlobalReset:
       bool: True if no proposal is dfltPrp and no proposal is None. False
         otherwise.
     """
-    return False
+    phs = set([prp[k] for k in self.config])
+    return (not phs.issubset(set(self.dflt_prp))) and None not in phs
 
   def local_reset(self, tag):
     """ Reset the local environment to only hold the Record with tag tag.
