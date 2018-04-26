@@ -108,6 +108,20 @@ class Register:
         return self.t0
     return max(phase_tags)
 
+  def max_set(self, phases, amount):
+    """
+    returns the list of the 'amount' largest tag numbers with a phase in phases
+    """
+    S = self.register
+    phase_tags = []
+    for tag in S:
+      if S[tag].phase in phases:
+        phase_tags.append(tag)
+    if not phase_tags:
+        return []
+    phase_tags.sort(reverse=True)
+    return phase_tags[:amount]
+
   def tag_tuple(self):
     """ return the tripple with max_phase of pre, fin and FIN records respectively """
     max_all = self.max_phase(['pre', 'fin', 'FIN'])
