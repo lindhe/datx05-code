@@ -26,6 +26,8 @@
 
 from register.register import Register
 from proposal import Proposal as prp
+from itertools import combinations
+
 
 class GlobalReset:
   """ Handle global reset (wrap-around) procedure. """
@@ -230,7 +232,26 @@ class GlobalReset:
     Returns:
       bool: True if there is a transient fault detected, False otherwise.
     """
-    return False
+    # (∃pk : ((prp[k] =< 0, s >) ∧ (s != ⊥))
+    zero_s_not_bot = [self.prp[k] for k in self.config if self.prp[k][1]]
+    # (∃pk, pk' ∈ config : ¬corrDeg(k, k'))
+    differing_deg = False
+    for k in combinations(self.config, 2):
+      if not self.corr_deg(*k):
+        differing_deg = True
+    k_with_diff_deg = [k for k in config\
+        if (self.degree(self.uid)+1 % self.degrees == self.degree(k))]
+    # (pk ∈ config : degree(i)+1 mod 6 = degree(k)} ⊆ allSeenProcessors)
+    close_deg_seen = set(k_with_diff_deg) <= self.all_seen_processors
+    # (∃pk ∈ config : prp[k] = ⊥)
+    is_bot_prp = [k for k in config if self.prp[k] == None]
+    # (prp[i] != {dfltPrp})
+    prp_other_than_dflt = self.prp[uid] != self.dflt_prp
+    return zero_s_not_bot \
+        or differing_deg \
+        or close_deg_seen \
+        or (len(self.proposal_set()) > 1) \
+        or (is_bot_prp and prp_other_than_dflt)
 
   def no_default_no_bot(self):
     """ Checks that no proposal holds dfltPrp or None (bot).
