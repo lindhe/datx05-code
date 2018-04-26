@@ -37,7 +37,9 @@ class GlobalReset:
     """ Initialize the global reset procedure.
 
     Args:
+      uid (uid): the servers own id
       config (list): list of all servers in configuration
+      register (Register): the register to reset
     """
     self.uid = uid
     self.S = register
