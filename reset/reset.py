@@ -33,7 +33,7 @@ import time
 class GlobalReset:
   """ Handle global reset (wrap-around) procedure. """
 
-  def __init__(self, uid, config, register):
+  def __init__(self, uid, register, nbr_of_servers):
     """ Initialize the global reset procedure.
 
     Args:
@@ -43,8 +43,9 @@ class GlobalReset:
     """
     self.uid = uid
     self.S = register
+    self.n = nbr_of_servers
     # Algorithm variables:
-    self.config = config # List of uid
+    self.config = [uid] # List of uid
     self.prp = {} # {uid: Proposal} or {uid: None}
     self.all = {} # {uid: bool}
     self.echo_answers = {} # {uid: (prp, msg_all)}
@@ -53,31 +54,38 @@ class GlobalReset:
     self.dflt_prp = Prp(0, None)
     self.degrees = 6
 
+  def run(self, k, prp, msg_all, echo):
+    if k not in self.config:
+      self.config.append(k)
+    self.prp[k] = Prp(*prp)
+    self.echo_answers[k] = echo
+    self.all[k] = msg_all
+    print(f"############################## config is {self.config}")
+    if len(self.config) == self.n:
+      self.main()
+
   def main(self):
     # Main loop
     uid = self.uid
-    while True:
-      if self.transient_fault():
-        print("Transient fault detected!")
-        self.prp_set(None)
-      # Update all[i]:
-      self.all[uid] = self.and_every(self.echo_no_all)
-      if (self.prp[uid] == None and self.all[uid]):
-        print("Bot detected!")
-        self.prp[uid] = self.dflt_prp
-      if self.no_default_no_bot():
-        print(f"Found a proposal!: {self.prp}")
-        self.prp[uid] = self.max_prp()
-        for k in self.config:
-          if (self.echo(k) and self.my_all(k)):
-            self.all_seen_processors.add(k)
-        if self.all_seen():
-          (self.prp[uid], self.all_seen_processors) = \
-              (self.increment(self.prp[uid]), set())
-        if self.prp[uid].phase == 2:
-          self.local_reset(self.prp[uid].tag)
-      print("Main loop")
-      time.sleep(1)
+    if self.transient_fault():
+      print("Transient fault detected!")
+      self.prp_set(None)
+    # Update all[i]:
+    self.all[uid] = self.and_every(self.echo_no_all)
+    if (self.prp[uid] == None and self.all[uid]):
+      print("Bot detected!")
+      self.prp[uid] = self.dflt_prp
+    if self.no_default_no_bot():
+      print(f"Found a proposal!: {self.prp}")
+      self.prp[uid] = self.max_prp()
+      for k in self.config:
+        if (self.echo(k) and self.my_all(k)):
+          self.all_seen_processors.add(k)
+      if self.all_seen():
+        (self.prp[uid], self.all_seen_processors) = \
+            (self.increment(self.prp[uid]), set())
+      if self.prp[uid].phase == 2:
+        self.local_reset(self.prp[uid].tag)
 
   def propose(self, tag):
     """ Proposes to reset register to only hold the Record with tag tag.
