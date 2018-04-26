@@ -60,7 +60,8 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
         raise Exception("Coded elements less than 1")
     quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
 
-    server = Server(my_id, quorum_size, max_clients, delta, queue_size, storage_location="{}server{}/".format(base_location, my_id))
+    server = Server(my_id, quorum_size, max_clients, delta, queue_size,
+        nbr_of_servers, storage_location="{}server{}/".format(base_location, my_id))
     p = QuorumRecv(server)
     g = Gossip(server)
 

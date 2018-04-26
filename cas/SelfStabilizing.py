@@ -38,7 +38,7 @@ from itertools import combinations
 class Server:
   """ The event handlers for the server in Algorithm 2 """
 
-  def __init__(self, uid, quorum, max_clients, delta, queue_size, storage_location="./.storage/"):
+  def __init__(self, uid, quorum, max_clients, delta, queue_size, n, storage_location="./.storage/"):
     self.uid = uid
     self.inc_nbrs = deque(maxlen=queue_size)
     # Quorum size:
@@ -50,8 +50,7 @@ class Server:
     self.fin = {}
     self.FIN = {}
     ######### Wrap Around (Global Reset) #########
-    nbr_of_servers = 4
-    self.n = nbr_of_servers
+    self.n = n
     # Algorithm variables:
     self.dflt_prp = Prp(0, None)
     self.config = [uid] # List of uid
