@@ -68,7 +68,6 @@ class Register:
     """
     if tag == self.t0:
       return
-
     S = self.register
     if (tag in S) and S[tag].element and not element:
       w = S[tag].element
