@@ -80,6 +80,10 @@ class GlobalReset:
     Returns:
       bool: True if good to go, False otherwise
     """
+    for k in self.config:
+      if self.prp[k] == None \
+          or ((self.prp[k], self.all[k]) != (self.dflt_prp, True)):
+        return False
     return True
 
   def prp_set(self, val):
