@@ -115,7 +115,17 @@ class Server:
     await self.S.update_phase(t, None, d)
     return (t, None, d)
 
-  async def gossip(self, k, pre, fin, FIN, inc_nbrs):
+  async def gossip_departure(self):
+    tag_tuple = self.S.tag_tuple()
+    cntr = IncNbrHelper.to_list(self.inc_nbrs) if len(self.inc_nbrs) else None
+    prp = (1, None)
+    msg_all = False
+    echo = (prp, msg_all)
+    gossip_obj = GossipMessage(tag_tuple, cntr, prp, msg_all, echo)
+    data = gossip_obj.get_bytes()
+    return data
+
+  async def gossip_arrival(self, k, pre, fin, FIN, inc_nbrs):
     """ Reply to gossip arrival event, from pj's server to pi's server.
 
     Updates the class variables pre, fin and FIN to include the content of the
