@@ -45,7 +45,8 @@ def main(my_ip, my_port, cfgfile):
     f = int(config['General']['f'])
     e = int(config['General']['e'])
     base_location = config['General']['storage_location']
-    storage_size = int(config['General']['storage_size'])
+    max_clients = int(config['General']['max_clients'])
+    delta = int(config['General']['concurrent_clients'])
     queue_size = int(config['General']['queue_size'])
     gossip_freq = int(config['General']['gossip_freq'])
     k = nbr_of_servers - 2*(f + e)
@@ -53,7 +54,7 @@ def main(my_ip, my_port, cfgfile):
         raise Exception("Coded elements less than 1")
     quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
 
-    server = Server(my_id, quorum_size, storage_size, queue_size, storage_location="{}server{}/".format(base_location, my_id))
+    server = Server(my_id, quorum_size, max_clients, delta, queue_size, storage_location="{}server{}/".format(base_location, my_id))
     p = QuorumRecv(server)
     g = Gossip(server)
 

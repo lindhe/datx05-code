@@ -31,7 +31,7 @@ from .fileHelper import *
 class Register:
   """ Implementation of the register which stores recrods """
 
-  def __init__(self, storage_size, storage_location="./.storage/"):
+  def __init__(self, max_clients, delta, storage_location="./.storage/"):
     """ Initiates a register with no records.
     register is a dict of Record objects: {(tag, element, phase)}
     tag is a tuple of (seq, uid)
@@ -43,7 +43,8 @@ class Register:
     """
     self.register = {}
     self.t0 = (0, None)
-    self.storage_size = storage_size
+    self.max_clients = max_clients
+    self.delta = delta
     self.storage_location = storage_location
 
   def __repr__(self):
@@ -155,15 +156,19 @@ class Register:
   def relevant(self):
     """
     Removes all records from the register and storage
- that is not among the 'storage_size' most recent
+ that is not considered relevant
     """
+    write_query_set = self.max_set(['pre','fin','FIN'], 1)
+    read_query_set = self.max_set(['fin','FIN'], 1)
+    not_yet_fin_set = self.max_set(['pre','fin'], self.max_clients)
+    FIN_set = self.max_set(['FIN'], self.delta+1)
+    relevant = list(set().union(write_query_set, read_query_set, not_yet_fin_set, FIN_set))
+
     tags = list(self.register.keys())
-    tags.sort(reverse=True)
-    nbr_of_tags = range(len(tags))
-    for i in nbr_of_tags:
-      if (i >= self.storage_size):
-        filename = self.tag_to_filename(tags[i])
-        self.register.pop(tags[i], None)
+    for tag in tags:
+      if (tag not in relevant):
+        filename = self.tag_to_filename(tag)
+        self.register.pop(tag, None)
         delete_file(filename, path=self.storage_location)
 
   def tag_to_filename(self, tag):

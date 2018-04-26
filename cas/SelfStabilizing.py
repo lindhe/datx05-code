@@ -36,13 +36,13 @@ from register.register import Register
 class Server:
   """ The event handlers for the server in Algorithm 2 """
 
-  def __init__(self, uid, quorum, storage_size, queue_size, storage_location="./.storage/"):
+  def __init__(self, uid, quorum, max_clients, delta, queue_size, storage_location="./.storage/"):
     self.uid = uid
     self.inc_nbrs = deque(maxlen=queue_size)
     # Quorum size:
     self.quorum = quorum
     # Initialize with an empty register S
-    self.S = Register(storage_size, storage_location)
+    self.S = Register(max_clients, delta, storage_location)
     # Received gossip messages. Key is UID and value is tag
     self.pre = {}
     self.fin = {}

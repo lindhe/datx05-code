@@ -45,7 +45,8 @@ def main(filename, nbr_of_servers, f):
     config['General']['f'] = str(f)
     config['General']['e'] = '0'
     config['General']['storage_location'] = './.storage/'
-    config['General']['storage_size'] = '10'
+    config['General']['max_clients'] = '10'
+    config['General']['concurrent_clients'] = '5'
     config['General']['queue_size'] = '10'
     config['General']['gossip_freq'] = '1'
 
