@@ -40,7 +40,7 @@ class GlobalReset:
       config (list): list of all servers in configuration
     """
     self.uid = uid
-    self.register = register
+    self.S = register
     # Algorithm variables:
     self.config = config # List of uid
     self.prp = {} # {uid: Proposal} or {uid: None}
@@ -304,6 +304,6 @@ class GlobalReset:
     Args:
       tag (tuple): the record to keep.
     """
-    self.register.reset(tag)
-    print(self.register)
+    self.S.reset(tag)
+    print(self.S)
     return
