@@ -180,12 +180,13 @@ class Register:
     Args:
       tag (tuple): The tag to preserve.
     """
-    saved = self.register.pop(tag)
+    r = self.register.pop(tag)
+    element = r.element
     # Remove all other records, both from disk and from register:
-    for tag in self.register:
-      filename = self.tag_to_filename(tag)
+    for record in self.register:
+      filename = self.tag_to_filename(record)
       delete_file(filename, path=self.storage_location)
-    self.register = {tag: saved}
     # Update the sequence number:
-    self.register[tag].tag = (self.init_nbr, tag[uid])
+    new_tag = (self.init_nbr, tag[1])
+    self.register = {new_tag: Record(new_tag, element, 'FIN')}
     return
