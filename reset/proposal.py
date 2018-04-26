@@ -33,3 +33,12 @@ class Proposal:
 
   def __repr__(self):
     return repr( (self.phase, self.tag) )
+
+  def __eq__(self, other):
+    if other:
+      return self.phase == other.phase and self.tag == other.tag
+    else:
+      return False
+
+  def __hash__(self):
+    return hash( (self.tag, self.phase) )
