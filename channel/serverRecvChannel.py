@@ -69,6 +69,7 @@ class ServerRecvChannel:
         res = b''
         while (len(res) < msg_size):
             res += await self.loop.sock_recv(conn, self.chunks_size)
+            await asyncio.sleep(0)
         response = await self.check_msg(res)
         response_stream = io.BytesIO(response)
         stream = True
