@@ -67,8 +67,9 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
     loop = asyncio.get_event_loop()
     tag_tuple = server.get_tag_tuple()
     cntr = server.get_counter()
-    gossip_obj = GossipMessage(tag_tuple, cntr)
-    m = gossip_obj.get_bytes()
+    # gossip_obj = GossipMessage(tag_tuple, cntr)
+    # m = gossip_obj.get_bytes()
+    m=None
 
     node_index = 0
     for node in nodes:

@@ -50,16 +50,16 @@ class Server:
     self.fin = {}
     self.FIN = {}
     ######### Wrap Around (Global Reset) #########
-    nbr_of_servers = 2
+    nbr_of_servers = 4
     self.n = nbr_of_servers
     # Algorithm variables:
+    self.dflt_prp = Prp(0, None)
     self.config = [uid] # List of uid
-    self.prp = {} # {uid: Proposal} or {uid: None}
-    self.all = {} # {uid: bool}
-    self.echo_answers = {} # {uid: (prp, msg_all)}
+    self.prp = {uid: Prp(0, None)} # {uid: Proposal} or {uid: None}
+    self.all = {uid: False} # {uid: bool}
+    self.echo_answers = {uid: (self.dflt_prp, False)} # {uid: (prp, msg_all)}
     self.all_seen_processors = set()
     # Algorithm constants:
-    self.dflt_prp = Prp(0, None)
     self.degrees = 6
 
   def counter_query(self, sender):
@@ -129,12 +129,14 @@ class Server:
     await self.S.update_phase(t, None, d)
     return (t, None, d)
 
-  async def gossip_departure(self):
+  async def gossip_departure(self, k):
     tag_tuple = self.S.tag_tuple()
     cntr = IncNbrHelper.to_list(self.inc_nbrs) if len(self.inc_nbrs) else None
-    prp = (1, None)
-    msg_all = False
-    echo = (prp, msg_all)
+    prp = tuple(self.prp[self.uid]) if self.prp[self.uid] else None
+    msg_all = self.all[self.uid]
+    echo_prp = tuple(self.prp[k]) if k in self.prp else None
+    echo_all = self.all[k] if k in self.all else False
+    echo = (echo_prp, echo_all)
     gossip_obj = GossipMessage(tag_tuple, cntr, prp, msg_all, echo)
     data = gossip_obj.get_bytes()
     return data
@@ -169,7 +171,7 @@ class Server:
       implicitFinalized = [fin]
     self.FIN[i] = max( FIN, self.S.max_phase(['FIN']), *implicitFinalized )
     await self.S.update_phase(self.FIN[i], None, 'FIN')
-    
+    self.run(k, prp, msg_all, echo)
     # Update counter
     if inc_nbrs:
       IncNbrHelper.merge(self.inc_nbrs, inc_nbrs)
@@ -187,15 +189,21 @@ class Server:
   def run(self, k, prp, msg_all, echo):
     if k not in self.config:
       self.config.append(k)
-    self.prp[k] = Prp(*prp)
-    self.echo_answers[k] = echo
+    self.prp[k] = Prp(*prp) if prp else None
     self.all[k] = msg_all
-    print(f"############################## config is {self.config}")
+    print(f"{self.uid} 777777777777777############### prp is {self.prp}")
+    if echo[0]:
+      self.echo_answers[k] = (Prp(*echo[0]), echo[1])
+    else:
+      self.echo_answers[k] = (None, echo[1])
+    self.echo_answers[self.uid] = (self.prp[self.uid], self.all[self.uid])
+    print(f"{self.uid} ############################## config is {self.config}")
     if len(self.config) == self.n:
       self.main()
 
   def main(self):
     # Main loop
+    print("main reset thing")
     uid = self.uid
     if self.transient_fault():
       print("Transient fault detected!")
@@ -242,7 +250,7 @@ class Server:
   def prp_set(self, val):
     """ Sets prp[k] to val for each k in self.config. """
     for k in self.config:
-      self.prp[k] = None
+      self.prp[k] = val
     return
 
   def mod_max(self):
@@ -409,7 +417,7 @@ class Server:
     close_deg_seen = set(k_with_diff_deg) <= self.all_seen_processors \
         if k_with_diff_deg else False
     if zero_s_not_bot:
-      print("zero_s_not_bot")
+      print(f"{self.uid} zero_s_not_bot")
       return True
     elif differing_deg:
       print("differing_deg")

@@ -42,3 +42,7 @@ class Proposal:
 
   def __hash__(self):
     return hash( (self.tag, self.phase) )
+
+  def __iter__(self):
+    yield self.phase
+    yield self.tag
