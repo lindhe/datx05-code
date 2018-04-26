@@ -25,7 +25,7 @@
 # SOFTWARE.
 
 from register.register import Register
-from proposal import Proposal as prp
+from .proposal import Proposal as Prp
 from itertools import combinations
 
 
@@ -47,9 +47,12 @@ class GlobalReset:
     self.echo_answers = {} # {uid: (prp, msg_all)}
     self.all_seen_processors = set()
     # Algorithm constants:
-    self.dflt_prp = prp(0, None)
+    self.dflt_prp = Prp(0, None)
     self.degrees = 6
+
+  def main(self):
     # Main loop
+    uid = self.uid
     while True:
       if self.transient_fault():
         self.prp_set(None)
@@ -75,7 +78,7 @@ class GlobalReset:
       tag (tuple): tag to use as new ground truth
     """
     if enable_reset():
-      prp[self.uid] = prp(1, tag)
+      prp[self.uid] = Prp(1, tag)
     return
 
   def enable_reset(self):
@@ -93,7 +96,7 @@ class GlobalReset:
   def prp_set(self, val):
     """ Sets prp[k] to val for each k in self.config. """
     for k in self.config:
-      prp[k] = None
+      self.prp[k] = None
     return
 
   def mod_max(self):
@@ -105,7 +108,7 @@ class GlobalReset:
     phs = set()
     for k in self.config:
       phs.add(self.prp[k].phase)
-    if not phs in set(0, 2):
+    if not phs in set([0, 2]):
       return max(phs)
     return 0
 
@@ -117,7 +120,7 @@ class GlobalReset:
     Returns:
       int: the degree of prp[k]
     """
-    return 2*prp[k].phase + (1 if my_all(k) else 0)
+    return 2*self.prp[k].phase + (1 if self.my_all(k) else 0)
 
   def corr_deg(self, k, l):
     """ Returns whether the degrees of prp[k] and prp[l] correlates.
@@ -148,7 +151,7 @@ class GlobalReset:
       tags.append(self.prp[k].tag)
       if ((self.degree(k) - self.degree(self.uid))%self.degrees not in set(0, 1)):
         return self.prp[self.uid]
-    return prp(self.mod_max(), max(prp_tags))
+    return Prp(self.mod_max(), max(prp_tags))
 
   def my_all(self, k):
     """ The myAll macro.
@@ -166,7 +169,7 @@ class GlobalReset:
     Return
       bool: True if my proposal is the echoed proposal from processor k
     """
-    return prp[self.uid] == self.echo_answers[k][0]
+    return self.prp[self.uid] == self.echo_answers[k][0]
 
   def echo(self, k):
     """ Checks if my proposal and my_all variable are echoed by processor k.
@@ -177,7 +180,7 @@ class GlobalReset:
       bool: True if my proposal and my_all are what's echoed back by processor
         k, false otherwise
     """
-    return (self.prp[self.uid], self.my_all[self.uid]) == self.echo_answers[k]
+    return (self.prp[self.uid], self.my_all(self.uid)) == self.echo_answers[k]
 
   def increment(self, proposal):
     """ Returns the appropriate incremented new proposal based on its phase.
@@ -189,7 +192,7 @@ class GlobalReset:
       otherwise.
     """
     if proposal.phase == 1:
-      return prp(2, proposal.tag)
+      return Prp(2, proposal.tag)
     return self.dflt_prp
 
   def all_seen(self):
@@ -199,7 +202,7 @@ class GlobalReset:
       bool: True if all is True and all active processors are in all_seen_processors
     """
     return self.all[self.uid] \
-        and set(self.config) <= self.all_seen_processors | set(uid)
+        and set(self.config) <= self.all_seen_processors | set(self.uid)
 
   def proposal_set(self):
     """ Returns the set of all active proposals.
@@ -239,7 +242,8 @@ class GlobalReset:
     for k in combinations(self.config, 2):
       if not self.corr_deg(*k):
         differing_deg = True
-    k_with_diff_deg = [k for k in config\
+    # {pk ∈ config : degree(i)+1 mod 6 = degree(k)}
+    k_with_diff_deg = [k for k in self.config\
         if (self.degree(self.uid)+1 % self.degrees == self.degree(k))]
     # (pk ∈ config : degree(i)+1 mod 6 = degree(k)} ⊆ allSeenProcessors)
     close_deg_seen = set(k_with_diff_deg) <= self.all_seen_processors
@@ -260,8 +264,8 @@ class GlobalReset:
       bool: True if no proposal is dfltPrp and no proposal is None. False
         otherwise.
     """
-    phs = set([prp[k] for k in self.config])
-    return (not phs.issubset(set(self.dflt_prp))) and None not in phs
+    phs = set([self.prp[k] for k in self.config])
+    return (not phs.issubset(set([self.dflt_prp]))) and (None not in phs)
 
   def local_reset(self, tag):
     """ Reset the local environment to only hold the Record with tag tag.
