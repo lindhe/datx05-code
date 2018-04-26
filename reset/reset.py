@@ -56,12 +56,15 @@ class GlobalReset:
     uid = self.uid
     while True:
       if self.transient_fault():
+        print("Transient fault detected!")
         self.prp_set(None)
       # Update all[i]:
       self.all[uid] = self.and_every(self.echo_no_all)
       if (self.prp[uid] == None and self.all[uid]):
+        print("Bot detected!")
         self.prp[uid] = self.dflt_prp
       if self.no_default_no_bot():
+        print(f"Found a proposal!: {self.prp}")
         self.prp[uid] = self.max_prp()
         for k in self.config:
           if (self.echo(k) and self.my_all(k)):
@@ -71,6 +74,7 @@ class GlobalReset:
               (self.increment(self.prp[uid]), set())
         if self.prp[uid].phase == 2:
           self.local_reset(self.prp[uid].tag)
+      print("Main loop")
       time.sleep(1)
 
   def propose(self, tag):
@@ -264,6 +268,21 @@ class GlobalReset:
     # (k_with_diff_deg ⊆ allSeenProcessors)
     close_deg_seen = set(k_with_diff_deg) <= self.all_seen_processors \
         if k_with_diff_deg else False
+    if zero_s_not_bot:
+      print("zero_s_not_bot")
+      return True
+    elif differing_deg:
+      print("differing_deg")
+      return True
+    elif close_deg_seen:
+      print("close_deg_seen")
+      return True
+    elif (len(self.proposal_set()) > 1):
+      print("|proposalSet| > 1")
+      return True
+    else:
+      print("ok")
+      return False
     return zero_s_not_bot \
         or differing_deg \
         or close_deg_seen \
@@ -286,4 +305,5 @@ class GlobalReset:
       tag (tuple): the record to keep.
     """
     self.register.reset(tag)
+    print(self.register)
     return
