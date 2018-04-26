@@ -60,7 +60,8 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
         raise Exception("Coded elements less than 1")
     quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
 
-    server = Server(my_id, quorum_size, max_clients, delta, queue_size,
+    uid =  get_uid()
+    server = Server(uid, quorum_size, max_clients, delta, queue_size,
         nbr_of_servers, storage_location="{}server{}/".format(base_location, my_id))
     p = QuorumRecv(server)
     g = Gossip(server)
@@ -76,11 +77,11 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
     for node in nodes:
         ip, port = node.split(':')
         if node_index is not my_id:
-            c = SenderChannel(node_index, get_uid(), 'gossip', g, ip, port, init_tx=m)
+            c = SenderChannel(node_index, uid, 'gossip', g, ip, port, init_tx=m)
             loop.create_task(c.start())
         node_index += 1
 
-    s = ServerRecvChannel(p, g, my_port, gossip_freq=gossip_freq)
+    s = ServerRecvChannel(uid, p, g, my_port)
     loop.create_task(s.tcp_listen())
     loop.create_task(s.udp_listen())
 

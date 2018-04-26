@@ -9,12 +9,13 @@ from .UdpSender import UdpSender
 class ServerRecvChannel:
     """ Creates a server recv channel for pingpong and gossip"""
 
-    def __init__(self, callback_obj_pp, callback_obj_gossip, port,
+    def __init__(self, uid, callback_obj_pp, callback_obj_gossip, port,
                  gossip_freq=1, chunks_size=1024):
         """
         Initialize callbacks, parameters and create tcp/udp sockets
         """
 
+        self.uid = uid.encode()
         self.cb_obj_pp = callback_obj_pp
         self.cb_obj_gossip = callback_obj_gossip
         self.port = port
@@ -102,7 +103,7 @@ class ServerRecvChannel:
 
         if(self.tokens[sender] != msg_cntr):
             self.tokens[sender] = msg_cntr
-            token = struct.pack("ii", msg_type,self.tokens[sender])
+            token = struct.pack("ii17s", msg_type,self.tokens[sender], self.uid)
             if(msg_type == 0):
                 if msg:
                     new_msg = await self.cb_obj_pp.arrival(sender, msg)
@@ -115,7 +116,7 @@ class ServerRecvChannel:
                 await asyncio.sleep(self.gsp_freq)
         else:
             print("NO TOKEN ARRIVAL")
-            token = struct.pack("ii", msg_type,self.tokens[sender])
+            token = struct.pack("ii17s", msg_type,self.tokens[sender], self.uid)
             response = token
 
         return response
