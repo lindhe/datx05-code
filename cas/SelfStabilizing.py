@@ -125,7 +125,7 @@ class Server:
     data = gossip_obj.get_bytes()
     return data
 
-  async def gossip_arrival(self, k, pre, fin, FIN, inc_nbrs):
+  async def gossip_arrival(self, k, pre, fin, FIN, prp, msg_all, echo, inc_nbrs):
     """ Reply to gossip arrival event, from pj's server to pi's server.
 
     Updates the class variables pre, fin and FIN to include the content of the
