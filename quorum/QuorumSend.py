@@ -41,7 +41,8 @@ class QuorumSend:
                (msg.get_tag() == None or
                msg.get_label() == 'qry' or
                (msg.get_label() != 'qry' and
-               (msg.get_tag() == msg.get_req_tag()
+               (msg.get_tag() == msg.get_req_tag() and (
+                msg.get_label() == pingTx.get_label())
               )))):
                 self.pongRx[server_id] = msg
                 if __debug__:
