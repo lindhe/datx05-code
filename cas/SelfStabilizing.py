@@ -31,6 +31,7 @@ from channel.GossipProtocol import GossipMessage
 from channel.ppProtocol import PingPongMessage
 from register.record import Record
 from register.register import Register
+from .proposal import Proposal as Prp
 
 
 class Server:
