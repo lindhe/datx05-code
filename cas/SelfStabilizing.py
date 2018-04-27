@@ -133,7 +133,7 @@ class Server:
     cntr = IncNbrHelper.to_list(self.inc_nbrs) if len(self.inc_nbrs) else None
     prp = tuple(self.prp[self.uid]) if self.prp[self.uid] else None
     msg_all = self.all[self.uid]
-    echo_prp = tuple(self.prp[k]) if k in self.prp else None
+    echo_prp = tuple(self.prp[k]) if k in self.prp and self.prp[k] else None
     echo_all = self.all[k] if k in self.all else False
     echo = (echo_prp, echo_all)
     gossip_obj = GossipMessage(tag_tuple, cntr, prp, msg_all, echo)
