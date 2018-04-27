@@ -40,6 +40,7 @@ class Server:
 
   def __init__(self, uid, quorum, max_clients, delta, queue_size, n, storage_location="./.storage/"):
     self.uid = uid
+    self.t_top = 3
     self.inc_nbrs = deque(maxlen=queue_size)
     # Quorum size:
     self.quorum = quorum
@@ -88,7 +89,11 @@ class Server:
     Returns:
       tuple (t, None, 'qry') where t is max_phase of ['pre', 'fin', 'FIN']
     """
-    return (self.S.max_phase(['pre', 'fin', 'FIN']), None, 'qry')
+    max_tag = self.S.max_phase(['pre', 'fin', 'FIN'])
+    if max_tag[0] >= self.t_top:
+        return None
+    else:
+        return (max_tag, None, 'qry')
 
   async def pre_write(self, t, w):
     """ Reply to pre-write arrival event, from pj's writer to pi's server.
@@ -170,12 +175,37 @@ class Server:
       implicitFinalized = [fin]
     self.FIN[i] = max( FIN, self.S.max_phase(['FIN']), *implicitFinalized )
     await self.S.update_phase(self.FIN[i], None, 'FIN')
-    self.run(k, prp, msg_all, echo)
+    
+
     # Update counter
     if inc_nbrs:
       IncNbrHelper.merge(self.inc_nbrs, inc_nbrs)
-    # Remove not relevant records
-    self.S.relevant()
+
+    #Check for max tag
+    max_tag = self.S.max_phase(['pre', 'fin', 'FIN'])
+    if (max_tag[0] >= self.t_top and self.stabilized()):
+      self.propose(max_tag)
+    else:
+      # Remove not relevant records
+      self.S.relevant()
+
+    # Run wrap around algorithm
+    self.run(k, prp, msg_all, echo)
+
+  def stabilized(self):
+    max_tuple = self.S.tag_tuple()
+    max_pre = max_tuple[0]
+    max_fin = max_tuple[1]
+    max_FIN = max_tuple[2]
+    tag_tuple_stab = (max_fin == max_FIN) and (max_pre >= max_fin)
+    pre_set = set(self.pre.values())
+    pre_stab = (len(pre_set) == 1) and (max_pre in pre_set)
+    fin_set = set(self.fin.values())
+    fin_stab = (len(fin_set) == 1) and (max_fin in fin_set)
+    FIN_set = set(self.FIN.values())
+    FIN_stab = (len(FIN_set) == 1) and (max_FIN in FIN_set)
+    return tag_tuple_stab and pre_stab and fin_stab and FIN_stab
+
 
   def get_tag_tuple(self):
     return self.S.tag_tuple()

@@ -55,7 +55,7 @@ async def write_file(data, filename, path=default_path):
   try:
     async with aiofiles.open(filepath, 'wb') as f:
       await f.write(data)
-    return filepath
+    return filename
   except OSError as e:
     print(f"Error reading file {filepath}: {e}", file=sys.stderr)
 
