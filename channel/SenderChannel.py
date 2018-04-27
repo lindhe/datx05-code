@@ -80,7 +80,10 @@ arrival construct a new message and send it.
             if __debug__:
                 print("Token arrival: cntr is {}".format(msg_cntr))
             if(msg_cntr >= counter):
-                self.tx, self.udp = await self.cb_obj.departure(sender, msg_data)
+                if self.ch_type:
+                    self.tx, self.udp = await self.cb_obj.departure(sender, msg_data)
+                else:
+                    self.tx, self.udp = await self.cb_obj.departure(self.sid, msg_data)
                 counter = msg_cntr+1
                 token = struct.pack("ii17s", self.ch_type, counter, self.uid)
                 msg = token+self.tx if self.tx else token
