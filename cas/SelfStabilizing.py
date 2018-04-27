@@ -230,9 +230,8 @@ class Server:
     Args:
       tag (tuple): tag to use as new ground truth
     """
-    if enable_reset():
-      prp[self.uid] = Prp(1, tag)
-    return
+    if self.enable_reset():
+      self.prp[self.uid] = Prp(1, tag)
 
   def enable_reset(self):
     """ Blocks proposal if ongoing proposal.
