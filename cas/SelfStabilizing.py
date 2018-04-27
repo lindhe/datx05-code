@@ -261,7 +261,7 @@ class Server:
     phs = set()
     for k in self.config:
       phs.add(self.prp[k].phase)
-    if not phs in set([0, 2]):
+    if not phs.issubset(set([0, 2])):
       return max(phs)
     return 0
 
