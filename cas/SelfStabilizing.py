@@ -258,12 +258,9 @@ class Server:
     Returns:
       int: a phase represented by 0, 1 or 2
     """
-    phs = set()
-    for k in self.config:
-      phs.add(self.prp[k].phase)
-    if not phs.issubset(set([0, 2])):
-      return max(phs)
-    return 0
+    i = self.uid
+    phs = set([ self.prp[k].phase for k in self.prp if self.prp[k] ])
+    return max(phs) if 1 in phs else self.prp[i].phase
 
   def degree(self, k):
     """ Returns the degree of proposal k.
