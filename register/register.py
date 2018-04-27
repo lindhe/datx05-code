@@ -46,7 +46,7 @@ class Register:
     self.max_clients = max_clients
     self.delta = delta
     self.storage_location = storage_location
-    self.init_nbr = 0
+    self.init_nbr = 1
 
   def __repr__(self):
     """ String representation prints the entire register dict """
@@ -180,13 +180,13 @@ class Register:
     Args:
       tag (tuple): The tag to preserve.
     """
-    r = self.register.pop(tag)
-    element = r.element
-    # Remove all other records, both from disk and from register:
-    for record in self.register:
-      filename = self.tag_to_filename(record)
-      delete_file(filename, path=self.storage_location)
-    # Update the sequence number:
-    new_tag = (self.init_nbr, tag[1])
-    self.register = {new_tag: Record(new_tag, element, 'FIN')}
-    return
+    if tag in self.register:
+      r = self.register.pop(tag)
+      element = r.element
+      # Remove all other records, both from disk and from register:
+      for record in self.register:
+        filename = self.tag_to_filename(record)
+        delete_file(filename, path=self.storage_location)
+      # Update the sequence number:
+      new_tag = (self.init_nbr, tag[1])
+      self.register = {new_tag: Record(new_tag, element, 'FIN')}
