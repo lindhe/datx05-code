@@ -301,15 +301,16 @@ class Server:
     Returns:
       tuple: proposal
     """
+    i = self.uid
     prp_tags = []
     for k in self.config:
       if self.prp[k]:
         prp_tags.append(self.prp[k].tag)
-        if ((self.degree(k) - self.degree(self.uid))%self.degrees not in set([0, 1])):
-          return self.prp[self.uid]
+        if ((self.degree(k) - self.degree(i))%self.degrees not in set([0, 1])):
+          return self.prp[i]
       else:
         # If there was a None proposal, let's not progress
-        return self.prp[self.uid]
+        return self.prp[i]
     return Prp(self.mod_max(), max(prp_tags))
 
   def my_all(self, k):
