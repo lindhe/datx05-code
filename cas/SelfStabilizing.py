@@ -442,8 +442,8 @@ class Server:
       bool: True if no proposal is dfltPrp and no proposal is None. False
         otherwise.
     """
-    phs = set([self.prp[k] for k in self.config])
-    return (not phs.issubset(set([self.dflt_prp]))) and (None not in phs)
+    prps = set([self.prp[k] for k in self.config])
+    return (not prps.issubset(set([self.dflt_prp]))) and (None not in prps)
 
   def local_reset(self, tag):
     """ Reset the local environment to only hold the Record with tag tag.
