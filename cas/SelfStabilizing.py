@@ -443,7 +443,7 @@ class Server:
         otherwise.
     """
     prps = set([self.prp[k] for k in self.config])
-    return (not prps.issubset(set([self.dflt_prp]))) and (None not in prps)
+    return ( prps != set([self.dflt_prp]) ) and (None not in prps)
 
   def local_reset(self, tag):
     """ Reset the local environment to only hold the Record with tag tag.
