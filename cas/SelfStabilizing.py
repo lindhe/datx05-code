@@ -273,6 +273,8 @@ class Server:
     Returns:
       int: the degree of prp[k]
     """
+    if not self.prp[k]:
+      return 0
     return 2*self.prp[k].phase + (1 if self.my_all(k) else 0)
 
   def corr_deg(self, k, l):
