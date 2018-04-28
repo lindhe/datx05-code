@@ -313,10 +313,13 @@ class Server:
     """
     a = self.degree(k)
     b = self.degree(l)
-    correlating_degrees = set()
+    correlating_degrees = []
     for i in range(self.degrees):
-      correlating_degrees |= set([ (i, i), (i, (i+1)%self.degrees) ])
-    return tuple(sorted((a, b))) in correlating_degrees
+      correlating_degrees.append(set([i, i]))
+      correlating_degrees.append(set([i, (i+1)%self.degrees]))
+    if not set([a, b]) in correlating_degrees:
+        raise Exception(f"{a} {b} {correlating_degrees}\n {self.prp} {self.all}")
+    return set([a, b]) in correlating_degrees
 
   def max_prp(self):
     """ Returns the maximal proposal.
@@ -331,7 +334,8 @@ class Server:
     prp_tags = []
     for k in self.config:
       if self.prp[k]:
-        prp_tags.append(self.prp[k].tag)
+        if self.prp[k].tag:
+            prp_tags.append(self.prp[k].tag)
         if ((self.degree(k) - self.degree(i))%self.degrees not in set([0, 1])):
           return self.prp[i]
       else:
