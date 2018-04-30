@@ -137,9 +137,9 @@ class Server:
     tag_tuple = self.S.tag_tuple()
     cntr = IncNbrHelper.to_list(self.inc_nbrs) if len(self.inc_nbrs) else None
     prp = tuple(self.prp[self.uid]) if self.prp[self.uid] else None
-    msg_all = self.my_all(self.uid)
+    msg_all = self.all[self.uid]
     echo_prp = tuple(self.prp[k]) if k in self.prp and self.prp[k] else None
-    echo_all = self.my_all(k) if k in self.all else False
+    echo_all = self.all[k] if k in self.all else False
     echo = (echo_prp, echo_all)
     gossip_obj = GossipMessage(tag_tuple, cntr, prp, msg_all, echo)
     data = gossip_obj.get_bytes()
@@ -248,7 +248,7 @@ class Server:
       self.prp[uid] = self.max_prp()
       for k in self.config:
         if k != self.uid:
-          if (self.echo(k) and self.my_all(k)):
+          if (self.echo(k) and self.all[k]):
             self.all_seen_processors.add(k)
       if self.all_seen():
         (self.prp[uid], self.all_seen_processors) = \
@@ -303,7 +303,7 @@ class Server:
     """
     if not self.prp[k]:
       return 0
-    return 2*self.prp[k].phase + (1 if self.my_all(k) else 0)
+    return 2*self.prp[k].phase + (1 if self.all[k] else 0)
 
   def corr_deg(self, k, l):
     """ Returns whether the degrees of prp[k] and prp[l] correlates.
@@ -345,14 +345,6 @@ class Server:
         return self.prp[i]
     return Prp(self.mod_max(), max(prp_tags))
 
-  def my_all(self, k):
-    """ The myAll macro.
-
-    Returns:
-      bool: processor k is in all_seen_processors or all[k]==True
-    """
-    return k in (self.all_seen_processors | set([self.uid])) or self.all[k]
-
   def echo_no_all(self, k):
     """ Checks the echoed proposal from processor k.
 
@@ -364,15 +356,15 @@ class Server:
     return self.prp[self.uid] == self.echo_answers[k][0]
 
   def echo(self, k):
-    """ Checks if my proposal and my_all variable are echoed by processor k.
+    """ Checks if my proposal and all[] variable are echoed by processor k.
 
     Args:
       k (uid): the processor which echo to check
     Returns:
-      bool: True if my proposal and my_all are what's echoed back by processor
+      bool: True if my proposal and all[] are what's echoed back by processor
         k, false otherwise
     """
-    return (self.prp[self.uid], self.my_all(self.uid)) == self.echo_answers[k]
+    return (self.prp[self.uid], self.all[self.uid]) == self.echo_answers[k]
 
   def increment(self, proposal):
     """ Returns the appropriate incremented new proposal based on its phase.
