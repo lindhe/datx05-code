@@ -61,8 +61,6 @@ class Server:
     self.all = {self.uid: False} # {uid: bool}
     self.echo_answers = {} # {uid: (prp, msg_all)}
     self.all_seen_processors = set()
-    # Algorithm constants:
-    self.degrees = 6
 
   def counter_query(self, sender):
     """ Reply to queries with current counter value """
@@ -177,12 +175,9 @@ class Server:
       implicitFinalized = [fin]
     self.FIN[i] = max( FIN, self.S.max_phase(['FIN']), *implicitFinalized )
     await self.S.update_phase(self.FIN[i], None, 'FIN')
-    
-
     # Update counter
     if inc_nbrs:
       IncNbrHelper.merge(self.inc_nbrs, inc_nbrs)
-
     #Check for max tag
     max_tag = self.S.max_phase(['pre', 'fin', 'FIN'])
     if (max_tag[0] >= self.t_top and self.stabilized()):
@@ -190,7 +185,6 @@ class Server:
     else:
       # Remove not relevant records
       self.S.relevant()
-
     # Run wrap around algorithm
     self.run(k, prp, msg_all, echo)
 
@@ -322,9 +316,9 @@ class Server:
     a = self.degree(k)
     b = self.degree(l)
     correlating_degrees = []
-    for i in range(self.degrees):
+    for i in range(6):
       correlating_degrees.append(set([i, i]))
-      correlating_degrees.append(set([i, (i+1)%self.degrees]))
+      correlating_degrees.append(set([i, (i+1)%6]))
     if not set([a, b]) in correlating_degrees:
         raise Exception(f"{a} {b} {correlating_degrees}\n {self.prp} {self.all}")
     return set([a, b]) in correlating_degrees
@@ -344,7 +338,7 @@ class Server:
       if self.prp[k]:
         if self.prp[k].tag:
             prp_tags.append(self.prp[k].tag)
-        if ((self.degree(k) - self.degree(i))%self.degrees not in set([0, 1])):
+        if ((self.degree(k) - self.degree(i))%6 not in set([0, 1])):
           return self.prp[i]
       else:
         # If there was a None proposal, let's not progress
@@ -451,9 +445,9 @@ class Server:
     for k in combinations(self.config, 2):
       if not self.corr_deg(*k):
         differing_deg = True
-    # {pk ∈ config : degree(i)+1 mod 6 = degree(k)}
+    # {pk ∈ config : prp[i].phase+1 mod3 = prp[k]}
     k_with_diff_deg = [k for k in self.config\
-        if (self.degree(self.uid)+1 % self.degrees == self.degree(k))]
+        if (self.prp[self.uid].phase+1%3 == self.prp[k].phase)]
     # (k_with_diff_deg ⊆ allSeenProcessors)
     close_deg_seen = set(k_with_diff_deg) <= \
         (self.all_seen_processors | set([self.uid])) \
@@ -502,4 +496,3 @@ class Server:
     self.S.reset(tag)
     if self.verbose:
       print(self.S)
-    return
