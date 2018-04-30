@@ -225,7 +225,6 @@ class Server:
       self.echo_answers[k] = (Prp(*echo[0]), echo[1])
     else:
       self.echo_answers[k] = (None, echo[1])
-    self.echo_answers[self.uid] = (self.prp[self.uid], self.all[self.uid])
     print(f"{self.uid} ############################## config is {self.config}")
     if len(self.config) == self.n:
       self.main()
@@ -246,8 +245,9 @@ class Server:
       print(f"Found a proposal!: {self.prp}")
       self.prp[uid] = self.max_prp()
       for k in self.config:
-        if (self.echo(k) and self.my_all(k)):
-          self.all_seen_processors.add(k)
+        if k != self.uid:
+          if (self.echo(k) and self.my_all(k)):
+            self.all_seen_processors.add(k)
       if self.all_seen():
         (self.prp[uid], self.all_seen_processors) = \
             (self.increment(self.prp[uid]), set())
@@ -349,7 +349,7 @@ class Server:
     Returns:
       bool: processor k is in all_seen_processors or all[k]==True
     """
-    return k in self.all_seen_processors or self.all[k]
+    return k in (self.all_seen_processors | set([self.uid])) or self.all[k]
 
   def echo_no_all(self, k):
     """ Checks the echoed proposal from processor k.
@@ -418,8 +418,9 @@ class Server:
       bool: True if all macro[k]==True, False otherwise.
     """
     for k in self.config:
-      if not macro(k):
-        return False
+      if k != self.uid:
+        if not macro(k):
+          return False
     return True
 
   def transient_fault(self):
@@ -446,7 +447,8 @@ class Server:
     k_with_diff_deg = [k for k in self.config\
         if (self.degree(self.uid)+1 % self.degrees == self.degree(k))]
     # (k_with_diff_deg ⊆ allSeenProcessors)
-    close_deg_seen = set(k_with_diff_deg) <= self.all_seen_processors \
+    close_deg_seen = set(k_with_diff_deg) <= \
+        (self.all_seen_processors | set([self.uid])) \
         if k_with_diff_deg else False
     if zero_s_not_bot:
       print(f"{self.uid} zero_s_not_bot")
