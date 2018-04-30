@@ -59,7 +59,7 @@ class Server:
     self.config = [self.uid] # List of uid
     self.prp = {self.uid: Prp(0, None)} # {uid: Proposal} or {uid: None}
     self.all = {self.uid: False} # {uid: bool}
-    self.echo_answers = {self.uid: (self.dflt_prp, False)} # {uid: (prp, msg_all)}
+    self.echo_answers = {} # {uid: (prp, msg_all)}
     self.all_seen_processors = set()
     # Algorithm constants:
     self.degrees = 6
