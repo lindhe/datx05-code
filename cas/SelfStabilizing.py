@@ -404,7 +404,7 @@ class Server:
     """
     proposal_phases = [self.prp[k].phase if self.prp[k] else None for k in self.config]
     if 2 in proposal_phases:
-      return set([self.prp[k].tag if self.prp[k] and self.prp[k].tag for k in self.config])
+      return set([self.prp[k].tag for k in self.config if self.prp[k] and self.prp[k].tag ])
     else:
       return []
 
