@@ -54,7 +54,7 @@ def read_cfgfile(my_ip, my_port, cfgfile):
             delta, queue_size, gossip_freq, nodes]
 
 def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_clients,
-         delta, queue_size, gossip_freq, nodes):
+         delta, queue_size, gossip_freq, nodes, verbose=False):
     k = nbr_of_servers - 2*(f + e)
     if(k < 1):
         raise Exception("Coded elements less than 1")
@@ -62,7 +62,8 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
 
     uid =  get_uid()
     server = Server(uid, quorum_size, max_clients, delta, queue_size,
-        nbr_of_servers, storage_location="{}server{}/".format(base_location, my_id))
+        nbr_of_servers, storage_location="{}server{}/".format(base_location,
+          my_id), verbose=verbose)
     p = QuorumRecv(server)
     g = Gossip(server)
 
@@ -88,9 +89,9 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
     loop.run_forever()
     loop.close()
 
-def main(my_ip, my_port, cfgfile):
+def main(my_ip, my_port, cfgfile, verbose=False):
     parameters = read_cfgfile(my_ip, my_port, cfgfile)
-    start(my_ip, my_port, *parameters)
+    start(my_ip, my_port, *parameters, verbose)
 
 if __name__ == '__main__':
     my_port = sys.argv[1]

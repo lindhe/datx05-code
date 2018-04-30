@@ -38,7 +38,9 @@ from itertools import combinations
 class Server:
   """ The event handlers for the server in Algorithm 2 """
 
-  def __init__(self, uid, quorum, max_clients, delta, queue_size, n, storage_location="./.storage/"):
+  def __init__(self, uid, quorum, max_clients, delta, queue_size, n,
+      storage_location="./.storage/", verbose=False):
+    self.verbose = verbose
     self.uid = uid.encode()
     self.t_top = 3
     self.inc_nbrs = deque(maxlen=queue_size)
@@ -206,7 +208,6 @@ class Server:
     FIN_stab = (len(FIN_set) == 1) and (max_FIN in FIN_set)
     return tag_tuple_stab and pre_stab and fin_stab and FIN_stab
 
-
   def get_tag_tuple(self):
     return self.S.tag_tuple()
 
@@ -220,29 +221,36 @@ class Server:
       self.config.append(k)
     self.prp[k] = Prp(*prp) if prp else None
     self.all[k] = msg_all
-    print(f"{self.uid} 777777777777777############### prp is {self.prp}")
+    if self.verbose:
+      print(f"{self.uid} 777777777777777############### prp is {self.prp}")
     if echo[0]:
       self.echo_answers[k] = (Prp(*echo[0]), echo[1])
     else:
       self.echo_answers[k] = (None, echo[1])
-    print(f"{self.uid} ############################## config is {self.config}")
+    if self.verbose:
+      print(f"{self.uid} ############################## config is {self.config}")
     if len(self.config) == self.n:
+      self.propose((1, (3, 'a')))
       self.main()
 
   def main(self):
     # Main loop
-    print("main reset thing")
+    if self.verbose:
+      print("main reset thing")
     uid = self.uid
     if self.transient_fault():
-      print("Transient fault detected!")
+      if self.verbose:
+        print("Transient fault detected!")
       self.prp_set(None)
     # Update all[i]:
     self.all[uid] = self.and_every(self.echo_no_all)
     if (self.prp[uid] == None and self.all[uid]):
-      print("Bot detected!")
+      if self.verbose:
+        print("Bot detected!")
       self.prp[uid] = self.dflt_prp
     if self.no_default_no_bot():
-      print(f"Found a proposal!: {self.prp}")
+      if self.verbose:
+        print(f"Found a proposal!: {self.prp}")
       self.prp[uid] = self.max_prp()
       for k in self.config:
         if k != self.uid:
@@ -451,19 +459,24 @@ class Server:
         (self.all_seen_processors | set([self.uid])) \
         if k_with_diff_deg else False
     if zero_s_not_bot:
-      print(f"{self.uid} zero_s_not_bot")
+      if self.verbose:
+        print(f"{self.uid} zero_s_not_bot")
       return True
     elif differing_deg:
-      print("differing_deg")
+      if self.verbose:
+        print("differing_deg")
       return True
     elif close_deg_seen:
-      print("close_deg_seen")
+      if self.verbose:
+        print("close_deg_seen")
       return True
     elif (len(self.proposal_set()) > 1):
-      print("|proposalSet| > 1")
+      if self.verbose:
+        print("|proposalSet| > 1")
       return True
     else:
-      print("ok")
+      if self.verbose:
+        print("ok")
       return False
     return zero_s_not_bot \
         or differing_deg \
@@ -487,5 +500,6 @@ class Server:
       tag (tuple): the record to keep.
     """
     self.S.reset(tag)
-    print(self.S)
+    if self.verbose:
+      print(self.S)
     return
