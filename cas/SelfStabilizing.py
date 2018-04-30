@@ -375,9 +375,16 @@ class Server:
       tuple: Proposal which is (2, prp) if prp.phase == 1, or self.dflt_prp
       otherwise.
     """
+    i = self.uid
     if proposal.phase == 1:
-      return Prp(2, proposal.tag)
-    return self.dflt_prp
+      p = Prp(2, proposal.tag)
+      self.all[i] = False
+    elif proposal.phase == 2:
+      p = self.dflt_prp
+      self.all[i] = False
+    else:
+      p = self.prp[i]
+    return p
 
   def all_seen(self):
     """ Reports if everyone have seen my proposal.
