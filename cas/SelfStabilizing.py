@@ -288,7 +288,7 @@ class Server:
       int: a phase represented by 0, 1 or 2
     """
     i = self.uid
-    phs = set([ self.prp[k].phase for k in self.prp if self.prp[k] ])
+    phs = set([ self.prp[k].phase for k in self.config if self.prp[k] ])
     return max(phs) if 1 in phs else self.prp[i].phase
 
   def degree(self, k):
@@ -392,10 +392,10 @@ class Server:
       bool: True if all is True and all active processors are in all_seen_processors
     """
     return self.all[self.uid] \
-        and set(self.config) <= self.all_seen_processors | set(self.uid)
+        and set(self.config) <= self.all_seen_processors | set([self.uid])
 
   def proposal_set(self):
-    """ Returns the set of all active proposals.
+    """ If anyone is in phase 2, collect all non-bot proposals.
 
     Set of proposed tags, if there is an l in config for which prp[l]=(2, *)
 
@@ -404,7 +404,7 @@ class Server:
     """
     proposal_phases = [self.prp[k].phase if self.prp[k] else None for k in self.config]
     if 2 in proposal_phases:
-      return set([self.prp[k].tag if self.prp[k] else None for k in self.config])
+      return set([self.prp[k].tag if self.prp[k] and self.prp[k].tag for k in self.config])
     else:
       return []
 
