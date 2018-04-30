@@ -39,7 +39,7 @@ class Server:
   """ The event handlers for the server in Algorithm 2 """
 
   def __init__(self, uid, quorum, max_clients, delta, queue_size, n, storage_location="./.storage/"):
-    self.uid = uid
+    self.uid = uid.encode()
     self.t_top = 3
     self.inc_nbrs = deque(maxlen=queue_size)
     # Quorum size:
@@ -54,10 +54,10 @@ class Server:
     self.n = n
     # Algorithm variables:
     self.dflt_prp = Prp(0, None)
-    self.config = [uid] # List of uid
-    self.prp = {uid: Prp(0, None)} # {uid: Proposal} or {uid: None}
-    self.all = {uid: False} # {uid: bool}
-    self.echo_answers = {uid: (self.dflt_prp, False)} # {uid: (prp, msg_all)}
+    self.config = [self.uid] # List of uid
+    self.prp = {self.uid: Prp(0, None)} # {uid: Proposal} or {uid: None}
+    self.all = {self.uid: False} # {uid: bool}
+    self.echo_answers = {self.uid: (self.dflt_prp, False)} # {uid: (prp, msg_all)}
     self.all_seen_processors = set()
     # Algorithm constants:
     self.degrees = 6
