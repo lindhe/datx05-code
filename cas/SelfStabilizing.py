@@ -229,6 +229,7 @@ class Server:
 
   def main(self):
     # Main loop
+    old_deg = 0
     if self.verbose:
       print("main reset thing")
     uid = self.uid
@@ -262,8 +263,10 @@ class Server:
     Args:
       tag (tuple): tag to use as new ground truth
     """
+    i = self.uid
     if self.enable_reset():
-      self.prp[self.uid] = Prp(1, tag)
+      self.prp[i] = Prp(1, tag)
+      self.all[i] = False
 
   def enable_reset(self):
     """ Blocks proposal if ongoing proposal.
@@ -281,7 +284,7 @@ class Server:
     """ Sets prp[k] to val for each k in self.config. """
     for k in self.config:
       self.prp[k] = val
-    return
+      self.all[k] = False
 
   def mod_max(self):
     """ Return the maximum phase of all proposals, in a modulus manner.
@@ -301,6 +304,9 @@ class Server:
     Returns:
       int: the degree of prp[k]
     """
+    if self.verbose:
+      print(f"ddddddddddddddddddddddd degree\nself.uid={self.uid}, k={k}")
+      print(f"phase(k)={self.prp[k].phase if self.prp[k] else None}, all[k]={self.all[k]}")
     if not self.prp[k]:
       return 0
     return 2*self.prp[k].phase + (1 if self.all[k] else 0)
@@ -315,10 +321,18 @@ class Server:
     """
     a = self.degree(k)
     b = self.degree(l)
-    correlating_degrees = []
+    correlating_degrees = [set([5, 1])]
     for i in range(6):
       correlating_degrees.append(set([i, i]))
       correlating_degrees.append(set([i, (i+1)%6]))
+    if self.verbose:
+      print(f"""
+self.uid={self.uid}
+k={k}, degree(k)={a}
+k'={l}, degree(k')={b}
+correlating_degrees={correlating_degrees}
+corr_deg = {set([a, b]) in correlating_degrees}
+""")
     if not set([a, b]) in correlating_degrees:
         raise Exception(f"{a} {b} {correlating_degrees}\n {self.prp} {self.all}")
     return set([a, b]) in correlating_degrees
@@ -446,7 +460,7 @@ class Server:
         differing_deg = True
     # {pk ∈ config : prp[i].phase+1 mod3 = prp[k]}
     k_with_diff_deg = [k for k in self.config\
-        if (self.prp[self.uid].phase+1%3 == self.prp[k].phase)]
+        if self.prp[k] and (self.prp[self.uid].phase+1%3 == self.prp[k].phase)]
     # (k_with_diff_deg ⊆ allSeenProcessors)
     close_deg_seen = set(k_with_diff_deg) <= \
         (self.all_seen_processors | set([self.uid])) \
