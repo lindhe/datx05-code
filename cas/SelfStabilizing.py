@@ -52,15 +52,14 @@ class Server:
     self.FIN = {}
     ######### Wrap Around (Global Reset) #########
     self.n = n
+    self.p = True
     # Algorithm variables:
     self.dflt_prp = Prp(0, None)
     self.config = [self.uid] # List of uid
     self.prp = {self.uid: Prp(0, None)} # {uid: Proposal} or {uid: None}
     self.all = {self.uid: False} # {uid: bool}
-    self.echo_answers = {self.uid: (self.dflt_prp, False)} # {uid: (prp, msg_all)}
+    self.echo_answers = {}
     self.all_seen_processors = set()
-    # Algorithm constants:
-    self.degrees = 6
 
   def counter_query(self, sender):
     """ Reply to queries with current counter value """
@@ -136,10 +135,10 @@ class Server:
   async def gossip_departure(self, k):
     tag_tuple = self.S.tag_tuple()
     cntr = IncNbrHelper.to_list(self.inc_nbrs) if len(self.inc_nbrs) else None
-    prp = tuple(self.prp[self.uid]) if self.prp[self.uid] else None
-    msg_all = self.my_all(self.uid)
-    echo_prp = tuple(self.prp[k]) if k in self.prp and self.prp[k] else None
-    echo_all = self.my_all(k) if k in self.all else False
+    prp = tuple(self.prp[self.uid]) if self.prp[self.uid] else self.dflt_prp
+    msg_all = self.all[self.uid]
+    echo_prp = tuple(self.prp[k]) if k in self.prp and self.prp[k] else self.dflt_prp
+    echo_all = self.all[k] if k in self.all else False
     echo = (echo_prp, echo_all)
     gossip_obj = GossipMessage(tag_tuple, cntr, prp, msg_all, echo)
     data = gossip_obj.get_bytes()
@@ -159,22 +158,6 @@ class Server:
     Returns:
       tag_tuple(): (max_all, max_finFIN, max_FIN)
     """
-    # We need to store the received tag values, for the implicit FIN to work
-    (self.pre[k], self.fin[k], self.FIN[k]) = (pre, fin, FIN)
-    i = self.uid
-    # pre
-    self.pre[i] = max( pre, fin, FIN, self.S.max_phase(['pre', 'fin', 'FIN']) )
-    await self.S.update_phase(self.pre[i], None, 'pre')
-    # fin
-    self.fin[i] = max( fin, FIN, self.S.max_phase(['fin', 'FIN']) )
-    await self.S.update_phase(self.fin[i], None, 'fin')
-    #FIN
-    implicitFinalized = []
-    fin_tags = [t for t in self.fin.values() if t == fin]
-    if len(fin_tags) >= self.quorum:
-      implicitFinalized = [fin]
-    self.FIN[i] = max( FIN, self.S.max_phase(['FIN']), *implicitFinalized )
-    await self.S.update_phase(self.FIN[i], None, 'FIN')
     
 
     # Update counter
@@ -186,6 +169,22 @@ class Server:
     if (max_tag[0] >= self.t_top and self.stabilized()):
       self.propose(max_tag)
     else:
+      # We need to store the received tag values, for the implicit FIN to work
+      (self.pre[k], self.fin[k], self.FIN[k]) = (pre, fin, FIN)
+      i = self.uid
+      # pre
+      self.pre[i] = max( pre, fin, FIN, self.S.max_phase(['pre', 'fin', 'FIN']) )
+      await self.S.update_phase(self.pre[i], None, 'pre')
+      # fin
+      self.fin[i] = max( fin, FIN, self.S.max_phase(['fin', 'FIN']) )
+      await self.S.update_phase(self.fin[i], None, 'fin')
+      #FIN
+      implicitFinalized = []
+      fin_tags = [t for t in self.fin.values() if t == fin]
+      if len(fin_tags) >= self.quorum:
+        implicitFinalized = [fin]
+      self.FIN[i] = max( FIN, self.S.max_phase(['FIN']), *implicitFinalized )
+      await self.S.update_phase(self.FIN[i], None, 'FIN')
       # Remove not relevant records
       self.S.relevant()
 
@@ -221,38 +220,41 @@ class Server:
     self.prp[k] = Prp(*prp) if prp else None
     self.all[k] = msg_all
     print(f"{self.uid} 777777777777777############### prp is {self.prp}")
-    if echo[0]:
-      self.echo_answers[k] = (Prp(*echo[0]), echo[1])
-    else:
-      self.echo_answers[k] = (None, echo[1])
-    print(f"{self.uid} ############################## config is {self.config}")
+    self.echo_answers[k] = (Prp(*echo[0]), echo[1])
+    print(f"{self.uid} ############################## config is {self.config} {self.p}")
     if len(self.config) == self.n:
+      if self.p:
+        self.propose((1, (1,'a')))
       self.main()
 
   def main(self):
     # Main loop
     print("main reset thing")
     uid = self.uid
+    self.all[uid] = self.and_every(self.echo_no_all)
+    for k in self.config:
+      if k != self.uid:
+        if (self.echo(k) and self.all[k]):
+          self.all_seen_processors.add(k)
     if self.transient_fault():
       print("Transient fault detected!")
       self.prp_set(None)
     # Update all[i]:
-    self.all[uid] = self.and_every(self.echo_no_all)
+    self.prp[uid] = self.max_prp()
+    #self.all[uid] = self.and_every(self.echo_no_all)
     if (self.prp[uid] == None and self.all[uid]):
       print("Bot detected!")
       self.prp[uid] = self.dflt_prp
     if self.no_default_no_bot():
-      print(f"Found a proposal!: {self.prp}")
-      self.prp[uid] = self.max_prp()
-      for k in self.config:
-        if k != self.uid:
-          if (self.echo(k) and self.my_all(k)):
-            self.all_seen_processors.add(k)
+      print(f"Found a proposal!: {self.uid} {self.prp} {self.all}")
+      print(f"{self.all_seen_processors} {self.echo_answers}")
       if self.all_seen():
-        (self.prp[uid], self.all_seen_processors) = \
-            (self.increment(self.prp[uid]), set())
+        (self.prp[uid], self.all[uid]) = self.increment(self.prp[uid])
+        self.all_seen_processors = set()
       if self.prp[uid].phase == 2:
-        self.local_reset(self.prp[uid].tag)
+        #self.local_reset(self.prp[uid].tag)
+        print("LOCAL RESET")
+        self.p = False
 
   def propose(self, tag):
     """ Proposes to reset register to only hold the Record with tag tag.
@@ -262,6 +264,7 @@ class Server:
     """
     if self.enable_reset():
       self.prp[self.uid] = Prp(1, tag)
+      self.all[self.uid] = False
 
   def enable_reset(self):
     """ Blocks proposal if ongoing proposal.
@@ -289,7 +292,11 @@ class Server:
     """
     i = self.uid
     phs = set([ self.prp[k].phase for k in self.config if self.prp[k] ])
-    return max(phs) if 1 in phs else self.prp[i].phase
+    if (1 in phs) and (max(phs) != self.prp[i].phase):
+      self.all_seen_processors = set()
+      return max(phs)
+    else:
+      return self.prp[i].phase
 
   def degree(self, k):
     """ Returns the degree of proposal k.
@@ -301,7 +308,7 @@ class Server:
     """
     if not self.prp[k]:
       return 0
-    return 2*self.prp[k].phase + (1 if self.my_all(k) else 0)
+    return 2*self.prp[k].phase + (1 if self.all[k] else 0)
 
   def corr_deg(self, k, l):
     """ Returns whether the degrees of prp[k] and prp[l] correlates.
@@ -314,9 +321,9 @@ class Server:
     a = self.degree(k)
     b = self.degree(l)
     correlating_degrees = []
-    for i in range(self.degrees):
+    for i in range(6):
       correlating_degrees.append(set([i, i]))
-      correlating_degrees.append(set([i, (i+1)%self.degrees]))
+      correlating_degrees.append(set([i, (i+1)%6]))
     if not set([a, b]) in correlating_degrees:
         raise Exception(f"{a} {b} {correlating_degrees}\n {self.prp} {self.all}")
     return set([a, b]) in correlating_degrees
@@ -335,13 +342,16 @@ class Server:
     for k in self.config:
       if self.prp[k]:
         if self.prp[k].tag:
-            prp_tags.append(self.prp[k].tag)
-        if ((self.degree(k) - self.degree(i))%self.degrees not in set([0, 1])):
+          prp_tags.append(self.prp[k].tag)
+        if ((self.degree(k) - self.degree(i))%6 not in set([0, 1])):
           return self.prp[i]
       else:
         # If there was a None proposal, let's not progress
         return self.prp[i]
-    return Prp(self.mod_max(), max(prp_tags))
+    if prp_tags:
+      return Prp(self.mod_max(), max(prp_tags))
+    else:
+      return Prp(self.mod_max(), None)
 
   def my_all(self, k):
     """ The myAll macro.
@@ -349,7 +359,7 @@ class Server:
     Returns:
       bool: processor k is in all_seen_processors or all[k]==True
     """
-    return k in (self.all_seen_processors | set([self.uid])) or self.all[k]
+    return k in (self.all_seen_processors) or self.all[k]
 
   def echo_no_all(self, k):
     """ Checks the echoed proposal from processor k.
@@ -370,7 +380,7 @@ class Server:
       bool: True if my proposal and my_all are what's echoed back by processor
         k, false otherwise
     """
-    return (self.prp[self.uid], self.my_all(self.uid)) == self.echo_answers[k]
+    return (self.prp[self.uid], self.all[self.uid]) == self.echo_answers[k]
 
   def increment(self, proposal):
     """ Returns the appropriate incremented new proposal based on its phase.
@@ -382,8 +392,11 @@ class Server:
       otherwise.
     """
     if proposal.phase == 1:
-      return Prp(2, proposal.tag)
-    return self.dflt_prp
+      return (Prp(2, proposal.tag), False)
+    elif proposal.phase == 2:
+       return (self.dflt_prp, False)
+    else:
+       return (self.prp[self.uid], self.all[self.uid])
 
   def all_seen(self):
     """ Reports if everyone have seen my proposal.
@@ -445,10 +458,11 @@ class Server:
         differing_deg = True
     # {pk ∈ config : degree(i)+1 mod 6 = degree(k)}
     k_with_diff_deg = [k for k in self.config\
-        if (self.degree(self.uid)+1 % self.degrees == self.degree(k))]
+        if (self.prp[self.uid].phase+1 % 3 == self.prp[k].phase) and \
+            self.prp[self.uid] != self.dflt_prp]
     # (k_with_diff_deg ⊆ allSeenProcessors)
-    close_deg_seen = set(k_with_diff_deg) <= \
-        (self.all_seen_processors | set([self.uid])) \
+    close_deg_seen = not set(k_with_diff_deg) <= \
+        (self.all_seen_processors ) \
         if k_with_diff_deg else False
     if zero_s_not_bot:
       print(f"{self.uid} zero_s_not_bot")
@@ -465,10 +479,6 @@ class Server:
     else:
       print("ok")
       return False
-    return zero_s_not_bot \
-        or differing_deg \
-        or close_deg_seen \
-        or (len(self.proposal_set()) > 1)
 
   def no_default_no_bot(self):
     """ Checks that no proposal holds dfltPrp or None (bot).
