@@ -205,7 +205,6 @@ class Server:
     FIN_stab = (len(FIN_set) == 1) and (max_FIN in FIN_set)
     return tag_tuple_stab and pre_stab and fin_stab and FIN_stab
 
-
   def get_tag_tuple(self):
     return self.S.tag_tuple()
 
@@ -391,12 +390,15 @@ class Server:
       tuple: Proposal which is (2, prp) if prp.phase == 1, or self.dflt_prp
       otherwise.
     """
+    i = self.uid
     if proposal.phase == 1:
+      assert self.all[i]
       return (Prp(2, proposal.tag), False)
     elif proposal.phase == 2:
-       return (self.dflt_prp, False)
+      assert self.all[i]
+      return (self.dflt_prp, False)
     else:
-       return (self.prp[self.uid], self.all[self.uid])
+      return (self.prp[i], self.all[i])
 
   def all_seen(self):
     """ Reports if everyone have seen my proposal.
