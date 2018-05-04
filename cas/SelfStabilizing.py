@@ -230,28 +230,37 @@ class Server:
     # Main loop
     print("main reset thing")
     uid = self.uid
+    self.prp[uid] = self.max_prp()
     self.all[uid] = self.and_every(self.echo_no_all)
     for k in self.config:
       if k != self.uid:
-        if (self.echo(k) and self.all[k]):
+        if self.all[k]:
           self.all_seen_processors.add(k)
     if self.transient_fault():
       print("Transient fault detected!")
       self.prp_set(None)
     # Update all[i]:
-    self.prp[uid] = self.max_prp()
-    #self.all[uid] = self.and_every(self.echo_no_all)
+    print(f"\nAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa\n\n"
+        f"{self.uid}        my_prp={self.prp[uid]}, {self.all[uid]}\n"
+        f"{self.uid}        echo={[self.echo_answers[p] for p in self.echo_answers ]}\n"
+        f"{self.uid}        all_same={self.and_every(self.echo_no_all)}\n"
+        f"{self.uid}        allSeen={self.all_seen_processors}\necho={self.echo_answers}\n"
+        f"{self.uid}        my_all={self.my_all(uid)}\n"
+        f"{self.uid}        all={self.all}\n")
     if (self.prp[uid] == None and self.all[uid]):
       print("Bot detected!")
       self.prp[uid] = self.dflt_prp
     if self.no_default_no_bot():
-      print(f"Found a proposal!: {self.uid} {self.prp} {self.all}")
-      print(f"{self.all_seen_processors} {self.echo_answers}")
-      if self.all_seen():
+      print(f"Found a proposal!: uid={self.uid}\nprp={self.prp}\nall={self.all}\n"
+      f"allSeen={self.all_seen_processors}\necho={self.echo_answers}\n"
+      f"all={self.all}\n")
+      if self.all_seen() and self.and_every(self.echo):
+        print("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")
         (self.prp[uid], self.all[uid]) = self.increment(self.prp[uid])
+        self.all[uid] = False
         self.all_seen_processors = set()
       if self.prp[uid].phase == 2:
-        #self.local_reset(self.prp[uid].tag)
+        # self.local_reset(self.prp[uid].tag)
         print("LOCAL RESET")
         self.p = False
 
@@ -264,6 +273,7 @@ class Server:
     if self.enable_reset():
       self.prp[self.uid] = Prp(1, tag)
       self.all[self.uid] = False
+      self.all_seen_processors = set()
 
   def enable_reset(self):
     """ Blocks proposal if ongoing proposal.
@@ -272,8 +282,9 @@ class Server:
       bool: True if good to go, False otherwise
     """
     for k in self.config:
-      if self.prp[k] == None \
-          or ((self.prp[k], self.all[k]) != (self.dflt_prp, True)):
+      if (self.prp[k] == None \
+          or ((self.prp[k], self.all[k]) != (self.dflt_prp, True))) and \
+          self.and_every(self.echo) and self.all_seen():
         return False
     return True
 
@@ -309,6 +320,18 @@ class Server:
       return 0
     return 2*self.prp[k].phase + (1 if self.all[k] else 0)
 
+  def my_degree(self, k):
+    """ Returns the degree of proposal k.
+
+    Args:
+      k (uid): which proposal to look at.
+    Returns:
+      int: the degree of prp[k]
+    """
+    if not self.prp[k]:
+      return 0
+    return 2*self.prp[k].phase + (1 if self.my_all(k) else 0)
+
   def corr_deg(self, k, l):
     """ Returns whether the degrees of prp[k] and prp[l] correlates.
 
@@ -317,14 +340,20 @@ class Server:
     Returns:
       bool: True if they correlate, False otherwise.
     """
-    a = self.degree(k)
-    b = self.degree(l)
+    a = self.my_degree(k)
+    b = self.my_degree(l)
     correlating_degrees = []
     for i in range(6):
       correlating_degrees.append(set([i, i]))
       correlating_degrees.append(set([i, (i+1)%6]))
     if not set([a, b]) in correlating_degrees:
-        raise Exception(f"{a} {b} {correlating_degrees}\n {self.prp} {self.all}")
+        raise Exception(f"{self.uid}        {a} {b} {correlating_degrees}\n {self.prp} {self.all}"
+          f"{self.uid}        my_prp={self.prp[self.uid]}, {self.all[self.uid]}\n"
+          f"{self.uid}        echo={[self.echo_answers[p] for p in self.echo_answers ]}\n"
+          f"{self.uid}        all_same={self.and_every(self.echo_no_all)}\n"
+          f"{self.uid}        allSeen={self.all_seen_processors}\necho={self.echo_answers}\n"
+          f"{self.uid}        my_all={self.my_all(self.uid)}\n"
+          f"{self.uid}        all={self.all}\n")
     return set([a, b]) in correlating_degrees
 
   def max_prp(self):
@@ -379,6 +408,7 @@ class Server:
       bool: True if my proposal and my_all are what's echoed back by processor
         k, false otherwise
     """
+    print(f"EEEEEEEEEEEEEEEEEEEEEEEEEEE\nEcho: {self.echo_answers}\n(all, prp): ({self.prp[self.uid]}, {self.all[self.uid]})\n")
     return (self.prp[self.uid], self.all[self.uid]) == self.echo_answers[k]
 
   def increment(self, proposal):
@@ -391,6 +421,7 @@ class Server:
       otherwise.
     """
     i = self.uid
+    print(f"\n\nPPPPPPPPPPPPPPPPPPP\nIncrement: prp={proposal}, all={self.all[i]}\n\n")
     if proposal.phase == 1:
       assert self.all[i]
       return (Prp(2, proposal.tag), False)
