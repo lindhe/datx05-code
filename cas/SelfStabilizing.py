@@ -509,6 +509,6 @@ class Server:
     Args:
       tag (tuple): the record to keep.
     """
-    self.S.reset(tag)
-    print(self.S)
+    if(tag[0] == self.t_top):
+      self.S.reset(tag)
     return
