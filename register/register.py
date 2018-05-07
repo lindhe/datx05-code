@@ -26,7 +26,7 @@
 
 from .record import Record
 from .fileHelper import *
-
+import shutil
 
 class Register:
   """ Implementation of the register which stores records """
@@ -189,4 +189,20 @@ class Register:
         delete_file(filename, path=self.storage_location)
       # Update the sequence number:
       new_tag = (self.init_nbr, tag[1])
+      if element:
+        element = self.rename(tag, new_tag)
       self.register = {new_tag: Record(new_tag, element, 'FIN')}
+
+  def rename(self, old, new):
+    """ Renames a file from old tag to new tag.
+
+    Args:
+      old (tag): old tag name
+      new (tag): new tag name
+    Returns:
+      string: New file path
+    """
+    base_path = self.storage_location
+    old_file = base_path + self.tag_to_filename(old)
+    new_file = base_path + self.tag_to_filename(new)
+    return shutil.move(old_file, new_file)
