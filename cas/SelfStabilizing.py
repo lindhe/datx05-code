@@ -290,11 +290,10 @@ class Server:
     """
     i = self.uid
     phs = set([ self.prp[k].phase for k in self.config if self.prp[k] ])
-    if (1 in phs) and (max(phs) != self.prp[i].phase):
-      self.all_seen_processors = set()
+    if phs != set([0, 2]):
       return max(phs)
     else:
-      return self.prp[i].phase
+      return 0
 
   def degree(self, k):
     """ Returns the degree of proposal k.
@@ -346,10 +345,14 @@ class Server:
       else:
         # If there was a None proposal, let's not progress
         return self.prp[i]
+    m_max = self.mod_max()
     if prp_tags:
-      return Prp(self.mod_max(), max(prp_tags))
+      if m_max:
+        return Prp(m_max, max(prp_tags))
+      else:
+        return Prp(m_max, None)
     else:
-      return Prp(self.mod_max(), None)
+      return Prp(m_max, None)
 
   def my_all(self, k):
     """ The myAll macro.
