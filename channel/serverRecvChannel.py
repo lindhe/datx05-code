@@ -58,7 +58,8 @@ class ServerRecvChannel:
         Create udp response and send it.
         """
         response = await self.check_msg(data)
-        await self.udp_sock.sendto(response, addr)
+        if response:
+            await self.udp_sock.sendto(response, addr)
 
     async def tcp_response(self, conn):
         """
@@ -107,7 +108,10 @@ class ServerRecvChannel:
             if(msg_type == 0):
                 if msg:
                     new_msg = await self.cb_obj_pp.arrival(sender, msg)
-                    response = token+new_msg if new_msg else token
+                    if new_msg:
+                        response = token+new_msg
+                    else:
+                        response = None
                 else:
                     response = token
             elif(msg_type == 1):
