@@ -370,6 +370,18 @@ class Server:
       bool: True if my proposal is the echoed proposal from processor k
     """
     return self.prp[self.uid] == self.echo_answers[k][0]
+   
+  def all_same(self, k):
+    return self.mmax(k) and (self.all[self.uid] == self.all[k])
+
+  def mmax(self, k):
+    if self.prp[k].phase >= self.prp[self.uid].phase:
+      return True
+    elif self.prp[k].phase == 0 and self.prp[self.uid].phase > 0:
+      return True
+    else:
+      return False
+      
 
   def echo(self, k):
     """ Checks if my proposal and my_all variable are echoed by processor k.
