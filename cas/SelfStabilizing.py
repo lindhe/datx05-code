@@ -168,7 +168,7 @@ class Server:
     max_tag = self.S.max_phase(['pre', 'fin', 'FIN'])
     if (max_tag[0] >= self.t_top and self.stabilized()):
       self.propose(max_tag)
-    else:
+    elif (self.and_every(self.all_same)):
       # We need to store the received tag values, for the implicit FIN to work
       (self.pre[k], self.fin[k], self.FIN[k]) = (pre, fin, FIN)
       i = self.uid
@@ -234,21 +234,19 @@ class Server:
     self.all[uid] = self.and_every(self.echo_no_all)
     for k in self.config:
       if k != self.uid:
-        if (self.echo(k) and self.all[k]):
+        if (self.all[k]):
           self.all_seen_processors.add(k)
     if self.transient_fault():
       print("Transient fault detected!")
       self.prp_set(None)
     # Update all[i]:
     self.prp[uid] = self.max_prp()
-    #self.all[uid] = self.and_every(self.echo_no_all)
+    self.all[uid] = self.and_every(self.echo_no_all)
     if (self.prp[uid] == None and self.all[uid]):
       print("Bot detected!")
       self.prp[uid] = self.dflt_prp
     if self.no_default_no_bot():
-      print(f"Found a proposal!: {self.uid} {self.prp} {self.all}")
-      print(f"{self.all_seen_processors} {self.echo_answers}")
-      if self.all_seen():
+      if self.all_seen() and self.and_every(self.echo) and self.and_every(self.all_same):
         (self.prp[uid], self.all[uid]) = self.increment(self.prp[uid])
         self.all_seen_processors = set()
       if self.prp[uid].phase == 2:
