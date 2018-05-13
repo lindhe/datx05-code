@@ -74,7 +74,7 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
     for node in nodes:
         ip, port = node.split(':')
         if node_index is not my_id:
-            c = SenderChannel(node_index, get_uid(), 'gossip', g, ip, port, init_tx=m)
+            c = SenderChannel(node_index, get_uid(), 1, g, ip, port, init_tx=m)
             loop.create_task(c.start())
         node_index += 1
 

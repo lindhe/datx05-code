@@ -6,8 +6,10 @@ class QuorumRecv:
     def __init__(self, server):
         self.server = server
 
-    async def arrival(self, sender, msg_data):
+    async def arrival(self, sender, payload):
         print("pingpong CALLBACK")
+        msg_list = PingPongMessage.set_message(payload)
+        msg_data = PingPongMessage(*msg_list)
         if msg_data:
             tag = msg_data.get_tag()
             data = msg_data.get_data()

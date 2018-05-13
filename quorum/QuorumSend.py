@@ -1,9 +1,9 @@
-from channel.ppProtocol import PingPongMessage
 import asyncio
 
 class QuorumSend:
-    def __init__(self, quorum_size):
+    def __init__(self, quorum_size, protocol):
         self.pongRx = {}
+        self.protocol = protocol
         self.Q = quorum_size
         self.replies = quorum_size
         self.pingTx = None
@@ -19,16 +19,16 @@ class QuorumSend:
         if (type(m[1]) == list):
             self.pingTx = []
             for i in range(len(m[1])):
-                self.pingTx.append(PingPongMessage(m[0], m[1][i], *m[2:]))
+                self.pingTx.append(self.protocol(m[0], m[1][i], *m[2:]))
         else:
-            self.pingTx = PingPongMessage(*m)
+            self.pingTx = self.protocol(*m)
         self.event = asyncio.Event()
         await self.event.wait()
         x = self.aggregated
         self.aggregated = None
         return x
 
-    async def departure(self, server_id, msg):
+    async def departure(self, server_id, payload):
         if __debug__:
             print("pingpong arrival! ")
         if (type(self.pingTx) == list):
@@ -36,7 +36,9 @@ class QuorumSend:
         else:
             pingTx = self.pingTx
 
-        if msg and (pingTx != None):
+        if payload and (pingTx != None):
+            msg_list = self.protocol.set_message(payload)
+            msg = self.protocol(*msg_list)
             if(msg.get_req_tag() == pingTx.get_tag() and
                (msg.get_tag() == None or
                msg.get_label() == 'qry' or
@@ -47,7 +49,7 @@ class QuorumSend:
                 self.pongRx[server_id] = msg
                 if __debug__:
                     print("ADD to pongRx with size %s" % len(self.pongRx))
-        elif not msg:
+        elif not payload:
             self.pongRx.pop(server_id, None)
 
         if len(self.pongRx) >= self.replies:

@@ -31,7 +31,7 @@ class Client:
         quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
         self.majority = math.ceil((nbr_of_servers+1)/2)
         self.ec_driver = ECDriver(k=k, m=nbr_of_servers, ec_type='liberasurecode_rs_vand')
-        self.p = QuorumSend(quorum_size)
+        self.p = QuorumSend(quorum_size, PingPongMessage)
         t = Thread(target=self.start_event_loop, args=(self.loop, config['Nodes']))
         t.daemon = True
         t.start()
@@ -55,7 +55,7 @@ class Client:
         i = 0
         for node in nodes:
             ip, port = nodes[node].split(':')
-            c = SenderChannel(i, self.hw_addr, 'pingpong', self.p, ip, port)
+            c = SenderChannel(i, self.hw_addr, 0, self.p, ip, port)
             asyncio.ensure_future(c.start())
             print("Create channel to {}:{}".format(ip, port))
             i = i+1

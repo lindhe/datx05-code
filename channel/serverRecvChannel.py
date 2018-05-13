@@ -9,13 +9,13 @@ from .UdpSender import UdpSender
 class ServerRecvChannel:
     """ Creates a server recv channel for pingpong and gossip"""
 
-    def __init__(self, callback_obj_pp, callback_obj_gossip, port,
+    def __init__(self, callback_obj, callback_obj_gossip, port,
                  gossip_freq=1, chunks_size=1024):
         """
         Initialize callbacks, parameters and create tcp/udp sockets
         """
 
-        self.cb_obj_pp = callback_obj_pp
+        self.cb_obj = callback_obj
         self.cb_obj_gossip = callback_obj_gossip
         self.port = port
         self.gsp_freq = gossip_freq
@@ -86,16 +86,7 @@ class ServerRecvChannel:
         token = res[:self.token_size]
         payload = res[self.token_size:]
         msg_type, msg_cntr, sender = struct.unpack("ii17s", token)
-        msg = None
         
-        if payload:
-            if(msg_type == 0):
-                msg_list = PingPongMessage.set_message(payload)
-                msg = PingPongMessage(*msg_list)
-            else:
-                msg_list = GossipMessage.set_message(payload)
-                msg = GossipMessage(*msg_list)
-
         if(sender not in self.tokens.keys()):
             print("Add to token list")
             self.tokens[sender] = 0
@@ -104,13 +95,13 @@ class ServerRecvChannel:
             self.tokens[sender] = msg_cntr
             token = struct.pack("ii", msg_type,self.tokens[sender])
             if(msg_type == 0):
-                if msg:
-                    new_msg = await self.cb_obj_pp.arrival(sender, msg)
+                if payload:
+                    new_msg = await self.cb_obj.arrival(sender, payload)
                     response = token+new_msg if new_msg else token
                 else:
                     response = token
             elif(msg_type == 1):
-                await self.cb_obj_gossip.arrival(sender, msg)
+                await self.cb_obj_gossip.arrival(sender, payload)
                 response = token
                 await asyncio.sleep(self.gsp_freq)
         else:
