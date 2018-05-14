@@ -25,7 +25,10 @@
 # SOFTWARE.
 
 class Record:
-  """ A record object class """
+  """ The Record object class.
+
+  Type: (tag, element, phase)
+  """
 
   def __init__(self, tag, element, phase):
     self.tag = tag
