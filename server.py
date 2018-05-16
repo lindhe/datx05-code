@@ -1,5 +1,3 @@
-import zmq
-import zmq.asyncio
 import asyncio
 import struct
 import sys
