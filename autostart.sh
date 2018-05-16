@@ -13,10 +13,10 @@ grep -c $address $config > /dev/null
 
 if [ $? -eq 0 ]; then
   echo "Starting Server..."
-  sudo python3.6 /home/$slice/casss/server.py $port $address $config
+  sudo python3.6 /home/$slice/casss/server.py $port $address $config > /dev/null &
 else
   echo "Starting Client..."
   sleep 1
-  sudo python3.6 -O /home/$slice/casss/run_client.py $config
+  sudo python3.6 -O /home/$slice/casss/run_client.py $config  > /dev/null&
 fi
 
