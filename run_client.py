@@ -10,7 +10,11 @@ def main():
             res = c.read()
             print("CLIENT: %s" % res)
         elif (op[0] == 'write'):
-            c.write(op[1].encode())
+            if len(op) < 2:
+                msg = 'empty'.encode()
+            else:
+                msg = op[1].encode()
+            c.write(msg)
             print("CLIENT: finished write operation")
 
 if __name__ == '__main__':
