@@ -9,7 +9,7 @@ from .UdpSender import UdpSender
 class ServerRecvChannel:
     """ Creates a server recv channel for pingpong and gossip"""
 
-    def __init__(self, callback_obj, callback_obj_gossip, port,
+    def __init__(self, callback_obj, callback_obj_gossip, port, ip,
                  gossip_freq=1, chunks_size=1024):
         """
         Initialize callbacks, parameters and create tcp/udp sockets
@@ -22,14 +22,14 @@ class ServerRecvChannel:
         self.chunks_size = chunks_size
 
         self.loop = asyncio.get_event_loop()
-        self.udp_sock = UdpSender(self.loop, '', int(port))
+        self.udp_sock = UdpSender(self.loop, ip, int(port))
         self.token_size = 2*struct.calcsize("i")+struct.calcsize("17s")
         self.tokens = {}
 
         self.tc_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.tc_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.tc_sock.setblocking(False)
-        self.tc_sock.bind(('', int(port)))
+        self.tc_sock.bind((ip, int(port)))
         self.tc_sock.listen(10)
 
     async def tcp_listen(self):

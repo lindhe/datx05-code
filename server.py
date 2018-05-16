@@ -76,7 +76,7 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
             loop.create_task(c.start())
         node_index += 1
 
-    s = ServerRecvChannel(p, g, my_port, gossip_freq=gossip_freq)
+    s = ServerRecvChannel(p, g, my_port, my_ip, gossip_freq=gossip_freq)
     loop.create_task(s.tcp_listen())
     loop.create_task(s.udp_listen())
 
