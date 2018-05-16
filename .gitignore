@@ -4,3 +4,5 @@ __pycache__*
 autogen.ini
 perf_result.txt
 result/
+config/wip/*
+config/servers.txt
