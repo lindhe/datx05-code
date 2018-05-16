@@ -1,6 +1,6 @@
 #!/bin/bash
 
-port=5555
+port=5550
 servers=./config/servers.txt
 defaultconf=./config/default.ini
 configfile=./config/autogen.ini
@@ -15,6 +15,7 @@ echo "[Nodes]" >> $configfile
 i=0
 while read server; do
   echo "node$i = $server:$port" >> $configfile
+  port=$((port+1))
   i=$((i+1))
 done <$servers
 

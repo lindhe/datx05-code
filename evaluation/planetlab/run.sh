@@ -2,13 +2,14 @@
 
 ssh_key=~/.ssh/planetlab_rsa
 slice=chalmersple_casss2
-servers=./config/servers.txt
+servers=$(cat ./config/servers.txt | sort | uniq)
+failed=0
 
-while read server; do
-  ssh -l chalmersple_casss2 -i ~/.ssh/planetlab_rsa \
+for server in $servers; do
+  ssh -l chalmersple_casss2 -i ~/.ssh/planetlab_rsa $server "~/casss/autostart.sh" \
     && echo "Running server on $server"  \
     || { echo "Failed on $server"; failed=1; break; }
-done <$servers
+done
 
 
 if [ $failed -eq 0 ]; then
