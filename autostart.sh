@@ -3,19 +3,20 @@
 # Otherwise, it starts the Client application prompt.
 
 port=5555
-ip=$(hostname -I | awk '{$1=$1}1')
-config=/opt/project/config/autogen.ini
+address=$(hostname)
+slice=chalmersple_casss2
+config=/home/$slice/casss/config/autogen.ini
 
-# Check if my IP is in autogen.ini
-# If my IP is in the list, I'm a server.
-grep -c $ip $config > /dev/null
+# Check if my address is in autogen.ini
+# If my address is in the list, I'm a server.
+grep -c $address $config > /dev/null
 
 if [ $? -eq 0 ]; then
   echo "Starting Server..."
-  python3.6 /opt/project/server.py $port $ip $config
+  sudo python3.6 /home/$slice/casss/server.py $port $address $config
 else
   echo "Starting Client..."
   sleep 1
-  python3.6 -O /opt/project/run_client.py $config
+  sudo python3.6 -O /home/$slice/casss/run_client.py $config
 fi
 
