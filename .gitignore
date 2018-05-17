@@ -6,3 +6,4 @@ perf_result.txt
 result/
 config/wip/*
 config/servers.txt
+config/clients.txt
