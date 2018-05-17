@@ -398,9 +398,9 @@ self.prp[k].phase != self.prp[p].phase:
     return self.mmax(k) and (self.all[self.uid] == self.my_all(k))
 
   def mmax(self, k):
-    if self.prp[k].phase >= self.prp[self.uid].phase:
+    if self.prp[k].phase == (self.prp[self.uid].phase+1)%3:
       return True
-    elif self.prp[k].phase == 0 and self.prp[self.uid].phase > 0:
+    elif self.prp[k].phase == self.prp[self.uid].phase:
       return True
     else:
       return False
