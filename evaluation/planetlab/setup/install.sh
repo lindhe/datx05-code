@@ -1,6 +1,6 @@
 #!/bin/bash
 
-install_script=./evaluation/planetlab/install_deps.sh
+install_script=./evaluation/planetlab/setup/install_deps.sh
 servers=./config/servers.txt
 ssh_key=~/.ssh/planetlab_rsa
 slice=chalmersple_casss2
