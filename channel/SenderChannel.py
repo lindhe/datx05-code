@@ -29,6 +29,7 @@ class SenderChannel:
         self.token_size = 2*struct.calcsize("i")+struct.calcsize("17s")
         self.addr  = (ip, int(port))
         self.udp_sock = UdpSender(self.loop)
+        self.tc_sock = None
 
     async def receive(self, token):
         """
@@ -96,6 +97,8 @@ arrival construct a new message and send it.
         """
         Create a new tcp socket and wait until there is a connection
         """
+        if self.tc_sock:
+            self.tc_sock.close()
         self.tc_sock = socket.socket()
         self.tc_sock.setblocking(False)
         while True:

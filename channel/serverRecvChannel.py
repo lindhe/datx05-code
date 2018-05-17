@@ -67,7 +67,11 @@ class ServerRecvChannel:
         """
         int_size = struct.calcsize("i")
         recv_msg_size = await self.loop.sock_recv(conn, int_size)
-        msg_size = struct.unpack("i", recv_msg_size)[0]
+        try:
+            msg_size = struct.unpack("i", recv_msg_size)[0]
+        except Exception as e:
+            conn.close()
+            return
         res = b''
         while (len(res) < msg_size):
             res += await self.loop.sock_recv(conn, self.chunks_size)

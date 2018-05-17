@@ -85,4 +85,4 @@ def delete_file(filename, path=default_path):
   try:
     os.remove(filepath)
   except OSError as e:
-    print(f"Error deleting file {path}: {e}", file=sys.stderr)
+    print(f"Error deleting file {path}: {e}")#, file=sys.stderr)

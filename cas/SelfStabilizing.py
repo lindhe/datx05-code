@@ -25,6 +25,7 @@
 # SOFTWARE.
 
 import struct
+import sys
 from collections import deque
 from .IncNbrHelper import IncNbrHelper
 from channel.GossipProtocol import GossipMessage
@@ -52,7 +53,7 @@ class Server:
     self.FIN = {}
     ######### Wrap Around (Global Reset) #########
     self.n = n
-    self.p = True
+    self.p = False
     # Algorithm variables:
     self.dflt_prp = Prp(0, None)
     self.config = [self.uid] # List of uid
@@ -219,38 +220,37 @@ class Server:
       self.config.append(k)
     self.prp[k] = Prp(*prp) if prp else None
     self.all[k] = msg_all
-    print(f"{self.uid} 777777777777777############### prp is {self.prp}")
     self.echo_answers[k] = (Prp(*echo[0]), echo[1])
-    print(f"{self.uid} ############################## config is {self.config} {self.p}")
     if len(self.config) == self.n:
-      if self.p:
-        self.propose((1, (1,'a')))
       self.main()
 
   def main(self):
     # Main loop
     print("main reset thing")
     uid = self.uid
-    self.all[uid] = self.and_every(self.echo_no_all)
+    #print(f"Found a proposal!: {self.uid} {self.prp} {self.all}")
+    #print(f"{self.all_seen_processors} {self.echo_answers}")
+    #self.all[uid] = self.and_every(self.echo_no_all)
     for k in self.config:
       if k != self.uid:
         if (self.all[k]):
+          self.update_prp(self.prp[k])
           self.all_seen_processors.add(k)
     if self.transient_fault():
       print("Transient fault detected!")
       self.prp_set(None)
     # Update all[i]:
-    self.prp[uid] = self.max_prp()
-    self.all[uid] = self.and_every(self.echo_no_all)
     if (self.prp[uid] == None and self.all[uid]):
       print("Bot detected!")
       self.prp[uid] = self.dflt_prp
+    self.prp[uid] = self.max_prp()
+    self.all[uid] = self.and_every(self.echo_no_all)
     if self.no_default_no_bot():
       if self.all_seen() and self.and_every(self.echo) and self.and_every(self.all_same):
         (self.prp[uid], self.all[uid]) = self.increment(self.prp[uid])
         self.all_seen_processors = set()
       if self.prp[uid].phase == 2:
-        #self.local_reset(self.prp[uid].tag)
+        self.local_reset(self.prp[uid].tag)
         print("LOCAL RESET")
         self.p = False
 
@@ -280,7 +280,15 @@ class Server:
     """ Sets prp[k] to val for each k in self.config. """
     for k in self.config:
       self.prp[k] = val
+      self.all[k] = False
     return
+
+  def update_prp(self, val):
+    for k in self.config:
+      if (self.prp[k].phase+1)%3 == val.phase:
+        self.prp[k] = val
+        self.all[k] = False
+
 
   def mod_max(self):
     """ Return the maximum phase of all proposals, in a modulus manner.
@@ -288,6 +296,13 @@ class Server:
     Returns:
       int: a phase represented by 0, 1 or 2
     """
+    #i = self.uid
+    #phs = set([ self.prp[k].phase for k in self.config if self.prp[k] ])
+    #if 1 in phs and max(phs) != self.prp[i].phase:
+    #  self.all_seen_processors = set()
+    #  return max(phs)
+    #else:
+    #  return self.prp[i].phase
     i = self.uid
     phs = set([ self.prp[k].phase for k in self.config if self.prp[k] ])
     if phs != set([0, 2]):
@@ -305,7 +320,7 @@ class Server:
     """
     if not self.prp[k]:
       return 0
-    return 2*self.prp[k].phase + (1 if self.all[k] else 0)
+    return 2*self.prp[k].phase + (1 if self.my_all(k) else 0)
 
   def corr_deg(self, k, l):
     """ Returns whether the degrees of prp[k] and prp[l] correlates.
@@ -322,7 +337,7 @@ class Server:
       correlating_degrees.append(set([i, i]))
       correlating_degrees.append(set([i, (i+1)%6]))
     if not set([a, b]) in correlating_degrees:
-        raise Exception(f"{a} {b} {correlating_degrees}\n {self.prp} {self.all}")
+      raise Exception(f"{self.uid} {a} {k} {b} {l} {self.all_seen_processors}\n {self.prp} {self.all}\n {self.echo_answers}")
     return set([a, b]) in correlating_degrees
 
   def max_prp(self):
@@ -360,7 +375,12 @@ class Server:
     Returns:
       bool: processor k is in all_seen_processors or all[k]==True
     """
-    return k in (self.all_seen_processors) or self.all[k]
+    if self.all[k]:
+      return True
+    for p in self.all_seen_processors:
+      if (self.prp[p].phase == (self.prp[k].phase+1)%3):
+        return True
+    return False
 
   def echo_no_all(self, k):
     """ Checks the echoed proposal from processor k.
@@ -370,7 +390,8 @@ class Server:
     Return
       bool: True if my proposal is the echoed proposal from processor k
     """
-    return self.prp[self.uid] == self.echo_answers[k][0]
+    return (self.prp[self.uid] == self.echo_answers[k][0]) and \
+(self.mmax(k))
    
   def all_same(self, k):
     return self.mmax(k) and (self.all[self.uid] == self.all[k])
@@ -482,9 +503,12 @@ class Server:
       return True
     elif differing_deg:
       print("differing_deg")
+      sys.exit()
       return True
     elif close_deg_seen:
       print("close_deg_seen")
+      raise Exception(f"{self.uid} {self.all_seen_processors}\n {self.prp} {self.all}")
+      sys.exit()
       return True
     elif (len(self.proposal_set()) > 1):
       print("|proposalSet| > 1")
@@ -501,6 +525,7 @@ class Server:
         otherwise.
     """
     prps = set([self.prp[k] for k in self.config])
+    #return (None not in prps)
     return ( prps != set([self.dflt_prp]) ) and (None not in prps)
 
   def local_reset(self, tag):
