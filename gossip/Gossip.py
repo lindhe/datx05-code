@@ -9,9 +9,11 @@ class Gossip:
         data = await self.server.gossip_departure(uid)
         return (data, not self.use_tcp(data))
 
-    async def arrival(self, uid, msg_data):
+    async def arrival(self, uid, payload):
         print("Gossip CALLBACK RECV")
-        if msg_data:
+        if payload:
+            msg_list = GossipMessage.set_message(payload)
+            msg_data = GossipMessage(*msg_list)
             print(msg_data.get_tag_tuple())
             await self.server.gossip_arrival(uid, *msg_data.get_tag_tuple(),
 msg_data.get_prp(), msg_data.get_all(), msg_data.get_echo(), msg_data.get_cntrs())

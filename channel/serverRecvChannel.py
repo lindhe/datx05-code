@@ -9,28 +9,28 @@ from .UdpSender import UdpSender
 class ServerRecvChannel:
     """ Creates a server recv channel for pingpong and gossip"""
 
-    def __init__(self, uid, callback_obj_pp, callback_obj_gossip, port,
+    def __init__(self, uid, callback_obj, callback_obj_gossip, port, ip,
                  gossip_freq=1, chunks_size=1024):
         """
         Initialize callbacks, parameters and create tcp/udp sockets
         """
 
         self.uid = uid.encode()
-        self.cb_obj_pp = callback_obj_pp
+        self.cb_obj = callback_obj
         self.cb_obj_gossip = callback_obj_gossip
         self.port = port
         self.gsp_freq = gossip_freq
         self.chunks_size = chunks_size
 
         self.loop = asyncio.get_event_loop()
-        self.udp_sock = UdpSender(self.loop, '', int(port))
+        self.udp_sock = UdpSender(self.loop, ip, int(port))
         self.token_size = 2*struct.calcsize("i")+struct.calcsize("17s")
         self.tokens = {}
 
         self.tc_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.tc_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.tc_sock.setblocking(False)
-        self.tc_sock.bind(('', int(port)))
+        self.tc_sock.bind((ip, int(port)))
         self.tc_sock.listen(10)
 
     async def tcp_listen(self):
@@ -92,16 +92,7 @@ class ServerRecvChannel:
         token = res[:self.token_size]
         payload = res[self.token_size:]
         msg_type, msg_cntr, sender = struct.unpack("ii17s", token)
-        msg = None
         
-        if payload:
-            if(msg_type == 0):
-                msg_list = PingPongMessage.set_message(payload)
-                msg = PingPongMessage(*msg_list)
-            else:
-                msg_list = GossipMessage.set_message(payload)
-                msg = GossipMessage(*msg_list)
-
         if(sender not in self.tokens.keys()):
             print("Add to token list")
             self.tokens[sender] = 0
@@ -110,16 +101,16 @@ class ServerRecvChannel:
             self.tokens[sender] = msg_cntr
             token = struct.pack("ii17s", msg_type,self.tokens[sender], self.uid)
             if(msg_type == 0):
-                if msg:
-                    new_msg = await self.cb_obj_pp.arrival(sender, msg)
+                if payload:
+                    new_msg = await self.cb_obj.arrival(sender, payload)
                     if new_msg:
-                        response = token+new_msg
+                        response = token+new_msg if new_msg else token
                     else:
                         response = None
                 else:
                     response = token
             elif(msg_type == 1):
-                await self.cb_obj_gossip.arrival(sender, msg)
+                await self.cb_obj_gossip.arrival(sender, payload)
                 response = token
                 await asyncio.sleep(self.gsp_freq)
         else:

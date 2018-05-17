@@ -9,8 +9,8 @@ from channel.GossipProtocol import GossipMessage
 from channel.serverRecvChannel import ServerRecvChannel
 from channel.SenderChannel import SenderChannel
 from gossip.Gossip import Gossip
-from quorum.QuorumRecv import QuorumRecv
-from cas.SelfStabilizing import Server
+from atomic_register.QuorumRecvAR import QuorumRecvAR
+from atomic_register.AtomicRegister import Server
 
 def get_uid():
     with open('/sys/class/net/lo/address') as f:
@@ -44,41 +44,20 @@ def read_cfgfile(my_ip, my_port, cfgfile):
     f = int(config['General']['f'])
     e = int(config['General']['e'])
     base_location = config['General']['storage_location']
-    max_clients = int(config['General']['max_clients'])
-    delta = int(config['General']['concurrent_clients'])
-    queue_size = int(config['General']['queue_size'])
-    gossip_freq = int(config['General']['gossip_freq'])
-    return [my_id, nbr_of_servers, f, e, base_location, max_clients,
-            delta, queue_size, gossip_freq, nodes]
+    return [my_id, nbr_of_servers, f, e, base_location, nodes]
 
-def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_clients,
-         delta, queue_size, gossip_freq, nodes):
+def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, nodes):
     k = nbr_of_servers - 2*(f + e)
     if(k < 1):
         raise Exception("Coded elements less than 1")
     quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
 
-    uid =  get_uid()
-    server = Server(uid, quorum_size, max_clients, delta, queue_size,
-        nbr_of_servers, storage_location="{}server{}/".format(base_location, my_id))
-    p = QuorumRecv(server)
-    g = Gossip(server)
+    server = Server(my_id, quorum_size, storage_location="{}server{}/".format(base_location, my_id))
+    p = QuorumRecvAR(server)
 
     loop = asyncio.get_event_loop()
-    tag_tuple = server.get_tag_tuple()
-    cntr = server.get_counter()
-    # gossip_obj = GossipMessage(tag_tuple, cntr)
-    # m = gossip_obj.get_bytes()
-    m=None
 
-    node_index = 0
-    for node in nodes:
-        ip, port = node.split(':')
-        if node_index is not my_id:
-            c = SenderChannel(node_index, uid, 1, g, ip, port, init_tx=m)
-            loop.create_task(c.start())
-        node_index += 1
-    s = ServerRecvChannel(uid, p, g, my_port, my_ip, gossip_freq=gossip_freq)
+    s = ServerRecvChannel(p, None, my_port)
     loop.create_task(s.tcp_listen())
     loop.create_task(s.udp_listen())
 

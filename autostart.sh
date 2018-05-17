@@ -2,20 +2,16 @@
 # Checks if node is server. If it is, it starts the server program.
 # Otherwise, it starts the Client application prompt.
 
-port=5555
-ip=$(hostname -I | awk '{$1=$1}1')
-config=/opt/project/config/autogen.ini
+address=$(hostname)
+slice=chalmersple_casss2
+config=./casss/config/autogen.ini
 
-# Check if my IP is in autogen.ini
-# If my IP is in the list, I'm a server.
-grep -c $ip $config > /dev/null
+# For each time my address is in autogen.ini, start a server
+servers=$(grep $address $config | cut -d ' ' -f 3)
 
-if [ $? -eq 0 ]; then
-  echo "Starting Server..."
-  python3.6 /opt/project/server.py $port $ip $config
-else
-  echo "Starting Client..."
-  sleep 1
-  python3.6 -O /opt/project/run_client.py $config
-fi
-
+for server in $servers; do
+  address=$(echo $server | cut -d ':' -f 1)
+  port=$(echo $server | cut -d ':' -f 2)
+  echo "Starting server at $address:$port"
+  sudo python3.6 /home/$slice/casss/server.py $port $address $config > /dev/null &
+done

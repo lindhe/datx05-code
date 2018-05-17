@@ -7,7 +7,7 @@
 import sys
 import math
 
-def main(nmax=19, latex=False):
+def main(nmax=20, latex=False):
   n = nmax
   fmax = math.ceil(n/2)
   k_table(nmax, fmax, latex=latex)
@@ -30,6 +30,7 @@ def k_table(nmax, fmax, latex=False):
 
 def print_table(matrix, nmax, fmax, latex):
   if latex:
+    first = True
     for row in matrix:
       row_len = len(row)
       fmt = " {:>3} &"
@@ -38,6 +39,9 @@ def print_table(matrix, nmax, fmax, latex):
         row.append('')
         row_format = row_format + fmt
       row_format = row_format + " {:>3}\\\\"
+      if first:
+        row_format = row_format + "\\hline"
+        first = False
       print(row_format.format( *row ))
   else:
     matrix.append(['n'])

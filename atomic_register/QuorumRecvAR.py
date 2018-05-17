@@ -1,7 +1,7 @@
 import struct
 from channel.ppProtocol import PingPongMessage
 
-class QuorumRecv:
+class QuorumRecvAR:
 
     def __init__(self, server):
         self.server = server
@@ -17,25 +17,13 @@ class QuorumRecv:
             mode = msg_data.get_mode()
             if (label == 'qry'):
                 if (mode == 'read'):
-                    res = self.server.read_query()
+                    res = await self.server.read_query()
                 else:
                     res = self.server.write_query()
-                    if not res:
-                        return None
-            elif (label == 'pre'):
-                res = await self.server.pre_write(tag, data)
-            elif (label == 'fin' or label == 'FIN'):
-                if (mode == 'read'):
-                    res = await self.server.read_finalize(tag, label)
-                else:
-                    res = await self.server.write_finalize(tag, label)
-            elif (label == 'cntrQry'):
-                res = self.server.counter_query(sender)
-                if not res:
-                    return None
-            elif (label == 'incCntr'):
-                nbr = struct.unpack("i", data)[0]
-                res = self.server.set_counter(sender, nbr)
+            elif (label == 'write'):
+                res = await self.server.write(tag, data)
+            elif (label == 'inform'):
+                res = await self.server.inform(tag, data)
             else:
                 return None
             new_msg = PingPongMessage(*res, mode, req_tag=msg_data.get_tag())

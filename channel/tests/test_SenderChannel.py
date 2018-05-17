@@ -1,7 +1,6 @@
 import unittest
 import struct
 import mock
-import zmq
 import asyncio
 import pytest
 from unittest.mock import patch

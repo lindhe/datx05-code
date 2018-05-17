@@ -2,8 +2,6 @@ import asyncio
 import struct
 import socket
 import io
-from .ppProtocol import PingPongMessage
-from .GossipProtocol import GossipMessage
 from .UdpSender import UdpSender
 
 class SenderChannel:
@@ -16,7 +14,7 @@ class SenderChannel:
         """
         self.sid = sid
         self.uid = uid.encode()
-        self.ch_type = 0 if channel_type == 'pingpong' else 1
+        self.ch_type = channel_type
         self.cb_obj = callback_obj
         self.ip = ip
         self.port = int(port)
@@ -44,16 +42,8 @@ resend it.
                 else:
                     res = await self.tcp_recv()
                 token = res[:self.token_size]
-                payload = res[self.token_size:]
                 msg_type, msg_cntr, sender = struct.unpack("ii17s", token)
-                msg_data = None
-                if payload:
-                    if self.ch_type:
-                        msg_list = GossipMessage.set_message(payload)
-                        msg_data = GossipMessage(*msg_list)
-                    else:
-                        msg_list = PingPongMessage.set_message(payload)
-                        msg_data = PingPongMessage(*msg_list)
+                msg_data = res[self.token_size:]
                 break
             except Exception as e:
                 msg = token+self.tx if self.tx else token
