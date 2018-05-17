@@ -228,9 +228,6 @@ class Server:
     # Main loop
     print("main reset thing")
     uid = self.uid
-    #print(f"Found a proposal!: {self.uid} {self.prp} {self.all}")
-    #print(f"{self.all_seen_processors} {self.echo_answers} {self.and_every(self.echo)} {self.and_every(self.all_same)}")
-    #self.all[uid] = self.and_every(self.echo_no_all)
     for k in self.config:
       if k != self.uid:
         if (self.all[k]):
@@ -246,7 +243,7 @@ class Server:
     self.prp[uid] = self.max_prp()
     self.all[uid] = self.and_every(self.echo_no_all)
     if self.no_default_no_bot():
-      if self.all_seen() and self.and_every(self.echo):# and self.and_every(self.all_same):
+      if self.all_seen() and self.and_every(self.echo):
         (self.prp[uid], self.all[uid]) = self.increment(self.prp[uid])
         self.all_seen_processors = set()
       if self.prp[uid].phase == 2:
@@ -296,13 +293,6 @@ class Server:
     Returns:
       int: a phase represented by 0, 1 or 2
     """
-    #i = self.uid
-    #phs = set([ self.prp[k].phase for k in self.config if self.prp[k] ])
-    #if 1 in phs and max(phs) != self.prp[i].phase:
-    #  self.all_seen_processors = set()
-    #  return max(phs)
-    #else:
-    #  return self.prp[i].phase
     i = self.uid
     phs = set([ self.prp[k].phase for k in self.config if self.prp[k] ])
     if phs == set([0, 1]):
@@ -392,12 +382,12 @@ self.prp[k].phase != self.prp[p].phase:
       bool: True if my proposal is the echoed proposal from processor k
     """
     return (self.prp[self.uid] == self.echo_answers[k][0]) and \
-(self.mmax(k))
+(self.larger_or_equal(k))
    
   def all_same(self, k):
-    return self.mmax(k) and (self.all[self.uid] == self.my_all(k))
+    return self.larger_or_equal(k) and (self.all[self.uid] == self.my_all(k))
 
-  def mmax(self, k):
+  def larger_or_equal(self, k):
     if self.prp[k].phase == (self.prp[self.uid].phase+1)%3:
       return True
     elif self.prp[k].phase == self.prp[self.uid].phase:
@@ -416,7 +406,7 @@ self.prp[k].phase != self.prp[p].phase:
         k, false otherwise
     """
     return ((self.prp[self.uid], self.all[self.uid]) == self.echo_answers[k]) \
-and self.mmax(k) and self.corr_all(k)
+and self.larger_or_equal(k) and self.corr_all(k)
 
   def corr_all(self, k):
     if ((self.prp[self.uid].phase+1)%3 == self.prp[k].phase):
