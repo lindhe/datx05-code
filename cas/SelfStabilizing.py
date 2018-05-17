@@ -229,7 +229,7 @@ class Server:
     print("main reset thing")
     uid = self.uid
     #print(f"Found a proposal!: {self.uid} {self.prp} {self.all}")
-    #print(f"{self.all_seen_processors} {self.echo_answers}")
+    #print(f"{self.all_seen_processors} {self.echo_answers} {self.and_every(self.echo)} {self.and_every(self.all_same)}")
     #self.all[uid] = self.and_every(self.echo_no_all)
     for k in self.config:
       if k != self.uid:
@@ -246,7 +246,7 @@ class Server:
     self.prp[uid] = self.max_prp()
     self.all[uid] = self.and_every(self.echo_no_all)
     if self.no_default_no_bot():
-      if self.all_seen() and self.and_every(self.echo) and self.and_every(self.all_same):
+      if self.all_seen() and self.and_every(self.echo):# and self.and_every(self.all_same):
         (self.prp[uid], self.all[uid]) = self.increment(self.prp[uid])
         self.all_seen_processors = set()
       if self.prp[uid].phase == 2:
@@ -305,10 +305,10 @@ class Server:
     #  return self.prp[i].phase
     i = self.uid
     phs = set([ self.prp[k].phase for k in self.config if self.prp[k] ])
-    if phs != set([0, 2]):
+    if phs == set([0, 1]):
       return max(phs)
     else:
-      return 0
+      return self.prp[self.uid].phase
 
   def degree(self, k):
     """ Returns the degree of proposal k.
@@ -378,7 +378,8 @@ class Server:
     if self.all[k]:
       return True
     for p in self.all_seen_processors:
-      if (self.prp[p].phase == (self.prp[k].phase+1)%3):
+      if (self.prp[p].phase == (self.prp[k].phase+1)%3) and \
+self.prp[k].phase != self.prp[p].phase:
         return True
     return False
 
@@ -394,7 +395,7 @@ class Server:
 (self.mmax(k))
    
   def all_same(self, k):
-    return self.mmax(k) and (self.all[self.uid] == self.all[k])
+    return self.mmax(k) and (self.all[self.uid] == self.my_all(k))
 
   def mmax(self, k):
     if self.prp[k].phase >= self.prp[self.uid].phase:
@@ -414,7 +415,13 @@ class Server:
       bool: True if my proposal and my_all are what's echoed back by processor
         k, false otherwise
     """
-    return (self.prp[self.uid], self.all[self.uid]) == self.echo_answers[k]
+    return ((self.prp[self.uid], self.all[self.uid]) == self.echo_answers[k]) \
+and self.mmax(k) and self.corr_all(k)
+
+  def corr_all(self, k):
+    if ((self.prp[self.uid].phase+1)%3 == self.prp[k].phase):
+      return True
+    return self.all[k]
 
   def increment(self, proposal):
     """ Returns the appropriate incremented new proposal based on its phase.
