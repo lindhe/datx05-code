@@ -21,7 +21,7 @@ $ evaluation/planetlab/servers_start.sh
 ### Tests
 
 ```
-$ evaluation/planetlab/servers_init.sh
+$ ./servers_init.py
 $ evaluation/planetlab/tests/test_1.sh; # etc.
 ```
 
