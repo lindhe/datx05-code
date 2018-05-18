@@ -136,9 +136,9 @@ class Server:
   async def gossip_departure(self, k):
     tag_tuple = self.S.tag_tuple()
     cntr = IncNbrHelper.to_list(self.inc_nbrs) if len(self.inc_nbrs) else None
-    prp = tuple(self.prp[self.uid]) if self.prp[self.uid] else self.dflt_prp
+    prp = tuple(self.prp[self.uid]) if self.prp[self.uid] else None
     msg_all = self.all[self.uid]
-    echo_prp = tuple(self.prp[k]) if k in self.prp and self.prp[k] else self.dflt_prp
+    echo_prp = tuple(self.prp[k]) if k in self.prp and self.prp[k] else None
     echo_all = self.all[k] if k in self.all else False
     echo = (echo_prp, echo_all)
     gossip_obj = GossipMessage(tag_tuple, cntr, prp, msg_all, echo)
@@ -220,14 +220,20 @@ class Server:
       self.config.append(k)
     self.prp[k] = Prp(*prp) if prp else None
     self.all[k] = msg_all
-    self.echo_answers[k] = (Prp(*echo[0]), echo[1])
+    if echo[0]:
+      self.echo_answers[k] = (Prp(*echo[0]), echo[1])
+    else:
+      self.echo_answers[k] = (None, echo[1])
     if len(self.config) == self.n:
+      if self.p:
+        self.propose((1, (1, 'a')))
       self.main()
 
   def main(self):
     # Main loop
     print("main reset thing")
     uid = self.uid
+    #print(f"Found a proposal {self.uid} {self.prp} {self.all} {self.echo_answers}")
     for k in self.config:
       if k != self.uid:
         if (self.all[k]):
@@ -236,13 +242,16 @@ class Server:
     if self.transient_fault():
       print("Transient fault detected!")
       self.prp_set(None)
+      self.p = False
     # Update all[i]:
     if (self.prp[uid] == None and self.all[uid]):
       print("Bot detected!")
       self.prp[uid] = self.dflt_prp
-    self.prp[uid] = self.max_prp()
+      self.p = False
     self.all[uid] = self.and_every(self.echo_no_all)
     if self.no_default_no_bot():
+      self.prp[uid] = self.max_prp()
+      self.all[uid] = self.and_every(self.echo_no_all)
       if self.all_seen() and self.and_every(self.echo):
         (self.prp[uid], self.all[uid]) = self.increment(self.prp[uid])
         self.all_seen_processors = set()
@@ -260,6 +269,7 @@ class Server:
     if self.enable_reset():
       self.prp[self.uid] = Prp(1, tag)
       self.all[self.uid] = False
+      self.p = False
 
   def enable_reset(self):
     """ Blocks proposal if ongoing proposal.
@@ -281,6 +291,9 @@ class Server:
     return
 
   def update_prp(self, val):
+    prps = set([self.prp[k] for k in self.config])
+    if (None in prps):
+      return
     for k in self.config:
       if (self.prp[k].phase+1)%3 == val.phase:
         self.prp[k] = val
@@ -368,6 +381,8 @@ class Server:
     if self.all[k]:
       return True
     for p in self.all_seen_processors:
+      if not self.prp[k] or not self.prp[p]:
+        return False
       if (self.prp[p].phase == (self.prp[k].phase+1)%3) and \
 self.prp[k].phase != self.prp[p].phase:
         return True
@@ -385,9 +400,14 @@ self.prp[k].phase != self.prp[p].phase:
 (self.larger_or_equal(k))
    
   def all_same(self, k):
+    prps = set([self.prp[k] for k in self.config])
+    if (None in prps):
+      return False
     return self.larger_or_equal(k) and (self.all[self.uid] == self.my_all(k))
 
   def larger_or_equal(self, k):
+    if not self.prp[k] or not self.prp[self.uid]:
+      return True
     if self.prp[k].phase == (self.prp[self.uid].phase+1)%3:
       return True
     elif self.prp[k].phase == self.prp[self.uid].phase:
@@ -473,6 +493,8 @@ and self.larger_or_equal(k) and self.corr_all(k)
     Returns:
       bool: True if there is a transient fault detected, False otherwise.
     """
+    if not self.prp[self.uid]:
+      return False
     # (∃pk ∈ config : prp[k] = ⊥)
     is_bot_prp = [k for k in self.config if self.prp[k] == None]
     # (prp[i] != {dfltPrp})
@@ -489,7 +511,7 @@ and self.larger_or_equal(k) and self.corr_all(k)
         differing_deg = True
     # {pk ∈ config : degree(i)+1 mod 6 = degree(k)}
     k_with_diff_deg = [k for k in self.config\
-        if (self.prp[self.uid].phase+1 % 3 == self.prp[k].phase) and \
+        if self.prp[k] and (self.prp[self.uid].phase+1 % 3 == self.prp[k].phase) and \
             self.prp[self.uid] != self.dflt_prp]
     # (k_with_diff_deg ⊆ allSeenProcessors)
     close_deg_seen = not set(k_with_diff_deg) <= \
@@ -500,12 +522,10 @@ and self.larger_or_equal(k) and self.corr_all(k)
       return True
     elif differing_deg:
       print("differing_deg")
-      sys.exit()
       return True
     elif close_deg_seen:
       print("close_deg_seen")
       raise Exception(f"{self.uid} {self.all_seen_processors}\n {self.prp} {self.all}")
-      sys.exit()
       return True
     elif (len(self.proposal_set()) > 1):
       print("|proposalSet| > 1")
