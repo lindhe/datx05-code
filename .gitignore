@@ -3,7 +3,7 @@ __pycache__*
 .storage/
 autogen.ini
 perf_result.txt
-result/
+results/
 config/wip/*
 config/servers.txt
 config/clients.txt
