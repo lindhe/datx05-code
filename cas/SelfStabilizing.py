@@ -53,7 +53,6 @@ class Server:
     self.FIN = {}
     ######### Wrap Around (Global Reset) #########
     self.n = n
-    self.p = False
     # Algorithm variables:
     self.dflt_prp = Prp(0, None)
     self.config = [self.uid] # List of uid
@@ -225,15 +224,12 @@ class Server:
     else:
       self.echo_answers[k] = (None, echo[1])
     if len(self.config) == self.n:
-      if self.p:
-        self.propose((1, (1, 'a')))
       self.main()
 
   def main(self):
     # Main loop
     print("main reset thing")
     uid = self.uid
-    #print(f"Found a proposal {self.uid} {self.prp} {self.all} {self.echo_answers}")
     for k in self.config:
       if k != self.uid:
         if (self.all[k]):
@@ -242,12 +238,10 @@ class Server:
     if self.transient_fault():
       print("Transient fault detected!")
       self.prp_set(None)
-      self.p = False
     # Update all[i]:
     if (self.prp[uid] == None and self.all[uid]):
       print("Bot detected!")
       self.prp[uid] = self.dflt_prp
-      self.p = False
     self.all[uid] = self.and_every(self.echo_no_all)
     if self.no_default_no_bot():
       self.prp[uid] = self.max_prp()
@@ -258,7 +252,6 @@ class Server:
       if self.prp[uid].phase == 2:
         self.local_reset(self.prp[uid].tag)
         print("LOCAL RESET")
-        self.p = False
 
   def propose(self, tag):
     """ Proposes to reset register to only hold the Record with tag tag.
@@ -269,7 +262,6 @@ class Server:
     if self.enable_reset():
       self.prp[self.uid] = Prp(1, tag)
       self.all[self.uid] = False
-      self.p = False
 
   def enable_reset(self):
     """ Blocks proposal if ongoing proposal.
