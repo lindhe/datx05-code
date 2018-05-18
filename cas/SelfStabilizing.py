@@ -395,7 +395,7 @@ self.prp[k].phase != self.prp[p].phase:
     prps = set([self.prp[k] for k in self.config])
     if (None in prps):
       return False
-    return self.larger_or_equal(k) and (self.all[self.uid] == self.my_all(k))
+    return self.enable_reset() and (self.all[self.uid] == self.my_all(k))
 
   def larger_or_equal(self, k):
     if not self.prp[k] or not self.prp[self.uid]:
