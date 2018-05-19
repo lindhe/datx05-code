@@ -80,7 +80,11 @@ class Server:
     Returns:
       tuple (t, None, 'qry') where t is max_phase of ['fin', 'FIN']
     """
-    return (self.S.max_phase(['fin', 'FIN']), None, 'qry')
+    max_tag = self.S.max_phase(['pre', 'fin', 'FIN'])
+    if max_tag[0] >= self.t_top:
+      return None
+    else:
+      return (self.S.max_phase(['fin', 'FIN']), None, 'qry')
 
   def write_query(self):
     """ Reply to write query arrival event, from pj's client to pi's server.
@@ -129,7 +133,8 @@ class Server:
     Returns:
       tuple: (t, None, d)
     """
-    await self.S.update_phase(t, None, d)
+    if not ((t not in self.S.register) and (t[0] == self.t_top)):
+      await self.S.update_phase(t, None, d)
     return (t, None, d)
 
   async def gossip_departure(self, k):
