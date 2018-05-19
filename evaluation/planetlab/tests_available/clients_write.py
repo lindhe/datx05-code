@@ -15,20 +15,20 @@ from time import sleep
 from time import time
 from client import Client
 
-msg_size = 512*1024
-msg = os.urandom(msg_size)
-# Random delay in ms
-max_delay = 2000
-op = 'write'
-uid = os.uname().nodename
-home=pathlib.Path.home()
-res = str(home) + "/results/"
-res_file = res + op + '_' + uid + '.csv'
-outliers = 1
-
-def main(rounds, config):
+def main(operation, rounds, config):
+  msg_size = 512*1024
+  msg = os.urandom(msg_size)
+  # Random delay in ms
+  max_delay = 2000
+  op = operation
+  uid = os.uname().nodename
+  home=pathlib.Path.home()
+  res = str(home) + "/results/"
+  res_file = res + op + '_' + uid + '.log'
+  outliers = 1
   results = configparser.ConfigParser()
   acc_time = 0
+  # Results
   results['Meta'] = {}
   results['Meta']['start_time'] = str(time())
   results['Meta']['uid'] = str(uid)
@@ -44,7 +44,10 @@ def main(rounds, config):
     print(f"Running {op} test at {uid}")
     time_in = time()
     # DO WORK HERE
-    c.write(msg)
+    if op == 'writer':
+      c.write(msg)
+    else:
+      c.read()
     time_out = time() - time_in
     results['Times'][f"run{r}"] = str(time_out)
   times = sorted([ float(v) for v in results['Times'].values() ])
@@ -57,11 +60,13 @@ def main(rounds, config):
   print(f"Write test done!")
 
 if __name__ == '__main__':
-  global config
   program = sys.argv[0]
-  rounds = int(sys.argv[1]) if len(sys.argv) > 1 else rounds
-  config = sys.argv[2] if len(sys.argv) > 2 else "~/casss/config/autogen.ini"
+  if len(sys.argv) < 2:
+    sys.exit()
+  op = sys.argv[1]
+  rounds = int(sys.argv[2]) if len(sys.argv) > 2 else rounds
+  config = sys.argv[3] if len(sys.argv) > 3 else "/home/chalmersple_casss2/casss/config/autogen.ini"
   try:
-    main(rounds, config)
+    main(op, rounds, config)
   except KeyboardInterrupt:
     sys.exit("\nInterrupted by ^C\n")
