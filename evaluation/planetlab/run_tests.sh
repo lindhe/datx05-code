@@ -2,9 +2,11 @@
 
 rounds=20
 
+r=./config/readers.txt
+w=./config/writers.txt
+clients=$(cat $r $w | sort | uniq)
 ssh_key=~/.ssh/planetlab_rsa
 slice=chalmersple_casss2
-clients=$(cat ./config/clients.txt | sort)
 tests=evaluation/planetlab/tests_enabled/*
 
 for t in $tests; do
