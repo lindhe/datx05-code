@@ -3,10 +3,13 @@
 #
 # License: MIT
 # Author: Andreas Lindhé
+#
+##########################     CLIENT WRITE TEST     ##########################
 
 import sys
 import os
 import pathlib
+import configparser
 from random import randint as rand
 from time import sleep
 from time import time
@@ -24,8 +27,17 @@ res_file = res + op + '_' + uid + '.csv'
 outliers = 1
 
 def main(rounds, config):
+  results = configparser.ConfigParser()
   acc_time = 0
-  times = []
+  results['Meta'] = {}
+  results['Meta']['start_time'] = str(time())
+  results['Meta']['uid'] = str(uid)
+  results['Meta']['test'] = str(op)
+  results['Meta']['rounds'] = str(rounds)
+  results['Meta']['outliers'] = str(rounds)
+  results['Meta']['file_size'] = str(msg_size)
+  results['Times'] = {}
+  results['Average'] = {}
   c = Client(config)
   for r in range(rounds):
     sleep(rand(0, max_delay)/1000)
@@ -34,21 +46,15 @@ def main(rounds, config):
     # DO WORK HERE
     c.write(msg)
     time_out = time() - time_in
-    times.append(time_out)
-  times = sorted(times)
+    results['Times'][f"run{r}"] = str(time_out)
+  times = sorted([ float(v) for v in results['Times'].values() ])
   no_outliers = times[1:-1]
-  avg_time = sum(no_outliers) / (rounds - 2*outliers)
-  avg_all = sum(times) / (rounds)
-  result = str(time()) + '\t' \
-      + op + ' ' + str(msg_size) + '\t'\
-      + str(avg_time) + '\t' \
-      + str(avg_all) + '\t' \
-      + str(times) + '\t' \
-      '\n'
+  results['Average']['average'] = str(sum(times) / (rounds))
+  results['Average']['average_no_outliers'] = str(sum(no_outliers) / (rounds - 2*outliers))
   pathlib.Path(res).mkdir(exist_ok=True, parents=True)
   with open(res_file, 'a') as f:
-    f.write(result)
-  print(f"Wrote {msg_size} bytes to quorum system. It took {avg_time} seconds.")
+    results.write(f)
+  print(f"Write test done!")
 
 if __name__ == '__main__':
   global config
