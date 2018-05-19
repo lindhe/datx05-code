@@ -22,7 +22,7 @@ $ evaluation/planetlab/servers_start.sh
 ### Tests
 
 ```
-$ ./servers_init.py
+$ python3.6 -m evaluation.planetlab.servers_init
 $ evaluation/planetlab/run_tests.sh
 ```
 
