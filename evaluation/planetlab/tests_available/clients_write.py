@@ -34,7 +34,7 @@ def main(operation, rounds, config):
   results['Meta']['uid'] = str(uid)
   results['Meta']['test'] = str(op)
   results['Meta']['rounds'] = str(rounds)
-  results['Meta']['outliers'] = str(rounds)
+  results['Meta']['outliers'] = str(2*outliers)
   results['Meta']['file_size'] = str(msg_size)
   results['Times'] = {}
   results['Average'] = {}
@@ -51,7 +51,7 @@ def main(operation, rounds, config):
     time_out = time() - time_in
     results['Times'][f"run{r}"] = str(time_out)
   times = sorted([ float(v) for v in results['Times'].values() ])
-  no_outliers = times[1:-1]
+  no_outliers = times[outliers:-outliers]
   results['Average']['average'] = str(sum(times) / (rounds))
   results['Average']['average_no_outliers'] = str(sum(no_outliers) / (rounds - 2*outliers))
   pathlib.Path(res).mkdir(exist_ok=True, parents=True)

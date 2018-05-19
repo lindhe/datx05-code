@@ -11,13 +11,12 @@ import re
 from pathlib import Path
 
 def main(rel_path):
-    home = str(Path.home()) + "/"
-    res_path = home + rel_path
+    res_path = os.getcwd() + '/' + rel_path + '/'
     res_file = res_path + "summary.txt"
 
     results = configparser.ConfigParser()
     files = os.listdir(res_path)
-    regex = re.compile('.*csv')
+    regex = re.compile('.*log')
     filtered_files = [x for x in files if regex.match(x)]
     avg = []
     avg_no_outliers = []
@@ -28,7 +27,7 @@ def main(rel_path):
         test = results['Meta']['test']
         rounds = results['Meta']['rounds']
         outliers = results['Meta']['outliers']
-        
+
     summary = sum(avg)/len(avg)
     summary_no_outliers = sum(avg_no_outliers)/len(avg_no_outliers)
     result = f"Average from {len(avg)} {test} clients during {rounds} rounds:\nAll: {summary}\nRemoved {outliers} outliers: {summary_no_outliers}"
