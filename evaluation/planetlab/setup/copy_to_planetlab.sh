@@ -1,5 +1,6 @@
 #!/bin/bash
 
+opts="StrictHostKeyChecking=no"
 s=./config/servers.txt
 r=./config/readers.txt
 w=./config/writers.txt
@@ -11,7 +12,7 @@ failed=0
 echo "Copying working directory to servers..."
 
 for server in $all; do
-  rsync -aPz -e "ssh -i $ssh_key -l $slice" ./* $server:~/casss \
+  rsync -aPz -e "ssh -o $opts -i $ssh_key -l $slice" ./* $server:~/casss \
     && echo "Transfer to $server sucessful!"  \
     || { echo "Failed transfer to $server"; failed=1; break; }
 done

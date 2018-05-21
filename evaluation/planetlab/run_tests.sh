@@ -2,6 +2,7 @@
 
 rounds=20
 
+opts="StrictHostKeyChecking=no"
 ssh_key=~/.ssh/planetlab_rsa
 slice=chalmersple_casss2
 tests=evaluation/planetlab/tests_enabled/*
@@ -26,11 +27,11 @@ for step in $test_writers/*; do
       m=$(echo $t | sed 's/\//./g')
       module=${m%.py}
       for writer in $writers; do
-        ssh -l $slice -i ~/.ssh/planetlab_rsa $writer \
+        ssh -o $opts -l $slice -i ~/.ssh/planetlab_rsa $writer \
           "cd ~/casss/; python3.6 -m $module 'writer' $rounds $config $step" &
       done
       for reader in $readers; do
-        ssh -l $slice -i ~/.ssh/planetlab_rsa $reader \
+        ssh -o $opts -l $slice -i ~/.ssh/planetlab_rsa $reader \
           "cd ~/casss/; python3.6 -m $module 'reader' $rounds $config" &
       done
     fi
@@ -43,7 +44,8 @@ for step in $test_writers/*; do
   echo "Fetching results..."
   mkdir -p $step
   for writer in $writers; do
-    rsync -aPz -e "ssh -i $ssh_key -l $slice" $writer:~/results/$scenario* $step
+    rsync -aPz -e "ssh -o $opts -i $ssh_key -l $slice"\
+      $writer:~/results/$scenario* $step
   done
 
   python3.6 -m evaluation.planetlab.summary $step
