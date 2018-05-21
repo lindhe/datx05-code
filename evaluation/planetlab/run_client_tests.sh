@@ -47,6 +47,10 @@ for step in $test_case_dir/*; do
     rsync -aPz -e "ssh -o $opts -i $ssh_key -l $slice"\
       $writer:~/results/$scenario* $step
   done
+  for reader in $readers; do
+    rsync -aPz -e "ssh -o $opts -i $ssh_key -l $slice"\
+      $reader:~/results/$scenario* $step
+  done
 
   python3.6 -m evaluation.planetlab.summary $step
 
