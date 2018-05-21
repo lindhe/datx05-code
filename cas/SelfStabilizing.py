@@ -42,6 +42,7 @@ class Server:
   def __init__(self, uid, quorum, max_clients, delta, queue_size, n, storage_location="./.storage/"):
     self.uid = uid.encode()
     self.t_top = 3
+    self.queue_size = queue_size
     self.inc_nbrs = deque(maxlen=queue_size)
     # Quorum size:
     self.quorum = quorum
@@ -550,4 +551,4 @@ and self.larger_or_equal(k) and self.corr_all(k)
     """
     if(tag[0] == self.t_top):
       self.S.reset(tag)
-    return
+      self.inc_nbrs = deque(maxlen=self.queue_size)
