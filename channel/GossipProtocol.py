@@ -6,7 +6,7 @@ class GossipMessage:
 
     pack_helper = PackHelper()
     
-    def __init__(self, tag_tuple, cntrs, prp=None, msg_all=None, echo=None):
+    def __init__(self, tag_tuple, cntrs, prp, msg_all, echo):
         self.tag_tuple = str(tag_tuple).encode() if type(tag_tuple) != bytes else tag_tuple
         self.cntrs = str(cntrs).encode() if type(cntrs) != bytes else cntrs
         self.prp = str(prp).encode() if type(prp) != bytes else prp

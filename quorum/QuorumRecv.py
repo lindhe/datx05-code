@@ -18,8 +18,12 @@ class QuorumRecv:
             if (label == 'qry'):
                 if (mode == 'read'):
                     res = self.server.read_query()
+                    if not res:
+                        return None
                 else:
                     res = self.server.write_query()
+                    if not res:
+                        return None
             elif (label == 'pre'):
                 res = await self.server.pre_write(tag, data)
             elif (label == 'fin' or label == 'FIN'):

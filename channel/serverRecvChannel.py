@@ -9,12 +9,13 @@ from .UdpSender import UdpSender
 class ServerRecvChannel:
     """ Creates a server recv channel for pingpong and gossip"""
 
-    def __init__(self, callback_obj, callback_obj_gossip, port, ip,
+    def __init__(self, uid, callback_obj, callback_obj_gossip, port, ip,
                  gossip_freq=1, chunks_size=1024):
         """
         Initialize callbacks, parameters and create tcp/udp sockets
         """
 
+        self.uid = uid.encode()
         self.cb_obj = callback_obj
         self.cb_obj_gossip = callback_obj_gossip
         self.port = port
@@ -57,7 +58,8 @@ class ServerRecvChannel:
         Create udp response and send it.
         """
         response = await self.check_msg(data)
-        await self.udp_sock.sendto(response, addr)
+        if response:
+            await self.udp_sock.sendto(response, addr)
 
     async def tcp_response(self, conn):
         """
@@ -65,7 +67,11 @@ class ServerRecvChannel:
         """
         int_size = struct.calcsize("i")
         recv_msg_size = await self.loop.sock_recv(conn, int_size)
-        msg_size = struct.unpack("i", recv_msg_size)[0]
+        try:
+            msg_size = struct.unpack("i", recv_msg_size)[0]
+        except Exception as e:
+            conn.close()
+            return
         res = b''
         while (len(res) < msg_size):
             res += await self.loop.sock_recv(conn, self.chunks_size)
@@ -93,11 +99,14 @@ class ServerRecvChannel:
 
         if(self.tokens[sender] != msg_cntr):
             self.tokens[sender] = msg_cntr
-            token = struct.pack("ii", msg_type,self.tokens[sender])
+            token = struct.pack("ii17s", msg_type,self.tokens[sender], self.uid)
             if(msg_type == 0):
                 if payload:
                     new_msg = await self.cb_obj.arrival(sender, payload)
-                    response = token+new_msg if new_msg else token
+                    if new_msg:
+                        response = token+new_msg if new_msg else token
+                    else:
+                        response = None
                 else:
                     response = token
             elif(msg_type == 1):
@@ -106,7 +115,7 @@ class ServerRecvChannel:
                 await asyncio.sleep(self.gsp_freq)
         else:
             print("NO TOKEN ARRIVAL")
-            token = struct.pack("ii", msg_type,self.tokens[sender])
+            token = struct.pack("ii17s", msg_type,self.tokens[sender], self.uid)
             response = token
 
         return response
