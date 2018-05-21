@@ -9,9 +9,14 @@ import time
 import itertools
 import pathlib
 
-def main(r, w, c_nodes="clients.txt"):
+def main(r, w, s):
+  c_nodes="config/clients.txt"
+  s_nodes="config/servers.txt"
   r = [int(e) for e in r]
   w = [int(e) for e in w]
+  s = int(s)
+  with open(s_nodes) as f:
+    servers = f.read().splitlines()
   if len(r) == 1:
     r = r[0]
     with open(c_nodes) as f:
@@ -21,13 +26,17 @@ def main(r, w, c_nodes="clients.txt"):
         client_list = (client_nodes*clients)[:clients]
         rs = client_list[:r]
         ws = client_list[-writer:]
-        path = "tests/test-writers/" + "step" + str(writer) + '/'
+        ss = servers[:s]
+        path = "config/tests/test-writers/" + "step" + str(writer) + '/'
         pathlib.Path(path).mkdir(exist_ok=True, parents=True)
         with open(path + "writers.txt", 'w') as f:
           for line in ws:
             f.write(line + '\n')
         with open(path + "readers.txt", 'w') as f:
           for line in rs:
+            f.write(line + '\n')
+        with open(path + "servers.txt", 'w') as f:
+          for line in ss:
             f.write(line + '\n')
   else:
     w = w[0]
@@ -38,7 +47,7 @@ def main(r, w, c_nodes="clients.txt"):
         client_list = (client_nodes*clients)[:clients]
         rs = client_list[-reader:]
         ws = client_list[:w]
-        path = "tests/test-readers/" + "step" + str(reader) + '/'
+        path = "config/tests/test-readers/" + "step" + str(reader) + '/'
         pathlib.Path(path).mkdir(exist_ok=True, parents=True)
         with open(path + "writers.txt", 'w') as f:
           for line in ws:
@@ -46,13 +55,17 @@ def main(r, w, c_nodes="clients.txt"):
         with open(path + "readers.txt", 'w') as f:
           for line in rs:
             f.write(line + '\n')
+        with open(path + "servers.txt", 'w') as f:
+          for line in ss:
+            f.write(line + '\n')
 
 if __name__ == '__main__':
   program = sys.argv[0]
   readers = sys.argv[1].split(',')
   writers = sys.argv[2].split(',')
+  servers = sys.argv[3]
   try:
-    main(readers, writers)
+    main(readers, writers, servers)
   except KeyboardInterrupt:
     sys.exit("\nInterrupted by ^C\n")
 
