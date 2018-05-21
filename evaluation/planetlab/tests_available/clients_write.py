@@ -26,6 +26,9 @@ def main(operation, rounds, config):
   res = str(home) + "/results/"
   res_file = res + op + '_' + uid + '.log'
   outliers = 1
+  if rounds - 2*outliers < 1:
+    print("Can't have more outliers than rounds!", file=sys.stderr)
+    rounds = 2*outliers + 1
   results = configparser.ConfigParser()
   acc_time = 0
   # Results
