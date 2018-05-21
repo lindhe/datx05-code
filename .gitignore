@@ -11,3 +11,4 @@ config/readers.txt
 config/writers.txt
 *.log
 summary.txt
+config/tests/*
