@@ -58,9 +58,12 @@ def main(operation, rounds, config):
   results['Average']['average'] = str(sum(times) / (rounds))
   results['Average']['average_no_outliers'] = str(sum(no_outliers) / (rounds - 2*outliers))
   pathlib.Path(res).mkdir(exist_ok=True, parents=True)
-  with open(res_file, 'a') as f:
-    results.write(f)
-  print(f"Write test done!")
+  try:
+    with open(res_file, 'a') as f:
+      results.write(f)
+    print(f"Write test done!")
+  except OSError as e:
+    print(f"Error writing to file {res_file}: {e}", file=sys.stderr)
 
 if __name__ == '__main__':
   program = sys.argv[0]
