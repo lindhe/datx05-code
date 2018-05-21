@@ -21,6 +21,7 @@ class Client:
         config = configparser.ConfigParser()
         config.read(cfgfile)
         nbr_of_servers = int(config['General']['n'])
+        chunks_size = int(config['General']['chunks_size'])
         f = int(config['General']['f'])
         e = int(config['General']['e'])
         k = nbr_of_servers - 2*(f + e)
@@ -30,7 +31,7 @@ class Client:
         self.majority = math.ceil((nbr_of_servers+1)/2)
         self.ec_driver = ECDriver(k=k, m=nbr_of_servers, ec_type='liberasurecode_rs_vand')
         self.p = QuorumSend(quorum_size, PingPongMessage)
-        t = Thread(target=self.start_event_loop, args=(self.loop, config['Nodes']))
+        t = Thread(target=self.start_event_loop, args=(self.loop, config['Nodes'], chunks_size))
         t.daemon = True
         t.start()
 
@@ -48,12 +49,12 @@ class Client:
                             )
         return hw_addr
 
-    def start_event_loop(self, loop, nodes):
+    def start_event_loop(self, loop, nodes, chunks_size):
         asyncio.set_event_loop(loop)
         i = 0
         for node in nodes:
             ip, port = nodes[node].split(':')
-            c = SenderChannel(i, self.hw_addr, 0, self.p, ip, port)
+            c = SenderChannel(i, self.hw_addr, 0, self.p, ip, port, chunks_size=chunks_size)
             asyncio.ensure_future(c.start())
             print("Create channel to {}:{}".format(ip, port))
             i = i+1

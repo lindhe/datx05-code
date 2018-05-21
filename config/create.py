@@ -49,6 +49,7 @@ def main(filename, nbr_of_servers, f):
     config['General']['concurrent_clients'] = '5'
     config['General']['queue_size'] = '10'
     config['General']['gossip_freq'] = '1'
+    config['General']['chunks_size'] = '1024'
 
     with open(filename, 'w') as cfgfile:
         config.write(cfgfile)

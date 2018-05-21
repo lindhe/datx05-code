@@ -48,11 +48,12 @@ def read_cfgfile(my_ip, my_port, cfgfile):
     delta = int(config['General']['concurrent_clients'])
     queue_size = int(config['General']['queue_size'])
     gossip_freq = int(config['General']['gossip_freq'])
+    chunks_size = int(config['General']['chunks_size'])
     return [my_id, nbr_of_servers, f, e, base_location, max_clients,
-            delta, queue_size, gossip_freq, nodes]
+            delta, queue_size, gossip_freq, chunks_size, nodes]
 
 def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_clients,
-         delta, queue_size, gossip_freq, nodes):
+         delta, queue_size, gossip_freq, chunks_size, nodes):
     k = nbr_of_servers - 2*(f + e)
     if(k < 1):
         raise Exception("Coded elements less than 1")
@@ -75,10 +76,10 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
     for node in nodes:
         ip, port = node.split(':')
         if node_index is not my_id:
-            c = SenderChannel(node_index, uid, 1, g, ip, port, init_tx=m)
+            c = SenderChannel(node_index, uid, 1, g, ip, port, init_tx=m, chunks_size=chunks_size)
             loop.create_task(c.start())
         node_index += 1
-    s = ServerRecvChannel(uid, p, g, my_port, my_ip, gossip_freq=gossip_freq)
+    s = ServerRecvChannel(uid, p, g, my_port, my_ip, gossip_freq=gossip_freq, chunks_size=chunks_size)
     loop.create_task(s.tcp_listen())
     loop.create_task(s.udp_listen())
 
