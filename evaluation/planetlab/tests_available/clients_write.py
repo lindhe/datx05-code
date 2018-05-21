@@ -10,21 +10,24 @@ import sys
 import os
 import pathlib
 import configparser
+import re
 from random import randint as rand
 from time import sleep
 from time import time
 from client import Client
 
-def main(operation, rounds, config):
+def main(operation, rounds, config, step):
   msg_size = 512*1024
   msg = os.urandom(msg_size)
   # Random delay in ms
   max_delay = 2000
   op = operation
   uid = os.uname().nodename
+  pid = str(os.getpid())
   home=pathlib.Path.home()
   res = str(home) + "/results/"
-  res_file = res + op + '_' + uid + '.log'
+  scenario = step.split('/')[-1]
+  res_file = res + scenario + '_' + op + '_' + uid + '.' + pid + '.log'
   outliers = 1
   if rounds - 2*outliers < 1:
     print("Can't have more outliers than rounds!", file=sys.stderr)
@@ -57,22 +60,25 @@ def main(operation, rounds, config):
   no_outliers = times[outliers:-outliers]
   results['Average']['average'] = str(sum(times) / (rounds))
   results['Average']['average_no_outliers'] = str(sum(no_outliers) / (rounds - 2*outliers))
-  pathlib.Path(res).mkdir(exist_ok=True, parents=True)
-  try:
-    with open(res_file, 'a') as f:
-      results.write(f)
-    print(f"Write test done!")
-  except OSError as e:
-    print(f"Error writing to file {res_file}: {e}", file=sys.stderr)
+  if op == 'writer':
+    pathlib.Path(res).mkdir(exist_ok=True, parents=True)
+    try:
+      with open(res_file, 'a') as f:
+        results.write(f)
+      print(f"Write test done!")
+    except OSError as e:
+      print(f"Error writing to file {res_file}: {e}", file=sys.stderr)
 
 if __name__ == '__main__':
   program = sys.argv[0]
   if len(sys.argv) < 2:
     sys.exit()
   op = sys.argv[1]
-  rounds = int(sys.argv[2]) if len(sys.argv) > 2 else rounds
-  config = sys.argv[3] if len(sys.argv) > 3 else "/home/chalmersple_casss2/casss/config/autogen.ini"
+  rounds = int(sys.argv[2]) if len(sys.argv) > 2 else 20
+  home=str(pathlib.Path.home())
+  config = sys.argv[3] if len(sys.argv) > 3 else f"{home}/casss/config/autogen.ini"
+  step_name = sys.argv[4] if len(sys.argv) > 4 else "step0"
   try:
-    main(op, rounds, config)
+    main(op, rounds, config, step_name)
   except KeyboardInterrupt:
     sys.exit("\nInterrupted by ^C\n")
