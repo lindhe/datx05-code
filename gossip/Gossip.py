@@ -26,7 +26,7 @@ msg_data.get_prp(), msg_data.get_all(), msg_data.get_echo(), msg_data.get_cntrs(
     def use_tcp(self, tx):
         if not tx:
             return False
-        if (len(tx) > 1024):
+        if (len(tx) > 512):
            return True
         else:
             return False
