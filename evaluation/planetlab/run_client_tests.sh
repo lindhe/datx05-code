@@ -6,10 +6,10 @@ opts="StrictHostKeyChecking=no"
 ssh_key=~/.ssh/planetlab_rsa
 slice=chalmersple_casss2
 tests=evaluation/planetlab/tests_enabled/*
-test_writers=config/tests/test-writers
+test_case_dir=config/tests/$1
 config="/home/$slice/casss/config/autogen.ini"
 
-for step in $test_writers/*; do
+for step in $test_case_dir/*; do
   scenario=$(echo "$step" | sed 's/.*\/\(step.*\)/\1/')
 
   for file in $step/*; do
