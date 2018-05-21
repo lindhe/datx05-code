@@ -10,7 +10,6 @@ import sys
 import os
 import pathlib
 import configparser
-import re
 from random import randint as rand
 from time import sleep
 from time import time
@@ -44,29 +43,32 @@ def main(operation, rounds, config, step, msg_size):
   results['Times'] = {}
   results['Average'] = {}
   c = Client(config)
+  # Add init record
+  c.write(msg)
   for r in range(rounds):
     sleep(rand(0, max_delay)/1000)
     print(f"Running {op} test at {uid}")
-    time_in = time()
     # DO WORK HERE
     if op == 'writer':
+      time_in = time()
       c.write(msg)
+      time_out = time() - time_in
     else:
+      time_in = time()
       c.read()
-    time_out = time() - time_in
+      time_out = time() - time_in
     results['Times'][f"run{r}"] = str(time_out)
   times = sorted([ float(v) for v in results['Times'].values() ])
   no_outliers = times[outliers:-outliers]
   results['Average']['average'] = str(sum(times) / (rounds))
   results['Average']['average_no_outliers'] = str(sum(no_outliers) / (rounds - 2*outliers))
-  if op == 'writer':
-    pathlib.Path(res).mkdir(exist_ok=True, parents=True)
-    try:
-      with open(res_file, 'a') as f:
-        results.write(f)
-      print(f"Write test done!")
-    except OSError as e:
-      print(f"Error writing to file {res_file}: {e}", file=sys.stderr)
+  pathlib.Path(res).mkdir(exist_ok=True, parents=True)
+  try:
+    with open(res_file, 'a') as f:
+      results.write(f)
+    print(f"Write test done!")
+  except OSError as e:
+    print(f"Error writing to file {res_file}: {e}", file=sys.stderr)
 
 def to_bytes(s, prefix='b'):
   size = int(s)
