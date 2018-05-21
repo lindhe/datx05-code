@@ -234,7 +234,6 @@ class Server:
 
   def main(self):
     # Main loop
-    print("main reset thing")
     uid = self.uid
     for k in self.config:
       if k != self.uid:
@@ -242,11 +241,13 @@ class Server:
           self.update_prp(self.prp[k])
           self.all_seen_processors.add(k)
     if self.transient_fault():
-      print("Transient fault detected!")
+      if __debug__:
+        print("Transient fault detected!")
       self.prp_set(None)
     # Update all[i]:
     if (self.prp[uid] == None and self.all[uid]):
-      print("Bot detected!")
+      if __debug__:
+        print("Changing to dfltPrp!")
       self.prp[uid] = self.dflt_prp
     self.all[uid] = self.and_every(self.echo_no_all)
     if self.no_default_no_bot():
@@ -257,7 +258,8 @@ class Server:
         self.all_seen_processors = set()
       if self.prp[uid].phase == 2:
         self.local_reset(self.prp[uid].tag)
-        print("LOCAL RESET")
+        if __debug__:
+          print("LOCAL RESET")
 
   def propose(self, tag):
     """ Proposes to reset register to only hold the Record with tag tag.
@@ -516,20 +518,24 @@ and self.larger_or_equal(k) and self.corr_all(k)
         (self.all_seen_processors ) \
         if k_with_diff_deg else False
     if zero_s_not_bot:
-      print(f"{self.uid} zero_s_not_bot")
+      if __debug__:
+        print(f"{self.uid} zero_s_not_bot")
       return True
     elif differing_deg:
-      print("differing_deg")
+      if __debug__:
+        print("differing_deg")
       return True
     elif close_deg_seen:
-      print("close_deg_seen")
-      raise Exception(f"{self.uid} {self.all_seen_processors}\n {self.prp} {self.all}")
+      if __debug__:
+        print("close_deg_seen")
       return True
     elif (len(self.proposal_set()) > 1):
-      print("|proposalSet| > 1")
+      if __debug__:
+        print("|proposalSet| > 1")
       return True
     else:
-      print("ok")
+      if __debug__:
+        print("ok")
       return False
 
   def no_default_no_bot(self):
@@ -540,7 +546,6 @@ and self.larger_or_equal(k) and self.corr_all(k)
         otherwise.
     """
     prps = set([self.prp[k] for k in self.config])
-    #return (None not in prps)
     return ( prps != set([self.dflt_prp]) ) and (None not in prps)
 
   def local_reset(self, tag):

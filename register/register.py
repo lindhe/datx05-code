@@ -181,7 +181,8 @@ class Register:
       tag (tuple): The tag to preserve.
     """
     if tag in self.register:
-      print(f"LOCAL RESET {tag} {self.register}")
+      if __debug__:
+        print(f"LOCAL RESET {tag} {self.register}")
       r = self.register.pop(tag)
       element = r.element
       # Remove all other records, both from disk and from register:
