@@ -7,7 +7,6 @@ class QuorumRecv:
         self.server = server
 
     async def arrival(self, sender, payload):
-        print("pingpong CALLBACK")
         msg_list = PingPongMessage.set_message(payload)
         msg_data = PingPongMessage(*msg_list)
         if msg_data:
@@ -43,5 +42,6 @@ class QuorumRecv:
             new_msg = PingPongMessage(*res, mode, req_tag=msg_data.get_tag())
             return new_msg.get_bytes()
         else:
-            print("Got empty message")
+            if __debug__:
+                print("Got empty message")
             return None
