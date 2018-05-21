@@ -16,8 +16,7 @@ from time import sleep
 from time import time
 from client import Client
 
-def main(operation, rounds, config, step):
-  msg_size = 512*1024
+def main(operation, rounds, config, step, msg_size):
   msg = os.urandom(msg_size)
   # Random delay in ms
   max_delay = 2000
@@ -69,6 +68,17 @@ def main(operation, rounds, config, step):
     except OSError as e:
       print(f"Error writing to file {res_file}: {e}", file=sys.stderr)
 
+def to_bytes(s, prefix='b'):
+  size = int(s)
+  if (prefix == 'G'):
+    return size*(2**30)
+  elif (prefix == 'M'):
+    return size*(2**20)
+  elif (prefix == 'K'):
+    return size*(2**10)
+  else:
+    return size
+
 if __name__ == '__main__':
   program = sys.argv[0]
   if len(sys.argv) < 2:
@@ -78,7 +88,9 @@ if __name__ == '__main__':
   home=str(pathlib.Path.home())
   config = sys.argv[3] if len(sys.argv) > 3 else f"{home}/casss/config/autogen.ini"
   step_name = sys.argv[4] if len(sys.argv) > 4 else "step0"
+  size = sys.argv[5] if len(sys.argv) > 5 else "512 K"
+  msg_size = to_bytes(*size.split(' '))
   try:
-    main(op, rounds, config, step_name)
+    main(op, rounds, config, step_name, msg_size)
   except KeyboardInterrupt:
     sys.exit("\nInterrupted by ^C\n")
