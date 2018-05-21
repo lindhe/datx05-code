@@ -2,7 +2,7 @@
 
 opts="StrictHostKeyChecking=no"
 slice=chalmersple_casss2
-clients=$(cat ./config/readers.txt ./config/writers.txt | sort | uniq)
+clients=$(cat ./config/clients.txt | sort | uniq)
 
 echo "Removing clients results directory"
 

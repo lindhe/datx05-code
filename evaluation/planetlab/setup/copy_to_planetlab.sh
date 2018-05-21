@@ -2,9 +2,8 @@
 
 opts="StrictHostKeyChecking=no"
 s=./config/servers.txt
-r=./config/readers.txt
-w=./config/writers.txt
-all=$(cat $s $r $w | sort | uniq)
+c=./config/clients.txt
+all=$(cat $s $c | sort | uniq)
 ssh_key=~/.ssh/planetlab_rsa
 slice=chalmersple_casss2
 failed=0
