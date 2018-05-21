@@ -47,13 +47,14 @@ resend it.
                 break
             except Exception as e:
                 msg = token+self.tx if self.tx else token
-                print(e)
                 if self.udp:
-                    print("Sending udp to %s" % str(self.addr))
+                    if __debug__:
+                        print("Sending udp to %s" % str(self.addr))
                     await self.udp_sock.sendto(msg, self.addr)
                 else:
                     await self.tcp_send(msg)
-                print("TIMEOUT: no response within {}s".format(self.timeout))
+                if __debug__:
+                    print("TIMEOUT: no response within {}s".format(self.timeout))
         return (sender, msg_type, msg_cntr, msg_data)
 
     async def start(self):
@@ -95,7 +96,8 @@ arrival construct a new message and send it.
             try:
                 await self.loop.sock_connect(self.tc_sock, (self.ip, self.port))
             except OSError as e:
-                print("Trying to connect to ({}, {})".format(self.ip, self.port))
+                if __debug__:
+                    print("Trying to connect to ({}, {})".format(self.ip, self.port))
                 await asyncio.sleep(2)
             else:
                 break

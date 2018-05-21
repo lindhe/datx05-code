@@ -37,20 +37,22 @@ class ServerRecvChannel:
         """
         Wait for tcp connections to arrive
         """
+        print("Listening for tcp connections")
         while True:
-            print("Listening")
             conn, addr = await self.loop.sock_accept(self.tc_sock)
-            print("{} got tcp connection from {}".format(self.port, addr))
+            if __debug__:
+                print("{} got tcp connection from {}".format(self.port, addr))
             asyncio.ensure_future(self.tcp_response(conn))
 
     async def udp_listen(self):
         """
         Wait until udp message arrives.
         """
+        print("Listening for udp connections")
         while True:
-            print("Listening")
             data, addr = await self.udp_sock.recvfrom(self.chunks_size)
-            print("{} got udp request from {}".format(self.port, addr))
+            if __debug__:
+                print("{} got udp request from {}".format(self.port, addr))
             asyncio.ensure_future(self.udp_response(data, addr))
 
     async def udp_response(self, data, addr):
@@ -83,7 +85,8 @@ class ServerRecvChannel:
             stream = response_stream.read(self.chunks_size)
             await self.loop.sock_sendall(conn, stream)
         conn.close()
-        print("Connection closed")
+        if __debug__:
+            print("Connection closed")
         
     async def check_msg(self, res):
         """
@@ -94,7 +97,8 @@ class ServerRecvChannel:
         msg_type, msg_cntr, sender = struct.unpack("ii17s", token)
         
         if(sender not in self.tokens.keys()):
-            print("Add to token list")
+            if __debug__:
+                print("Add new token")
             self.tokens[sender] = 0
 
         if(self.tokens[sender] != msg_cntr):
@@ -114,7 +118,8 @@ class ServerRecvChannel:
                 response = token
                 await asyncio.sleep(self.gsp_freq)
         else:
-            print("NO TOKEN ARRIVAL")
+            if __debug__:
+                print("NO TOKEN ARRIVAL")
             token = struct.pack("ii17s", msg_type,self.tokens[sender], self.uid)
             response = token
 
