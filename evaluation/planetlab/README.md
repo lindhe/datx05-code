@@ -18,6 +18,7 @@ All scripts in this directory must be run from the root of this repository.
 ```
 $ config/populate_steps.py 10 "5, 10, 15, 20" 10 # For writers test
 $ config/populate_steps.py "5, 10, 15, 20" 10 10 # For readers test
+$ config/populate_steps.py 10 10 "5, 10, 15, 20" # For servers test
 $ evaluation/planetlab/install_system.sh
 $ evaluation/planetlab/servers_start.sh
 ```
