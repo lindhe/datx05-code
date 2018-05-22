@@ -2,13 +2,9 @@
 __pycache__*
 .storage/
 autogen.ini
-perf_result.txt
 results/
 config/wip/*
-config/servers.txt
-config/clients.txt
-config/readers.txt
-config/writers.txt
 *.log
-summary.txt
 config/tests/*
+*.txt
+!blacklist.txt
