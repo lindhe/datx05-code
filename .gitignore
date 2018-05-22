@@ -8,3 +8,4 @@ config/wip/*
 config/tests/*
 *.txt
 !blacklist.txt
+**/tests_enabled/*
