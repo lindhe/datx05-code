@@ -41,7 +41,7 @@ class Server:
 
   def __init__(self, uid, quorum, max_clients, delta, queue_size, n, storage_location="./.storage/"):
     self.uid = uid.encode()
-    self.t_top = sys.maxsize
+    self.t_top = 2147483647
     self.queue_size = queue_size
     self.inc_nbrs = deque(maxlen=queue_size)
     # Quorum size:
