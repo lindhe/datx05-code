@@ -6,6 +6,9 @@ slice=chalmersple_casss2
 servers=$(cat ./config/servers.txt | sort | uniq)
 failed=0
 
+./evaluation/planetlab/setup/create_config.sh
+./evaluation/planetlab/setup/copy_to_planetlab.sh
+
 for server in $servers; do
   ssh -o $opts -l $slice -i ~/.ssh/planetlab_rsa $server "~/casss/autostart.sh" \
     && echo "Running server on $server"  \
