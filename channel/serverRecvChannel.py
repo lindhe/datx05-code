@@ -110,7 +110,7 @@ class ServerRecvChannel:
                     if new_msg:
                         response = token+new_msg if new_msg else token
                     else:
-                        response = None
+                        response = token
                 else:
                     response = token
             elif(msg_type == 1):
