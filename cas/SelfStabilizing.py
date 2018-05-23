@@ -26,6 +26,7 @@
 
 import struct
 import sys
+import asyncio
 from collections import deque
 from .IncNbrHelper import IncNbrHelper
 from channel.GossipProtocol import GossipMessage
@@ -39,11 +40,14 @@ from itertools import combinations
 class Server:
   """ The event handlers for the server in Algorithm 2 """
 
-  def __init__(self, uid, quorum, max_clients, delta, queue_size, n, storage_location="./.storage/"):
+  def __init__(self, uid, quorum, max_clients, delta, queue_size, n,
+storage_location="./.storage/", gossip_freq=1):
     self.uid = uid.encode()
     self.t_top = 2147483647
     self.queue_size = queue_size
     self.inc_nbrs = deque(maxlen=queue_size)
+    self.gossip_freq = gossip_freq
+    self.gsp_freq = gossip_freq
     # Quorum size:
     self.quorum = quorum
     # Initialize with an empty register S
@@ -197,6 +201,9 @@ class Server:
     # Run wrap around algorithm
     self.run(k, prp, msg_all, echo)
 
+    #Limit gossip frequency
+    await asyncio.sleep(self.gsp_freq)
+
   def stabilized(self):
     max_tuple = self.S.tag_tuple()
     max_pre = max_tuple[0]
@@ -233,6 +240,7 @@ class Server:
       self.main()
 
   def main(self):
+    self.gsp_freq = self.gossip_freq
     # Main loop
     uid = self.uid
     for k in self.config:
@@ -251,6 +259,7 @@ class Server:
       self.prp[uid] = self.dflt_prp
     self.all[uid] = self.and_every(self.echo_no_all)
     if self.no_default_no_bot():
+      self.gsp_freq = 0
       self.prp[uid] = self.max_prp()
       self.all[uid] = self.and_every(self.echo_no_all)
       if self.all_seen() and self.and_every(self.echo):

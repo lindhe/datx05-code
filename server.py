@@ -61,7 +61,8 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
 
     uid =  get_uid()
     server = Server(uid, quorum_size, max_clients, delta, queue_size,
-        nbr_of_servers, storage_location="{}server{}/".format(base_location, my_id))
+        nbr_of_servers, storage_location="{}server{}/".format(base_location,
+my_id), gossip_freq=gossip_freq)
     p = QuorumRecv(server)
     g = Gossip(server)
 
@@ -79,7 +80,7 @@ def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_client
             c = SenderChannel(node_index, uid, 1, g, ip, port, init_tx=m, chunks_size=chunks_size)
             loop.create_task(c.start())
         node_index += 1
-    s = ServerRecvChannel(uid, p, g, my_port, my_ip, gossip_freq=gossip_freq, chunks_size=chunks_size)
+    s = ServerRecvChannel(uid, p, g, my_port, my_ip,chunks_size=chunks_size)
     loop.create_task(s.tcp_listen())
     loop.create_task(s.udp_listen())
 

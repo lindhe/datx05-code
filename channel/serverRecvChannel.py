@@ -10,7 +10,7 @@ class ServerRecvChannel:
     """ Creates a server recv channel for pingpong and gossip"""
 
     def __init__(self, uid, callback_obj, callback_obj_gossip, port, ip,
-                 gossip_freq=1, chunks_size=1024):
+                 chunks_size=1024):
         """
         Initialize callbacks, parameters and create tcp/udp sockets
         """
@@ -19,7 +19,6 @@ class ServerRecvChannel:
         self.cb_obj = callback_obj
         self.cb_obj_gossip = callback_obj_gossip
         self.port = port
-        self.gsp_freq = gossip_freq
         self.chunks_size = chunks_size
 
         self.loop = asyncio.get_event_loop()
@@ -116,7 +115,6 @@ class ServerRecvChannel:
             elif(msg_type == 1):
                 await self.cb_obj_gossip.arrival(sender, payload)
                 response = token
-                await asyncio.sleep(self.gsp_freq)
         else:
             if __debug__:
                 print("NO TOKEN ARRIVAL")
