@@ -6,10 +6,10 @@ opts="StrictHostKeyChecking=no"
 ssh_key=~/.ssh/planetlab_rsa
 slice=chalmersple_casss2
 tests=evaluation/planetlab/tests_enabled/*
-test_case_dir=config/tests/$1
+test_case_dir=config/tests/$1/*
 config="/home/$slice/casss/config/autogen.ini"
 
-for step in $test_case_dir/*; do
+for step in $test_case_dir; do
   scenario=$(echo "$step" | sed 's/.*\/\(step.*\)/\1/')
 
   for file in $step/*; do
@@ -32,7 +32,7 @@ for step in $test_case_dir/*; do
       done
       for reader in $readers; do
         ssh -o $opts -l $slice -i ~/.ssh/planetlab_rsa $reader \
-          "cd ~/casss/; python3.6 -m $module 'reader' $rounds $config" &
+          "cd ~/casss/; python3.6 -m $module 'reader' $rounds $config $step" &
       done
     fi
   done
@@ -57,3 +57,6 @@ for step in $test_case_dir/*; do
 done
 
 echo "All tests done!"
+echo "Cleaning up clients..."
+evaluation/planetlab/cleanup_clients.sh
+echo "DONE"
