@@ -246,7 +246,6 @@ storage_location="./.storage/", gossip_freq=1):
     for k in self.config:
       if k != self.uid:
         if (self.all[k]):
-          self.update_prp(self.prp[k])
           self.all_seen_processors.add(k)
     if self.transient_fault():
       if __debug__:
@@ -348,8 +347,7 @@ storage_location="./.storage/", gossip_freq=1):
     for i in range(6):
       correlating_degrees.append(set([i, i]))
       correlating_degrees.append(set([i, (i+1)%6]))
-    if not set([a, b]) in correlating_degrees:
-      raise Exception(f"{self.uid} {a} {k} {b} {l} {self.all_seen_processors}\n {self.prp} {self.all}\n {self.echo_answers}")
+      correlating_degrees.append(set([i, (i+2)%6]))
     return set([a, b]) in correlating_degrees
 
   def max_prp(self):
