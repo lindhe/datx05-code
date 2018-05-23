@@ -46,8 +46,8 @@ def main(rounds, config, step):
   for r in range(rounds):
     sleep(delay)
     # DO WORK HERE
-    c.qrmAccess((max_tag, msg, 'pre', 'write'))
     time_in = time()
+    c.qrmAccess((max_tag, msg, 'pre', 'write'))
     c.qrmAccess((None, None, 'qry', 'write'))
     time_out = time() - time_in
     results['Times'][f"run{r}"] = str(time_out)
