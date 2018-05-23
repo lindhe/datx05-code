@@ -98,7 +98,7 @@ arrival construct a new message and send it.
             except OSError as e:
                 if __debug__:
                     print("Trying to connect to ({}, {})".format(self.ip, self.port))
-                await asyncio.sleep(2)
+                await asyncio.sleep(1)
             else:
                 break
     

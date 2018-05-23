@@ -30,7 +30,8 @@ class ServerRecvChannel:
         self.tc_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.tc_sock.setblocking(False)
         self.tc_sock.bind((ip, int(port)))
-        self.tc_sock.listen(10)
+        # Default backlog size in Linux is 128 (see /proc/sys/net/core/somaxconn)
+        self.tc_sock.listen()
 
     async def tcp_listen(self):
         """
