@@ -16,28 +16,29 @@ def main(rel_path):
 
     results = configparser.ConfigParser()
     files = os.listdir(res_path)
-    regex = re.compile('.*log')
-    filtered_files = [x for x in files if regex.match(x)]
-    avg = []
-    avg_no_outliers = []
-    if filtered_files:
-        for f in filtered_files:
-            results.read(res_path + f)
-            avg.append(float(results['Average']['average']))
-            avg_no_outliers.append(float(results['Average']['average_no_outliers']))
-            test = results['Meta']['test']
-            rounds = results['Meta']['rounds']
-            outliers = results['Meta']['outliers']
-    else:
-        print("No results file found!", file=sys.stderr)
-        sys.exit()
-
-    summary = sum(avg)/len(avg)
-    summary_no_outliers = sum(avg_no_outliers)/len(avg_no_outliers)
-    result = f"Average from {len(avg)} {test} clients during {rounds} rounds:\nAll: {summary}\nRemoved {outliers} outliers: {summary_no_outliers}"
-    with open(res_file, 'a') as f:
-        f.write(result)
-    print(f"Created summary file {res_file}")
+    for i in ['reader', 'writer']:
+      res_file = res_path + i + "_summary.txt"
+      regex = re.compile('.*' + i + '.*log')
+      filtered_files = [x for x in files if regex.match(x)]
+      avg = []
+      avg_no_outliers = []
+      if filtered_files:
+          for f in filtered_files:
+              results.read(res_path + f)
+              avg.append(float(results['Average']['average']))
+              avg_no_outliers.append(float(results['Average']['average_no_outliers']))
+              test = results['Meta']['test']
+              rounds = results['Meta']['rounds']
+              outliers = results['Meta']['outliers']
+      else:
+          print("No results file found!", file=sys.stderr)
+          sys.exit()
+      summary = sum(avg)/len(avg)
+      summary_no_outliers = sum(avg_no_outliers)/len(avg_no_outliers)
+      result = f"Average from {len(avg)} {test} clients during {rounds} rounds:\nAll: {summary}\nRemoved {outliers} outliers: {summary_no_outliers}"
+      with open(res_file, 'a') as f:
+          f.write(result)
+      print(f"Created summary file {res_file}")
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
