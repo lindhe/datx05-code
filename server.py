@@ -48,35 +48,39 @@ def read_cfgfile(my_ip, my_port, cfgfile):
     delta = int(config['General']['concurrent_clients'])
     queue_size = int(config['General']['queue_size'])
     gossip_freq = int(config['General']['gossip_freq'])
+    chunks_size = int(config['General']['chunks_size'])
     return [my_id, nbr_of_servers, f, e, base_location, max_clients,
-            delta, queue_size, gossip_freq, nodes]
+            delta, queue_size, gossip_freq, chunks_size, nodes]
 
 def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, max_clients,
-         delta, queue_size, gossip_freq, nodes):
+         delta, queue_size, gossip_freq, chunks_size, nodes):
     k = nbr_of_servers - 2*(f + e)
     if(k < 1):
         raise Exception("Coded elements less than 1")
     quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
 
-    server = Server(my_id, quorum_size, max_clients, delta, queue_size, storage_location="{}server{}/".format(base_location, my_id))
+    uid =  get_uid()
+    server = Server(uid, quorum_size, max_clients, delta, queue_size,
+        nbr_of_servers, storage_location="{}server{}/".format(base_location,
+my_id), gossip_freq=gossip_freq)
     p = QuorumRecv(server)
     g = Gossip(server)
 
     loop = asyncio.get_event_loop()
     tag_tuple = server.get_tag_tuple()
     cntr = server.get_counter()
-    gossip_obj = GossipMessage(tag_tuple, cntr)
-    m = gossip_obj.get_bytes()
+    # gossip_obj = GossipMessage(tag_tuple, cntr)
+    # m = gossip_obj.get_bytes()
+    m=None
 
     node_index = 0
     for node in nodes:
         ip, port = node.split(':')
         if node_index is not my_id:
-            c = SenderChannel(node_index, get_uid(), 1, g, ip, port, init_tx=m)
+            c = SenderChannel(node_index, uid, 1, g, ip, port, init_tx=m, chunks_size=chunks_size)
             loop.create_task(c.start())
         node_index += 1
-
-    s = ServerRecvChannel(p, g, my_port, my_ip, gossip_freq=gossip_freq)
+    s = ServerRecvChannel(uid, p, g, my_port, my_ip,chunks_size=chunks_size)
     loop.create_task(s.tcp_listen())
     loop.create_task(s.udp_listen())
 

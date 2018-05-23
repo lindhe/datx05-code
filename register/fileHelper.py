@@ -55,9 +55,10 @@ async def write_file(data, filename, path=default_path):
   try:
     async with aiofiles.open(filepath, 'wb') as f:
       await f.write(data)
-    return filepath
+    return filename
   except OSError as e:
-    print(f"Error reading file {filepath}: {e}", file=sys.stderr)
+    if __debug__:
+      print(f"Error reading file {filepath}: {e}", file=sys.stderr)
 
 async def read_file(filename, path=default_path):
   """ Tries to read (binary) data from a file.
@@ -73,7 +74,8 @@ async def read_file(filename, path=default_path):
       data = await f.read()
     return data
   except OSError as e:
-    print(f"Error reading file {path}: {e}", file=sys.stderr)
+    if __debug__:
+      print(f"Error reading file {path}: {e}", file=sys.stderr)
 
 def delete_file(filename, path=default_path):
   """ Deletes a file.
@@ -85,4 +87,5 @@ def delete_file(filename, path=default_path):
   try:
     os.remove(filepath)
   except OSError as e:
-    print(f"Error deleting file {path}: {e}", file=sys.stderr)
+    if __debug__:
+      print(f"Error deleting file {path}: {e}")#, file=sys.stderr)

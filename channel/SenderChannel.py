@@ -24,9 +24,10 @@ class SenderChannel:
 
         self.loop = asyncio.get_event_loop()
         self.udp = True
-        self.token_size = 2*struct.calcsize("i")
+        self.token_size = 2*struct.calcsize("i")+struct.calcsize("17s")
         self.addr  = (ip, int(port))
         self.udp_sock = UdpSender(self.loop)
+        self.tc_sock = None
 
     async def receive(self, token):
         """
@@ -41,19 +42,20 @@ resend it.
                 else:
                     res = await self.tcp_recv()
                 token = res[:self.token_size]
+                msg_type, msg_cntr, sender = struct.unpack("ii17s", token)
                 msg_data = res[self.token_size:]
-                msg_type, msg_cntr = struct.unpack("ii", token)
                 break
             except Exception as e:
                 msg = token+self.tx if self.tx else token
-                print(e)
                 if self.udp:
-                    print("Sending udp to %s" % str(self.addr))
+                    if __debug__:
+                        print("Sending udp to %s" % str(self.addr))
                     await self.udp_sock.sendto(msg, self.addr)
                 else:
                     await self.tcp_send(msg)
-                print("TIMEOUT: no response within {}s".format(self.timeout))
-        return (msg_type, msg_cntr, msg_data)
+                if __debug__:
+                    print("TIMEOUT: no response within {}s".format(self.timeout))
+        return (sender, msg_type, msg_cntr, msg_data)
 
     async def start(self):
         """
@@ -62,14 +64,18 @@ arrival construct a new message and send it.
         """
         counter = 1
         token = struct.pack("ii17s", self.ch_type, counter, self.uid)
+        await asyncio.sleep(2)
         await self.udp_sock.sendto(token, self.addr)
         while True:
             token = struct.pack("ii17s", self.ch_type, counter, self.uid)
-            msg_type, msg_cntr, msg_data = await self.receive(token)
+            sender, msg_type, msg_cntr, msg_data = await self.receive(token)
             if __debug__:
                 print("Token arrival: cntr is {}".format(msg_cntr))
             if(msg_cntr >= counter):
-                self.tx, self.udp = await self.cb_obj.departure(self.sid, msg_data)
+                if self.ch_type:
+                    self.tx, self.udp = await self.cb_obj.departure(sender, msg_data)
+                else:
+                    self.tx, self.udp = await self.cb_obj.departure(self.sid, msg_data)
                 counter = msg_cntr+1
                 token = struct.pack("ii17s", self.ch_type, counter, self.uid)
                 msg = token+self.tx if self.tx else token
@@ -82,13 +88,16 @@ arrival construct a new message and send it.
         """
         Create a new tcp socket and wait until there is a connection
         """
+        if self.tc_sock:
+            self.tc_sock.close()
         self.tc_sock = socket.socket()
         self.tc_sock.setblocking(False)
         while True:
             try:
                 await self.loop.sock_connect(self.tc_sock, (self.ip, self.port))
             except OSError as e:
-                print("Trying to connect to ({}, {})".format(self.ip, self.port))
+                if __debug__:
+                    print("Trying to connect to ({}, {})".format(self.ip, self.port))
                 await asyncio.sleep(2)
             else:
                 break

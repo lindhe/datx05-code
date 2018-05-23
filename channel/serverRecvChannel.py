@@ -9,16 +9,16 @@ from .UdpSender import UdpSender
 class ServerRecvChannel:
     """ Creates a server recv channel for pingpong and gossip"""
 
-    def __init__(self, callback_obj, callback_obj_gossip, port, ip,
-                 gossip_freq=1, chunks_size=1024):
+    def __init__(self, uid, callback_obj, callback_obj_gossip, port, ip,
+                 chunks_size=1024):
         """
         Initialize callbacks, parameters and create tcp/udp sockets
         """
 
+        self.uid = uid.encode()
         self.cb_obj = callback_obj
         self.cb_obj_gossip = callback_obj_gossip
         self.port = port
-        self.gsp_freq = gossip_freq
         self.chunks_size = chunks_size
 
         self.loop = asyncio.get_event_loop()
@@ -36,20 +36,22 @@ class ServerRecvChannel:
         """
         Wait for tcp connections to arrive
         """
+        print("Listening for tcp connections")
         while True:
-            print("Listening")
             conn, addr = await self.loop.sock_accept(self.tc_sock)
-            print("{} got tcp connection from {}".format(self.port, addr))
+            if __debug__:
+                print("{} got tcp connection from {}".format(self.port, addr))
             asyncio.ensure_future(self.tcp_response(conn))
 
     async def udp_listen(self):
         """
         Wait until udp message arrives.
         """
+        print("Listening for udp connections")
         while True:
-            print("Listening")
             data, addr = await self.udp_sock.recvfrom(self.chunks_size)
-            print("{} got udp request from {}".format(self.port, addr))
+            if __debug__:
+                print("{} got udp request from {}".format(self.port, addr))
             asyncio.ensure_future(self.udp_response(data, addr))
 
     async def udp_response(self, data, addr):
@@ -57,7 +59,8 @@ class ServerRecvChannel:
         Create udp response and send it.
         """
         response = await self.check_msg(data)
-        await self.udp_sock.sendto(response, addr)
+        if response:
+            await self.udp_sock.sendto(response, addr)
 
     async def tcp_response(self, conn):
         """
@@ -65,7 +68,11 @@ class ServerRecvChannel:
         """
         int_size = struct.calcsize("i")
         recv_msg_size = await self.loop.sock_recv(conn, int_size)
-        msg_size = struct.unpack("i", recv_msg_size)[0]
+        try:
+            msg_size = struct.unpack("i", recv_msg_size)[0]
+        except Exception as e:
+            conn.close()
+            return
         res = b''
         while (len(res) < msg_size):
             res += await self.loop.sock_recv(conn, self.chunks_size)
@@ -77,7 +84,8 @@ class ServerRecvChannel:
             stream = response_stream.read(self.chunks_size)
             await self.loop.sock_sendall(conn, stream)
         conn.close()
-        print("Connection closed")
+        if __debug__:
+            print("Connection closed")
         
     async def check_msg(self, res):
         """
@@ -88,25 +96,29 @@ class ServerRecvChannel:
         msg_type, msg_cntr, sender = struct.unpack("ii17s", token)
         
         if(sender not in self.tokens.keys()):
-            print("Add to token list")
+            if __debug__:
+                print("Add new token")
             self.tokens[sender] = 0
 
         if(self.tokens[sender] != msg_cntr):
             self.tokens[sender] = msg_cntr
-            token = struct.pack("ii", msg_type,self.tokens[sender])
+            token = struct.pack("ii17s", msg_type,self.tokens[sender], self.uid)
             if(msg_type == 0):
                 if payload:
                     new_msg = await self.cb_obj.arrival(sender, payload)
-                    response = token+new_msg if new_msg else token
+                    if new_msg:
+                        response = token+new_msg if new_msg else token
+                    else:
+                        response = token
                 else:
                     response = token
             elif(msg_type == 1):
                 await self.cb_obj_gossip.arrival(sender, payload)
                 response = token
-                await asyncio.sleep(self.gsp_freq)
         else:
-            print("NO TOKEN ARRIVAL")
-            token = struct.pack("ii", msg_type,self.tokens[sender])
+            if __debug__:
+                print("NO TOKEN ARRIVAL")
+            token = struct.pack("ii17s", msg_type,self.tokens[sender], self.uid)
             response = token
 
         return response

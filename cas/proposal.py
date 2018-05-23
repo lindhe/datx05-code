@@ -1,4 +1,5 @@
 #!/bin/python3.6
+# -*- coding: utf-8 -*-
 #
 # MIT License
 #
@@ -23,39 +24,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+class Proposal:
+  """ The prp class. """
 
-import sys
-import math
-import configparser
+  def __init__(self, phase, tag):
+    self.phase = phase
+    self.tag = tag
 
-def main(filename, nbr_of_servers, f):
-    k = nbr_of_servers - 2*f
-    if(k < 1):
-        raise Exception("Coded elements less than 1")
-    config = configparser.ConfigParser()
-    config['Nodes'] = {}
-    base_port = 5550
-    for i in range(nbr_of_servers):
-        nodename = 'Node{}'.format(i)
-        port = base_port + i
-        config['Nodes'][nodename] = '127.0.0.1:{}'.format(port)
+  def __repr__(self):
+    return repr( (self.phase, self.tag) )
 
-    config['General'] = {}
-    config['General']['n'] = str(nbr_of_servers)
-    config['General']['f'] = str(f)
-    config['General']['e'] = '0'
-    config['General']['storage_location'] = './.storage/'
-    config['General']['max_clients'] = '10'
-    config['General']['concurrent_clients'] = '5'
-    config['General']['queue_size'] = '10'
-    config['General']['gossip_freq'] = '1'
-    config['General']['chunks_size'] = '1024'
+  def __eq__(self, other):
+    if other:
+      return self.phase == other.phase and self.tag == other.tag
+    else:
+      return False
 
-    with open(filename, 'w') as cfgfile:
-        config.write(cfgfile)
+  def __hash__(self):
+    return hash( (self.tag, self.phase) )
 
-if __name__ == '__main__':
-    filename = input('Filename: ') + '.ini'
-    nbr_of_servers = int(input('Number of servers: '))
-    f = int(input('Number of crash prone servers: '))
-    main(filename, nbr_of_servers, f)
+  def __iter__(self):
+    yield self.phase
+    yield self.tag

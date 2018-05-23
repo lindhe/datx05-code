@@ -70,7 +70,7 @@ class QuorumSend:
     def use_tcp(self, tx):
         if not tx:
             return False
-        if (len(tx.get_bytes()) > 1024):
+        if (len(tx.get_bytes()) > 512):
            return True
         elif ((tx.get_label() == 'fin' or tx.get_label() == 'FIN') and tx.get_mode() == 'read'):
             return True
