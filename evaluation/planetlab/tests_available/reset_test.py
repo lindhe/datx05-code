@@ -42,9 +42,9 @@ def main(rounds, config, step):
   results['Average'] = {}
   c = Client(config)
   max_tag = (max_val, (1, uid))
+  print(f"Running reset test at {uid}")
   for r in range(rounds):
     sleep(delay)
-    print(f"Running reset test at {uid}")
     # DO WORK HERE
     c.qrmAccess((max_tag, msg, 'pre', 'write'))
     time_in = time()

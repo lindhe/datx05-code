@@ -13,5 +13,5 @@ for server in $servers; do
   address=$(echo $server | cut -d ':' -f 1)
   port=$(echo $server | cut -d ':' -f 2)
   echo "Starting server at $address:$port"
-  sudo python3.6 /home/$slice/casss/server.py $port $address $config > /dev/null &
+  sudo python3.6 -O /home/$slice/casss/server.py $port $address $config > /dev/null &
 done

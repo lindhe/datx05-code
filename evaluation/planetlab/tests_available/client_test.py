@@ -45,9 +45,9 @@ def main(operation, rounds, config, step, msg_size):
   c = Client(config)
   # Add init record
   c.write(msg)
+  print(f"Running {op} test at {uid}")
   for r in range(rounds):
     sleep(rand(0, max_delay)/1000)
-    print(f"Running {op} test at {uid}")
     # DO WORK HERE
     if op == 'writer':
       time_in = time()
