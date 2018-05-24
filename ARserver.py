@@ -46,10 +46,7 @@ def read_cfgfile(my_ip, my_port, cfgfile):
 
 def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, nodes,
     chunks_size):
-    k = nbr_of_servers - 2*(f + e)
-    if(k < 1):
-        raise Exception("Coded elements less than 1")
-    quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
+    quorum_size = math.ceil((nbr_of_servers + 1)/2)
 
     uid =  get_uid()
     server = Server(my_id, quorum_size, storage_location="{}server{}/".format(base_location, my_id))
