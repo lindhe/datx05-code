@@ -82,7 +82,11 @@ class ServerRecvChannel:
         stream = True
         while stream:
             stream = response_stream.read(self.chunks_size)
-            await self.loop.sock_sendall(conn, stream)
+            try:
+                await self.loop.sock_sendall(conn, stream)
+            except Exception as e:
+                conn.close()
+                return
         conn.close()
         if __debug__:
             print("Connection closed")
