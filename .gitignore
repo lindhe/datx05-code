@@ -9,3 +9,4 @@ config/tests/*
 *.txt
 !blacklist.txt
 **/tests_enabled/*
+!config/rsync_ignore.txt
