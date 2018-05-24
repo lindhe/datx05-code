@@ -20,13 +20,8 @@ class Client:
         config = configparser.ConfigParser()
         config.read(cfgfile)
         nbr_of_servers = int(config['General']['n'])
-        f = int(config['General']['f'])
-        e = int(config['General']['e'])
-        k = nbr_of_servers - 2*(f + e)
-        if(k < 1):
-            raise Exception("Coded elements less than 1")
-        quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
         self.majority = math.ceil((nbr_of_servers+1)/2)
+        quorum_size = self.majority
         self.p = QuorumSend(quorum_size, PingPongMessage)
         t = Thread(target=self.start_event_loop, args=(self.loop, config['Nodes']))
         t.daemon = True

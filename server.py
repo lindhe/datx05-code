@@ -80,7 +80,7 @@ my_id), gossip_freq=gossip_freq)
             c = SenderChannel(node_index, uid, 1, g, ip, port, init_tx=m, chunks_size=chunks_size)
             loop.create_task(c.start())
         node_index += 1
-    s = ServerRecvChannel(uid, p, g, my_port, my_ip,chunks_size=chunks_size)
+    s = ServerRecvChannel(uid, p, g, my_port, my_ip, chunks_size=chunks_size)
     loop.create_task(s.tcp_listen())
     loop.create_task(s.udp_listen())
 

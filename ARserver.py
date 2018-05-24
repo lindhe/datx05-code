@@ -5,10 +5,7 @@ import configparser
 import math
 import random as r
 from channel.ppProtocol import PingPongMessage
-from channel.GossipProtocol import GossipMessage
 from channel.serverRecvChannel import ServerRecvChannel
-from channel.SenderChannel import SenderChannel
-from gossip.Gossip import Gossip
 from atomic_register.QuorumRecvAR import QuorumRecvAR
 from atomic_register.AtomicRegister import Server
 
@@ -44,20 +41,20 @@ def read_cfgfile(my_ip, my_port, cfgfile):
     f = int(config['General']['f'])
     e = int(config['General']['e'])
     base_location = config['General']['storage_location']
-    return [my_id, nbr_of_servers, f, e, base_location, nodes]
+    chunks_size = int(config['General']['chunks_size'])
+    return [my_id, nbr_of_servers, f, e, base_location, nodes, chunks_size]
 
-def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, nodes):
-    k = nbr_of_servers - 2*(f + e)
-    if(k < 1):
-        raise Exception("Coded elements less than 1")
-    quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
+def start(my_ip, my_port, my_id, nbr_of_servers, f, e, base_location, nodes,
+    chunks_size):
+    quorum_size = math.ceil((nbr_of_servers + 1)/2)
 
+    uid =  get_uid()
     server = Server(my_id, quorum_size, storage_location="{}server{}/".format(base_location, my_id))
     p = QuorumRecvAR(server)
 
     loop = asyncio.get_event_loop()
 
-    s = ServerRecvChannel(p, None, my_port)
+    s = ServerRecvChannel(uid, p, None, my_port, my_ip, chunks_size=chunks_size)
     loop.create_task(s.tcp_listen())
     loop.create_task(s.udp_listen())
 
