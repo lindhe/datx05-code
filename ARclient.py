@@ -7,7 +7,7 @@ import struct
 import random as r
 from threading import Thread
 from channel.SenderChannel import SenderChannel
-from quorum.QuorumSend import QuorumSend
+from atomic_register.QuorumSendAR import QuorumSend
 from channel.ppProtocol import PingPongMessage
 
 class Client:
