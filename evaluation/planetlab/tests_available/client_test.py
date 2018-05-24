@@ -66,7 +66,7 @@ def main(operation, rounds, config, step, msg_size):
   try:
     with open(res_file, 'a') as f:
       results.write(f)
-    print(f"Write test done!")
+    print(f"Write test done at {uid}!")
   except OSError as e:
     print(f"Error writing to file {res_file}: {e}", file=sys.stderr)
 
