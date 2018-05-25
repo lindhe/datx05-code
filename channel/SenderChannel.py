@@ -8,7 +8,7 @@ class SenderChannel:
     """ Creates an instance of a sender channel"""
 
     def __init__(self, sid, uid, channel_type, callback_obj,
-                 ip, port, timeout = 5, init_tx = None, chunks_size = 1024):
+                 ip, port, timeout = 2, init_tx = None, chunks_size = 1024):
         """
         Define all parameters that is specific to this channel
         """
@@ -18,7 +18,8 @@ class SenderChannel:
         self.cb_obj = callback_obj
         self.ip = ip
         self.port = int(port)
-        self.timeout = timeout
+        self.udp_timeout = timeout
+        self.tcp_timeout = timeout*5
         self.tx = init_tx
         self.chunks_size = chunks_size
 
@@ -38,7 +39,7 @@ resend it.
         while True:
             try:
                 if self.udp:
-                    res, addr = await asyncio.wait_for(self.udp_sock.recvfrom(self.chunks_size), self.timeout)
+                    res, addr = await asyncio.wait_for(self.udp_sock.recvfrom(self.chunks_size), self.udp_timeout)
                 else:
                     res = await self.tcp_recv()
                 token = res[:self.token_size]
@@ -54,7 +55,7 @@ resend it.
                 else:
                     await self.tcp_send(msg)
                 if __debug__:
-                    print("TIMEOUT: no response within {}s".format(self.timeout))
+                    print("TIMEOUT: no response within {}s".format(self.udp_timeout))
         return (sender, msg_type, msg_cntr, msg_data)
 
     async def start(self):
@@ -108,7 +109,7 @@ arrival construct a new message and send it.
         """
         msg = b''
         while True:
-            res_part = await asyncio.wait_for(self.loop.sock_recv(self.tc_sock, self.chunks_size), self.timeout)
+            res_part = await asyncio.wait_for(self.loop.sock_recv(self.tc_sock, self.chunks_size), self.tcp_timeout)
             if not res_part:
                 break
             else:
