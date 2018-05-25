@@ -23,7 +23,7 @@ for step in $test_case_dir; do
   done
 
   for t in $tests; do
-    if [[ $t == *'client_test.py' ]]; then
+    if [[ $t == *'/client_test.py' ]]; then
       m=$(echo $t | sed 's/\//./g')
       module=${m%.py}
       for writer in $writers; do
