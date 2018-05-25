@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rounds=20
+rounds=50
 
 opts="StrictHostKeyChecking=no"
 ssh_key=~/.ssh/planetlab_rsa
