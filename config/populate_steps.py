@@ -49,6 +49,7 @@ def main(r, w, s):
         client_list = (client_nodes*clients)[:clients]
         rs = client_list[-reader:]
         ws = client_list[:w]
+        ss = servers[:s]
         path = "config/tests/test-readers/" + "step" + str(reader) + '/'
         pathlib.Path(path).mkdir(exist_ok=True, parents=True)
         with open(path + "writers.txt", 'w') as f:
