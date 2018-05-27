@@ -25,8 +25,10 @@ class Client:
         f = int(config['General']['f'])
         e = int(config['General']['e'])
         k = nbr_of_servers - 2*(f + e)
-        if(k < 1):
+        if (k < 1):
             raise Exception("Coded elements less than 1")
+        if (nbr_of_servers+k > 32):
+            raise Exception("[liberasurecode] Total number of fragments (k + m) must be at most 32")
         quorum_size = math.ceil((nbr_of_servers + k + 2*e)/2)
         self.majority = math.ceil((nbr_of_servers+1)/2)
         self.ec_driver = ECDriver(k=k, m=nbr_of_servers, ec_type='liberasurecode_rs_vand')
