@@ -14,7 +14,7 @@ from time import time
 from client import Client
 
 def main(rounds, config, step):
-  msg_sizes = ["1 K", "32 K", "128 K", "512 K", "1 M", "32 M"]
+  msg_sizes = ["1 K", "32 K", "128 K", "512 K", "1 M", "2 M", "4 M", "8 M"]
   delay = 2
   uid = os.uname().nodename
   pid = str(os.getpid())
