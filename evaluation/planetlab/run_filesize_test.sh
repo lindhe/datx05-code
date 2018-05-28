@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rounds=20
+rounds=50
 
 opts="StrictHostKeyChecking=no"
 ssh_key=~/.ssh/planetlab_rsa
@@ -57,6 +57,6 @@ for step in $test_case_dir; do
 done
 
 echo "All tests done!"
-echo "Cleaning up clients..."
-evaluation/planetlab/cleanup_clients.sh
+# echo "Cleaning up clients..."
+#evaluation/planetlab/cleanup_clients.sh
 echo "DONE"
