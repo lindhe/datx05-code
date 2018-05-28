@@ -36,7 +36,7 @@ def start(my_port, my_ip, nbr_of_servers, f, e, base_location, max_clients,
     print(other_nodes)
     s = server(my_addr, other_nodes)
     s.start()
-    
+
 
 def main(my_ip, my_port, cfgfile):
     parameters = read_cfgfile(my_ip, my_port, cfgfile)

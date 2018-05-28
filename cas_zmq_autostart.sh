@@ -1,0 +1,17 @@
+#!/bin/bash
+# Checks if node is server. If it is, it starts the server program.
+# Otherwise, it starts the Client application prompt.
+
+address=$(hostname)
+slice=chalmersple_casss1
+config=./casss/config/autogen.ini
+
+# For each time my address is in autogen.ini, start a server
+servers=$(grep $address $config | cut -d ' ' -f 3)
+
+for server in $servers; do
+  address=$(echo $server | cut -d ':' -f 1)
+  port=$(echo $server | cut -d ':' -f 2)
+  echo "Starting server at $address:$port"
+  sudo python3.6 -O /home/$slice/casss/start_old_cas_servers.py $address $port $config > /dev/null &
+done
