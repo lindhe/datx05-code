@@ -8,7 +8,7 @@ from cas.old.cas import cas as Client
 def main():
     msg_size = 512*1024
     cfgfile = sys.argv[1]
-    c = Client(cfgfile)
+    c = Client(cfgfile, verbose=True)
     msg = os.urandom(msg_size)
     c.write(msg)
     print(f"Wrote {msg_size} bytes to quorum system.")
