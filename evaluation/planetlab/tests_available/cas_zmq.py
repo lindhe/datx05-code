@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/bin/python3.5
 # -*- coding: utf-8 -*-
 #
 # License: MIT

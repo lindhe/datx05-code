@@ -1,4 +1,4 @@
-#!/bin/python3.6
+#!/bin/python3.5
 
 import os
 import sys
