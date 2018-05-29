@@ -1,7 +1,7 @@
 #!/bin/bash
 
 opts="StrictHostKeyChecking=no"
-slice=chalmersple_casss2
+slice=chalmersple_casss1
 servers=$(cat ./config/servers.txt | sort | uniq)
 
 echo "Killing servers"
