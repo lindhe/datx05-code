@@ -48,7 +48,7 @@ def main(operation, rounds, config, step, msg_size):
   c = Client(config)
   # Add init record
   c.write(msg)
-  print(f"Running {op} test at {uid}")
+  print("Running {} test at {}".format(op, uid))
   for r in range(rounds):
     sleep(rand(0, max_delay)/1000)
     # DO WORK HERE
@@ -59,8 +59,8 @@ def main(operation, rounds, config, step, msg_size):
     time_in_read = time()
     c.read()
     time_out_read = time() - time_in_read
-    results['Times_write'][f"run{r}"] = str(time_out_write)
-    results['Times_read'][f"run{r}"] = str(time_out_read)
+    results['Times_write']["run{}".format(r)] = str(time_out_write)
+    results['Times_read']["run{}".format(r)] = str(time_out_read)
   # Writer
   times_write = sorted([ float(v) for v in results['Times_write'].values() ])
   no_outliers_write = times_write[outliers:-outliers]
@@ -76,9 +76,9 @@ def main(operation, rounds, config, step, msg_size):
   try:
     with open(res_file, 'a') as f:
       results.write(f)
-    print(f"Write test done at {uid}!")
+    print("Write test done at {}!".format(uid))
   except OSError as e:
-    print(f"Error writing to file {res_file}: {e}", file=sys.stderr)
+    print("Error writing to file {}: {}".format(res_file, e), file=sys.stderr)
 
 def to_bytes(s, prefix='b'):
   size = int(s)
@@ -98,7 +98,7 @@ if __name__ == '__main__':
   op = sys.argv[1]
   rounds = int(sys.argv[2]) if len(sys.argv) > 2 else 20
   home=str(pathlib.Path.home())
-  config = sys.argv[3] if len(sys.argv) > 3 else f"{home}/casss/config/autogen.ini"
+  config = sys.argv[3] if len(sys.argv) > 3 else "{}/casss/config/autogen.ini".format(home)
   step_name = sys.argv[4] if len(sys.argv) > 4 else "step0"
   size = sys.argv[5] if len(sys.argv) > 5 else "512 K"
   msg_size = to_bytes(*size.split(' '))
