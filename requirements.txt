@@ -2,4 +2,3 @@ pyeclib==1.5.0
 mock==2.0.0
 aiofiles==0.3.2
 pytest==3.4.2
-pyzmq

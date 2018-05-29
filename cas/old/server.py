@@ -21,7 +21,7 @@ class server:
     self.identity = "Server-{0}:{1}".format(myip,port)
     self.socket.identity = self.identity.encode()
     print(myaddr)
-    self.socket.bind("tcp://%s" % myaddr)
+    self.socket.bind("tcp://*:%s" % port)
     self.socketid = {}
     self.sockets = []
     print("Running server on %s" % port)

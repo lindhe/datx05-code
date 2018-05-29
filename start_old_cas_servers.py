@@ -3,10 +3,10 @@ import sys
 import configparser
 import math
 import random as r
-from CAS.server import server
+from cas.old.server import server
 
 
-def read_cfgfile(my_ip, my_port, cfgfile):
+def read_cfgfile(my_port, my_ip, cfgfile):
     my_addr = ":".join([my_ip, my_port])
 
     config = configparser.ConfigParser()
@@ -38,12 +38,12 @@ def start(my_port, my_ip, nbr_of_servers, f, e, base_location, max_clients,
     s.start()
 
 
-def main(my_ip, my_port, cfgfile):
+def main(my_port, my_ip, cfgfile):
     parameters = read_cfgfile(my_ip, my_port, cfgfile)
-    start(my_ip, my_port, *parameters)
+    start(my_port, my_ip, *parameters)
 
 if __name__ == '__main__':
-    my_ip = sys.argv[1]
-    my_port = sys.argv[2]
+    my_port = sys.argv[1]
+    my_ip = sys.argv[2]
     cfgfile = sys.argv[3]
     main(my_port, my_ip, cfgfile)
