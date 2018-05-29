@@ -4,7 +4,7 @@ rounds=20
 
 opts="StrictHostKeyChecking=no"
 ssh_key=~/.ssh/planetlab_rsa
-slice=chalmersple_casss2
+slice=chalmersple_casss1
 tests=evaluation/planetlab/tests_enabled/*
 test_case_dir=config/tests/$1/*
 config="/home/$slice/casss/config/autogen.ini"

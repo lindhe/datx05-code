@@ -3,7 +3,7 @@
 # Otherwise, it starts the Client application prompt.
 
 address=$(hostname -i)
-slice=chalmersple_casss2
+slice=chalmersple_casss1
 config=./casss/config/autogen.ini
 
 # For each time my address is in autogen.ini, start a server
