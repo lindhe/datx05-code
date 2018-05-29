@@ -41,7 +41,10 @@ def main(operation, rounds, config, step, msg_size):
   results['Meta']['outliers'] = str(2*outliers)
   results['Meta']['file_size'] = str(msg_size)
   results['Times'] = {}
-  results['Average'] = {}
+  results['Times_write'] = {}
+  results['Times_read'] = {}
+  results['Average_write'] = {}
+  results['Average_read'] = {}
   c = Client(config)
   # Add init record
   c.write(msg)
@@ -49,19 +52,26 @@ def main(operation, rounds, config, step, msg_size):
   for r in range(rounds):
     sleep(rand(0, max_delay)/1000)
     # DO WORK HERE
-    if op == 'writer':
-      time_in = time()
-      c.write(msg)
-      time_out = time() - time_in
-    else:
-      time_in = time()
-      c.read()
-      time_out = time() - time_in
-    results['Times'][f"run{r}"] = str(time_out)
-  times = sorted([ float(v) for v in results['Times'].values() ])
-  no_outliers = times[outliers:-outliers]
-  results['Average']['average'] = str(sum(times) / (rounds))
-  results['Average']['average_no_outliers'] = str(sum(no_outliers) / (rounds - 2*outliers))
+    time_in_write = time()
+    c.write(msg)
+    time_out_write = time() - time_in_write
+    sleep(rand(0, max_delay)/1000)
+    time_in_read = time()
+    c.read()
+    time_out_read = time() - time_in_read
+    results['Times_write'][f"run{r}"] = str(time_out_write)
+    results['Times_read'][f"run{r}"] = str(time_out_read)
+  # Writer
+  times_write = sorted([ float(v) for v in results['Times_write'].values() ])
+  no_outliers_write = times_write[outliers:-outliers]
+  results['Average_write']['average'] = str(sum(times_write) / (rounds))
+  results['Average_write']['average_no_outliers'] = str(sum(no_outliers_write) / (rounds - 2*outliers))
+  # Reader
+  times_read = sorted([ float(v) for v in results['Times_read'].values() ])
+  no_outliers_read = times_read[outliers:-outliers]
+  results['Average_read']['average'] = str(sum(times_read) / (rounds))
+  results['Average_read']['average_no_outliers'] = str(sum(no_outliers_read) / (rounds - 2*outliers))
+
   pathlib.Path(res).mkdir(exist_ok=True, parents=True)
   try:
     with open(res_file, 'a') as f:
