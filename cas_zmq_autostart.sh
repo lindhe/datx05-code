@@ -13,5 +13,5 @@ for server in $servers; do
   address=$(echo $server | cut -d ':' -f 1)
   port=$(echo $server | cut -d ':' -f 2)
   echo "Starting server at $address:$port"
-  python3.5 -O /home/$slice/casss/start_old_cas_servers.py $port $address $config > /dev/null &
+  python3.5 -O /home/$slice/casss/start_cas_zmq_servers.py $port $address $config > /dev/null &
 done
