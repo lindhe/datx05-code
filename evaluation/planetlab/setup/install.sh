@@ -5,7 +5,7 @@ c=./config/clients.txt
 all=$(cat $s $c | sort | uniq)
 install_script=./evaluation/planetlab/setup/install_deps.sh
 ssh_key=~/.ssh/planetlab_rsa
-slice=chalmersple_casss1
+slice=chalmersple_casss2
 
 failed=0
 

@@ -4,7 +4,7 @@ opts="StrictHostKeyChecking=no"
 
 if [ $# -eq 0 ]; then
   nodes=$(cat ./servers.txt ./clients.txt | sort | uniq)
-  slice=chalmersple_casss1
+  slice=chalmersple_casss2
 else
   nodes=$(cat $1 | sort | uniq)
   slice=$2

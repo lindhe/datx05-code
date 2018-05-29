@@ -6,7 +6,7 @@ s=./config/servers.txt
 c=./config/clients.txt
 all=$(cat $s $c | sort | uniq)
 ssh_key=~/.ssh/planetlab_rsa
-slice=chalmersple_casss1
+slice=chalmersple_casss2
 failed=0
 
 echo "Copying working directory to servers..."

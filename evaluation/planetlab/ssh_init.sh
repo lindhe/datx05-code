@@ -1,7 +1,7 @@
 #!/bin/bash
 
 opts="StrictHostKeyChecking=no"
-slice=chalmersple_casss1
+slice=chalmersple_casss2
 all_things=$(cat ./config/servers.txt ./config/clients.txt | sort | uniq)
 
 echo "Removing clients results directory"

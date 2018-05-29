@@ -2,7 +2,7 @@
 
 opts="StrictHostKeyChecking=no"
 ssh_key=~/.ssh/planetlab_rsa
-slice=chalmersple_casss1
+slice=chalmersple_casss2
 
 if [ $# -eq 0 ]; then
   nodes=$(cat ./servers.txt ./clients.txt | sort | uniq)
