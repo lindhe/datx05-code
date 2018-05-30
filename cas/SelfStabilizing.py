@@ -240,7 +240,11 @@ storage_location="./.storage/", gossip_freq=1):
       self.main()
 
   def main(self):
-    self.gsp_freq = self.gossip_freq
+    if self.enable_reset():
+      self.gsp_freq = self.gossip_freq
+    max_tag = self.S.max_phase(['pre', 'fin', 'FIN'])
+    if max_tag[0] >= self.t_top:
+      self.gsp_freq = 0
     # Main loop
     uid = self.uid
     for k in self.config:
