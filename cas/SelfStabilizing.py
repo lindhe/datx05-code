@@ -86,7 +86,7 @@ storage_location="./.storage/", gossip_freq=1):
       tuple (t, None, 'qry') where t is max_phase of ['fin', 'FIN']
     """
     max_tag = self.S.max_phase(['pre', 'fin', 'FIN'])
-    if max_tag[0] >= self.t_top:
+    if max_tag[0] >= self.t_top or not self.enable_reset():
       return None
     else:
       return (self.S.max_phase(['fin', 'FIN']), None, 'qry')
@@ -98,10 +98,10 @@ storage_location="./.storage/", gossip_freq=1):
       tuple (t, None, 'qry') where t is max_phase of ['pre', 'fin', 'FIN']
     """
     max_tag = self.S.max_phase(['pre', 'fin', 'FIN'])
-    if max_tag[0] >= self.t_top:
-        return None
+    if max_tag[0] >= self.t_top or not self.enable_reset():
+      return None
     else:
-        return (max_tag, None, 'qry')
+      return (max_tag, None, 'qry')
 
   async def pre_write(self, t, w):
     """ Reply to pre-write arrival event, from pj's writer to pi's server.
