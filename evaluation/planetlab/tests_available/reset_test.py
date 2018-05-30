@@ -52,6 +52,7 @@ def main(rounds, config, step):
     c.qrmAccess((None, None, 'qry', 'write'))
     time_out = time() - time_in
     results['Times'][f"run{r}"] = str(time_out)
+    print(f"Test {r+1}/{rounds} took {time_out} seconds.")
   times = sorted([ float(v) for v in results['Times'].values() ])
   no_outliers = times[outliers:-outliers]
   results['Average']['average'] = str(sum(times) / (rounds))

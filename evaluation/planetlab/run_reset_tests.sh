@@ -25,7 +25,7 @@ for step in $test_case_dir; do
       module=${m%.py}
       for writer in $writers; do
         ssh -o $opts -l $slice -i ~/.ssh/planetlab_rsa $writer \
-          "cd ~/casss/; python3.6 -O -m $module $rounds $config $step" &
+          "cd ~/casss/; python3.6 -u -O -m $module $rounds $config $step" &
       done
     fi
   done
