@@ -17,7 +17,7 @@ def main(rounds, config, step):
   msg_size = 256
   msg = os.urandom(msg_size)
   max_val = 2147483647
-  delay = 5
+  delay = 2
   uid = os.uname().nodename
   pid = str(os.getpid())
   home=pathlib.Path.home()
@@ -43,6 +43,7 @@ def main(rounds, config, step):
   c = Client(config)
   max_tag = (max_val, (1, uid))
   print(f"Running reset test at {uid}")
+  c.qrmAccess((None, None, 'qry', 'write'))
   for r in range(rounds):
     sleep(delay)
     # DO WORK HERE
@@ -59,7 +60,7 @@ def main(rounds, config, step):
   try:
     with open(res_file, 'a') as f:
       results.write(f)
-    print(f"Write test done!")
+    print(f"Reset test done!")
   except OSError as e:
     print(f"Error writing to file {res_file}: {e}", file=sys.stderr)
 
