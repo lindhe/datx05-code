@@ -6,7 +6,9 @@ class Gossip:
         self.server = server
 
     async def departure(self, uid, msg_data):
-        data = await self.server.gossip_departure(uid)
+        (reset, data) = await self.server.gossip_departure(uid)
+        if reset:
+            return (data, False)
         return (data, not self.use_tcp(data))
 
     async def arrival(self, uid, payload):

@@ -152,7 +152,7 @@ storage_location="./.storage/", gossip_freq=1):
     echo = (echo_prp, echo_all)
     gossip_obj = GossipMessage(tag_tuple, cntr, prp, msg_all, echo)
     data = gossip_obj.get_bytes()
-    return data
+    return (not self.enable_reset(), data)
 
   async def gossip_arrival(self, k, pre, fin, FIN, prp, msg_all, echo, inc_nbrs):
     """ Reply to gossip arrival event, from pj's server to pi's server.
