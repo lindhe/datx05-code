@@ -437,7 +437,7 @@ self.prp[k].phase != self.prp[p].phase:
         k, false otherwise
     """
     return ((self.prp[self.uid], self.all[self.uid]) == self.echo_answers[k]) \
-and self.larger_or_equal(k) and self.corr_all(k)
+and self.larger_or_equal(k) # and self.corr_all(k)
 
   def corr_all(self, k):
     if ((self.prp[self.uid].phase+1)%3 == self.prp[k].phase):
@@ -565,6 +565,10 @@ and self.larger_or_equal(k) and self.corr_all(k)
     Args:
       tag (tuple): the record to keep.
     """
-    if(tag[0] == self.t_top):
+    max_tag = self.S.max_phase(['pre', 'fin', 'FIN'])
+    if(tag[0] == max_tag[0]):
       self.S.reset(tag)
       self.inc_nbrs = deque(maxlen=self.queue_size)
+      self.pre = {}
+      self.fin = {}
+      self.FIN = {}
