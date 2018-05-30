@@ -17,7 +17,7 @@ echo "Checking bind status..."
 # done
 
 for machine in $nodes; do
-  ssh -o $opts -l $slice -i $ssh_key $machine '~/casss/config/util/zmq_tester.py $(hostname -i) && echo "$(hostname) works" || echo "broken"'
+  ssh -o $opts -l $slice -i $ssh_key $machine '~/casss/config/util/zmq_tester.py $(hostname -i) && echo "$(hostname) works" || echo "$(hostname) is broken"'
 done
 
 echo "DONE"
