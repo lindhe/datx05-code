@@ -4,7 +4,7 @@
 # License: MIT
 # Author: Andreas Lindhé
 #
-##########################     CLIENT WRITE TEST     ##########################
+#############################     CAS ZMQ TEST     #############################
 
 import sys
 import os

@@ -4,7 +4,7 @@
 # License: MIT
 # Author: Andreas Lindhé
 #
-##########################     CLIENT WRITE TEST     ##########################
+##########################        CLIENT TEST         ##########################
 
 import sys
 import os
