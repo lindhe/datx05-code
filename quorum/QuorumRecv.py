@@ -37,6 +37,8 @@ class QuorumRecv:
             elif (label == 'incCntr'):
                 nbr = struct.unpack("i", data)[0]
                 res = self.server.set_counter(sender, nbr)
+            elif (label == 'fault'):
+                res = self.server.fault_injection()
             else:
                 return None
             new_msg = PingPongMessage(*res, mode, req_tag=msg_data.get_tag())

@@ -27,6 +27,7 @@
 import struct
 import sys
 import asyncio
+import random as r
 from collections import deque
 from .IncNbrHelper import IncNbrHelper
 from channel.GossipProtocol import GossipMessage
@@ -65,6 +66,15 @@ storage_location="./.storage/", gossip_freq=1):
     self.all = {self.uid: False} # {uid: bool}
     self.echo_answers = {}
     self.all_seen_processors = set()
+
+  def fault_injection(self):
+    for k, v in self.S.register.items():
+      old_record = self.S.register[k]
+      new_seq_nbr = r.randint(0, 10000)
+      new_tag = (new_seq_nbr, old_record.tag[1])
+      self.S.register[new_tag] = Record(new_tag, old_record.element, old_record.phase)
+      self.S.register.pop(k)
+    return (None, None, None)
 
   def counter_query(self, sender):
     """ Reply to queries with current counter value """
