@@ -61,6 +61,7 @@ def main(operation, rounds, config, step, msg_size):
     time_out_read = time() - time_in_read
     results['Times_write']["run{}".format(r)] = str(time_out_write)
     results['Times_read']["run{}".format(r)] = str(time_out_read)
+    print("Round {}/{} (+1) is done.".format(r, rounds))
   # Writer
   times_write = sorted([ float(v) for v in results['Times_write'].values() ])
   no_outliers_write = times_write[outliers:-outliers]

@@ -13,7 +13,8 @@ fi
 echo "Checking bind status..."
 
 for machine in $nodes; do
-  ssh -o $opts -l $slice -i $ssh_key $machine '~/casss/config/util/pyeclib_tester.py && echo "$(hostname) works" || echo "broken"'
+  ssh -o $opts -l $slice -i $ssh_key $machine\
+  '~/casss/config/util/pyeclib_tester.py && echo "$(hostname) works" || echo "$(hostname) is broken"'
 done
 
 echo "DONE"
