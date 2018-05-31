@@ -74,7 +74,7 @@ class Client:
         new_tag = (new_int, self.uid)
         self.qrmAccess((new_tag, elements, 'pre', 'write'))
         self.qrmAccess((new_tag, None, 'fin', 'write'))
-        self.qrmAccess((new_tag, None, 'FIN', 'write'))
+        # self.qrmAccess((new_tag, None, 'FIN', 'write'))
 
     def read(self):
         res = self.qrmAccess((None, None, 'qry', 'read'))
