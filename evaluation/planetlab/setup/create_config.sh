@@ -1,6 +1,6 @@
 #!/bin/bash
 
-port=5550
+port=7550
 servers=./config/servers.txt
 defaultconf=./config/default.ini
 configfile=./config/autogen.ini
