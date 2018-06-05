@@ -14,4 +14,5 @@ for addr in addr_list:
 max_val = max(avg_list)
 min_val = min(avg_list)
 avg_val = sum(avg_list)/float(len(avg_list))
-print(f"min: {min_val}, max: {max_val}, avg: {avg_val}")
+print(f"min\t& max\t& avg")
+print(f"{min_val}\t& {max_val}\t& {avg_val}")
