@@ -4,6 +4,7 @@ Robert Gustafsson <robg@student.chalmers.se>
 
 Andreas Lindhé <andreas@lindhe.io>
 
+
 # Self-Stabilizing Services for Emulating Distributed Shared Memory on Message Passing Platforms
 
 This is the outcome of our master's thesis project, during the spring of 2018.
@@ -11,17 +12,26 @@ We are the first ones to implement and practically evaluate the self-stabilizing
 version of _Coded Atomic Storage_ (CAS) by
 [Dolev, Petig and Schiller](https://arxiv.org/abs/1806.03498).
 
+
 ## License
 
 This project is licensed under the MIT license.
 Please see the LICENSE file.
 The copyright belongs to the authors.
 
+
 ## Installation
 
 The project was exclusively developed on and for Linux, but might run on other
 system too.
 If you find important points for a specific platform, please tell us.
+
+**IMPORTANT** -- To get access to NS-3, make sure to clone this repository using
+the following command:
+```
+$ git clone --recursive git@bitbucket.org:selfStabilizingAtomicStorage/datx05-code.git
+```
+
 
 ### Dependencies
 
@@ -31,17 +41,21 @@ If you find important points for a specific platform, please tell us.
 * `docker`
 * `rsync`
 * `ssh`
+* `tunctl`
+* (NS-3)
 
 **Install required python modules:**
 ```
 $ pip3.6 install -r requirements.txt
 ```
 
-### Needed for the CAS_ZMQ version:
+
+### Needed for the CAS\_ZMQ version:
 
 * `python3.6`
 * `zeromq`
 * `pyzmq`
+
 
 ## Repository Structure
 
@@ -50,6 +64,7 @@ It would be good to clean up things more, but this is a brief overview of what's
 where in this repository.
 More detailed README files are found in each of the subdirectories, but this is
 the gists of it:
+
 
 ### Code
 
@@ -79,6 +94,7 @@ the gists of it:
 * `start_multiple_servers.py`: an application spinning up multiple local instances of the CASSS server
 * `start_cas_zmq_servers.py`:  an application spinning up multiple local instances of the CAS_ZMQ server
 
+
 ### Configuration, tests, evaluation, misc.
 
 #### Directories
@@ -92,11 +108,13 @@ the gists of it:
 * `Dockerfile`: configuration file used for test bed (and potentially deployment)
 * `requirements.py`: required dependencies for pip (and/or Docker) to install
 
+
 ### Usage
 
 Before running anything, make sure that `config/servers.txt` and
 `config/clients.txt` are populated with the correct hosts.
 Also, make sure that `config/default.ini` is properly configured.
+
 
 #### Locally
 
@@ -107,13 +125,43 @@ $ ./create.py
 $ cd ..
 ```
 
-2: Start the servers and run the client
+2: Start the servers and run the client:
 ```
 $ python -u ./start_multiple_servers.py ./config/config.ini
 $ python -O ./run_client.py ./config/config.ini
 ```
 
+
 #### Test Bed
+
+To perform a throughput test, just run:
+```
+$ ./evaluation/perftest.sh
+```
+
+Otherwise:
+
+1: Start NS-3
+```
+$ sudo ./waf --run "tap-csma-virtual-machine --n=4"
+```
+
+2: Create `n` servers (`n=4` by default):
+```
+$ ./evaluation/create_new.sh 4
+```
+
+3: Run a client
+```
+$ python -O ./run_client.py ./config/autogen.ini
+```
+
+4: Tear down the test bed
+
+```
+$ ./evaluation/remove_old.sh
+```
+
 
 #### Evaluation Platform
 
