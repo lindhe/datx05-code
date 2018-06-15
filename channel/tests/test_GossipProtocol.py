@@ -8,9 +8,11 @@ class TestGossipMessage(unittest.TestCase):
         tag_tuple = ((3, (2, None)), (2, (2, None)), (1, (2, None)))
         prp = (1, None)
         msg_all = False
+        cntrs = None
         echo = (prp, msg_all)
-        gossip_msg = GossipMessage(tag_tuple, prp, msg_all, echo)
+        gossip_msg = GossipMessage(tag_tuple, cntrs, prp, msg_all, echo)
         self.assertEqual(tag_tuple, gossip_msg.get_tag_tuple())
+        self.assertEqual(cntrs, gossip_msg.get_cntrs())
         self.assertEqual(prp, gossip_msg.get_prp())
         self.assertEqual(msg_all, gossip_msg.get_all())
         self.assertEqual(echo, gossip_msg.get_echo())
