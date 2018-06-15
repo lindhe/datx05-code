@@ -11,18 +11,18 @@ echo "Result of test with $nodes nodes at $(date +'%F_%T')" >> $resfile
 echo "==================================================" >> $resfile
 
 echo "Setting up test environment..."
-/home/andreas/thesis-code/evaluation/create_new.sh $nodes
+./evaluation/create_new.sh $nodes
 
-n=$(grep -E "^n =" ~/thesis-code/config/autogen.ini | cut -f 3 -d ' ')
+n=$(grep -E "^n ="./config/autogen.ini | cut -f 3 -d ' ')
 n=$(((n+1)/2))
 
-ips=$(tail -n $n ~/thesis-code/config/autogen.ini |\
+ips=$(tail -n $n ./config/autogen.ini |\
   cut -d ' ' -f 3 |\
   cut -d ':' -f 1)
 
 # Start NS-3
 echo "Starting NS-3..."
-pushd ~/ns3_dir
+pushd ./ns3
 sudo ./waf --run "tap-csma-virtual-machine --n=$nodes" &
 waf=$!
 popd
