@@ -22,6 +22,7 @@ class SenderChannel:
         self.tcp_timeout = timeout*5
         self.tx = init_tx
         self.chunks_size = chunks_size
+        self.cap = 2**31
 
         self.loop = asyncio.get_event_loop()
         self.udp = True
@@ -77,7 +78,7 @@ arrival construct a new message and send it.
                     self.tx, self.udp = await self.cb_obj.departure(sender, msg_data)
                 else:
                     self.tx, self.udp = await self.cb_obj.departure(self.sid, msg_data)
-                counter = msg_cntr+1
+                counter = (msg_cntr+1) % self.cap
                 token = struct.pack("ii17s", self.ch_type, counter, self.uid)
                 msg = token+self.tx if self.tx else token
                 if self.udp:
