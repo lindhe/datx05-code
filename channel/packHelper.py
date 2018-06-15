@@ -1,12 +1,11 @@
 import struct
 
 class PackHelper:
+    """ Class to convert from and to a byte object """
 
-    '''
-    Takes a number of variable length arguments and
-    pack them into one byte object.
-    '''
     def pack(self, *args, payload=None):
+        """ Takes a number of variable length arguments and
+        pack them into one byte object. """
         header_fields = [x if x is not None else b'' for x in args]
         h_pattern = ""
         for field in header_fields:
@@ -19,11 +18,9 @@ class PackHelper:
             binary_data += payload
         return binary_data
 
-    '''
-    Takes and parses a byte object and return
-    the data on the form ((field1, field2,...) payload).
-    '''
     def unpack(self, binary_data):
+        """ Takes and parses a byte object and return
+        the data on the form ((field1, field2,...) payload). """
         int_size = struct.calcsize("i")
         pattern_size = struct.unpack("i", binary_data[:int_size])[0]
         pattern = str(pattern_size)+"s"

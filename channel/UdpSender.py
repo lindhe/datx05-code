@@ -6,6 +6,7 @@ https://github.com/crazyguitar/pysheeet/blob/master/docs/notes/python-asyncio.rs
 under MIT license
 '''
 class UdpSender:
+    """ Class to send and receive UDP messages with Asyncio """
 
     def __init__(self, loop, ip='', port=0):
         self.loop = loop

@@ -3,6 +3,7 @@ from .packHelper import PackHelper
 from ast import literal_eval
 
 class GossipMessage:
+    """ Class that represents a gossip message """
 
     pack_helper = PackHelper()
     

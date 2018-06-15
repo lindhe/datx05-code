@@ -2,7 +2,7 @@ from .packHelper import PackHelper
 from ast import literal_eval
 
 class PingPongMessage:
-
+    """ Class that represents a PingPong message """
     pack_helper = PackHelper()
     
     def __init__(self, tag, data, label, mode, req_tag=None):
