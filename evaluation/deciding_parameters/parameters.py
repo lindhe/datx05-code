@@ -52,11 +52,14 @@ def print_table(matrix, nmax, fmax, latex):
 
 if __name__ == '__main__':
   program = sys.argv[0]
-  latex=False
+  latex = False
+  nmax = 20
   if len(sys.argv) > 1:
     latex=True
+  if len(sys.argv) > 2:
+    nmax = int(sys.argv[2])
   try:
-    main(latex=latex)
+    main(nmax=nmax, latex=latex)
   except KeyboardInterrupt:
     sys.exit("\nInterrupted by ^C\n")
 
