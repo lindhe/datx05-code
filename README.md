@@ -165,6 +165,54 @@ $ ./evaluation/remove_old.sh
 
 #### Evaluation Platform
 
+We used PlanetLab to build an evaluation platform.
+The relevant scripts for this are mostly located in `evaluation/planetlab/`.
+
+**Before running, make sure of the following:**
+
+* All experiments you want to run are symlinked from `evaluation/planetlab/tests_available/` into `evaluation/planetlab/tests_enabled/`.
+* `config/servers.txt` and `config/clients.txt` are populated with the correct
+  PlanetLab nodes.
+* Your PlanetLab account has access to the slices, and you have uploaded your
+  public SSH key to that account.
+* The private SSH key to the slice is available in ~/.ssh/planetlab_rsa
+
+**TODO:** it would be really nice to have slice name as a configurable
+parameter, instead of having to change it in a billion files every time it
+switches. I made a new branch with a single commit, which I changed to when I
+wanted to switch slice.
+
+1: Install the system:
+```
+$ evaluation/planetlab/install_system.sh
+```
+
+2: Start servers:
+```
+$ evaluation/planetlab/servers_start.sh
+```
+
+3: Check that the service seems to work:
+```
+$ python -m evaluation.planetlab.servers_init ./config/autogen.ini
+```
+
+4: Prepare test (e.g. server scalability):
+```
+$ config/populate_steps.py 10 10 "5, 10, 15, 20"
+```
+
+5: Run test
+```
+$ evaluation/planetlab/run_client_tests.sh test-servers
+```
+
+6: Cleanup after yourself:
+```
+$ ./evaluation/planetlab/cleanup_clients.sh && ./evaluation/planetlab/servers_teardown.sh
+```
+
+
 ### Code Style
 
 * Line width: 80 characters
