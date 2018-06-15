@@ -94,7 +94,24 @@ the gists of it:
 
 ### Usage
 
+Before running anything, make sure that `config/servers.txt` and
+`config/clients.txt` are populated with the correct hosts.
+Also, make sure that `config/default.ini` is properly configured.
+
 #### Locally
+
+1: Create a configuration file:
+```
+$ cd config
+$ ./create.py
+$ cd ..
+```
+
+2: Start the servers and run the client
+```
+$ python -u ./start_multiple_servers.py ./config/config.ini
+$ python -O ./run_client.py ./config/config.ini
+```
 
 #### Test Bed
 
