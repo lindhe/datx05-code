@@ -43,7 +43,7 @@ class Server:
   def __init__(self, uid, quorum, max_clients, delta, queue_size, n,
 storage_location="./.storage/", gossip_freq=1):
     self.uid = uid.encode()
-    self.t_top = 2147483647
+    self.t_top = 2147483647 # max value for signed int for struct format 'i'
     self.queue_size = queue_size
     self.inc_nbrs = deque(maxlen=queue_size)
     self.gossip_freq = gossip_freq
@@ -143,6 +143,7 @@ storage_location="./.storage/", gossip_freq=1):
     return (t, None, d)
 
   async def gossip_departure(self, k):
+    """ Send the latest values open gossip depature event to server k """
     tag_tuple = self.S.tag_tuple()
     cntr = IncNbrHelper.to_list(self.inc_nbrs) if len(self.inc_nbrs) else None
     prp = tuple(self.prp[self.uid]) if self.prp[self.uid] else None
@@ -199,12 +200,13 @@ storage_location="./.storage/", gossip_freq=1):
       self.S.relevant()
 
     # Run wrap around algorithm
-    self.run(k, prp, msg_all, echo)
+    self.run_global_reset(k, prp, msg_all, echo)
 
     #Limit gossip frequency
     await asyncio.sleep(self.gsp_freq)
 
   def stabilized(self):
+    """ Check if the records have yet stabilized """
     max_tuple = self.S.tag_tuple()
     max_pre = max_tuple[0]
     max_fin = max_tuple[1]
@@ -220,14 +222,18 @@ storage_location="./.storage/", gossip_freq=1):
 
 
   def get_tag_tuple(self):
+    """ return largest tag tuples """
     return self.S.tag_tuple()
 
   def get_counter(self):
+    """ return list of incarnation numbers if there exist any """
     return IncNbrHelper.to_list(self.inc_nbrs) if len(self.inc_nbrs) else None
 
 ######### Wrap Around (Global Reset) #########
 
-  def run(self, k, prp, msg_all, echo):
+  def run_global_reset(self, k, prp, msg_all, echo):
+    """ Function to run global reset algorithm if everyone has initially
+        communicated """
     if k not in self.config:
       self.config.append(k)
     self.prp[k] = Prp(*prp) if prp else None
@@ -237,14 +243,15 @@ storage_location="./.storage/", gossip_freq=1):
     else:
       self.echo_answers[k] = (None, echo[1])
     if len(self.config) == self.n:
-      self.main()
+      self.global_reset()
 
-  def main(self):
+  def global_reset(self):
+    """ Global reset algorithm's main loop """
     if self.enable_reset():
       self.gsp_freq = self.gossip_freq
     max_tag = self.S.max_phase(['pre', 'fin', 'FIN'])
     if max_tag[0] >= self.t_top:
-      self.gsp_freq = 0
+      self.gsp_freq = 0 # increase communication frequency during reset
     # Main loop
     uid = self.uid
     for k in self.config:
@@ -301,16 +308,6 @@ storage_location="./.storage/", gossip_freq=1):
       self.prp[k] = val
       self.all[k] = False
     return
-
-  def update_prp(self, val):
-    prps = set([self.prp[k] for k in self.config])
-    if (None in prps):
-      return
-    for k in self.config:
-      if (self.prp[k].phase+1)%3 == val.phase:
-        self.prp[k] = val
-        self.all[k] = False
-
 
   def mod_max(self):
     """ Return the maximum phase of all proposals, in a modulus manner.
@@ -411,12 +408,14 @@ self.prp[k].phase != self.prp[p].phase:
 (self.larger_or_equal(k))
    
   def all_same(self, k):
+    """ Test so that everyone has dfltPrp and that everyone else seen it """
     prps = set([self.prp[k] for k in self.config])
     if (None in prps):
       return False
     return self.enable_reset() and (self.all[self.uid] == self.my_all(k))
 
   def larger_or_equal(self, k):
+    """ Returns true if k is at the same phase or one ahead of i """
     if not self.prp[k] or not self.prp[self.uid]:
       return True
     if self.prp[k].phase == (self.prp[self.uid].phase+1)%3:
@@ -437,12 +436,7 @@ self.prp[k].phase != self.prp[p].phase:
         k, false otherwise
     """
     return ((self.prp[self.uid], self.all[self.uid]) == self.echo_answers[k]) \
-and self.larger_or_equal(k) # and self.corr_all(k)
-
-  def corr_all(self, k):
-    if ((self.prp[self.uid].phase+1)%3 == self.prp[k].phase):
-      return True
-    return self.all[k]
+and self.larger_or_equal(k)
 
   def increment(self, proposal):
     """ Returns the appropriate incremented new proposal based on its phase.
