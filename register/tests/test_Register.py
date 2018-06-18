@@ -83,9 +83,9 @@ class TestRegister(unittest.TestCase):
     self.assertEqual( s.register[t1], r2 )
     # 3.2 Try to change from 'fin' to 'pre', with element != None
     x = (t1, w1, 'pre')
+    r3 = Record(*x)
     run(s.update_phase(*x))
-    self.assertNotEqual( s.register[t1], r1 )
-    self.assertEqual( s.register[t1], r2 )
+    self.assertEqual( s.register[t1], r3 )
     # 3.3 Try to change from 'fin' to 'pre', with element = None
     x = (t1, None, 'pre')
     run(s.update_phase(*x))
@@ -95,7 +95,7 @@ class TestRegister(unittest.TestCase):
     run(s.update_phase(*x))
     x = (t1, w1, 'FIN')
     run(s.update_phase(*x))
-    self.assertNotEqual( s.register[t1].phase, 'FIN')
+    self.assertEqual( s.register[t1].phase, 'FIN')
     # 3.5 Try to change from 'pre' to 'fin' and then to 'FIN', with element != None
     x = (t1, w1, 'fin')
     run(s.update_phase(*x))
