@@ -212,6 +212,17 @@ $ evaluation/planetlab/run_client_tests.sh test-servers
 $ ./evaluation/planetlab/cleanup_clients.sh && ./evaluation/planetlab/servers_teardown.sh
 ```
 
+## Unit tests:
+
+**One specific test:**
+```
+$ python -m unittest register/tests/test_Register.py
+```
+
+**Run all tests:**
+```
+$ python -m unittest
+```
 
 ### Code Style
 
