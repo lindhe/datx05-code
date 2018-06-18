@@ -22,7 +22,7 @@ ips=$(tail -n $n ./config/autogen.ini |\
 
 # Start NS-3
 echo "Starting NS-3..."
-pushd ./ns3
+pushd ./ns3/repos/ns-3-allinone/ns-3-dev
 sudo ./waf --run "tap-csma-virtual-machine --n=$nodes" &
 waf=$!
 popd
